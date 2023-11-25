@@ -3,7 +3,7 @@ console.log("hello");
 const synth = window.speechSynthesis;
 
 const inputForm = document.querySelector("form");
-const inputTxt = document.querySelector(".txt");
+const textConteiner = document.querySelector(".content");
 const voiceSelect = document.querySelector("select");
 
 const pitch = document.querySelector("#pitch");
@@ -11,22 +11,7 @@ const pitchValue = document.querySelector(".pitch-value");
 const rate = document.querySelector("#rate");
 const rateValue = document.querySelector(".rate-value");
 
-//
-
-// lang
-// :
-// "uk-UA"
-// localService
-// :
-// false
-// name
-// :
-// "Microsoft Ostap Online (Natural) - Ukrainian (Ukraine)"
-// voiceURI
-// :
-// "Microsoft Ostap Online (Natural) - Ukrainian (Ukraine)"
-//
-
+let paragraf = 0;
 let voices = [];
 function populateVoiceList() {
   voices = synth.getVoices().sort(function (a, b) {
@@ -61,7 +46,6 @@ function populateVoiceList() {
 }
 
 populateVoiceList();
-
 if (speechSynthesis.onvoiceschanged !== undefined) {
   speechSynthesis.onvoiceschanged = populateVoiceList;
 }
@@ -72,11 +56,18 @@ function speak() {
     return;
   }
 
-  if (inputTxt.value !== "") {
-    const utterThis = new SpeechSynthesisUtterance(inputTxt.value);
+  const paragrafText = textConteiner.children[paragraf].innerText;
+  if (paragrafText !== "") {
+    const utterThis = new SpeechSynthesisUtterance(paragrafText);
+
+    textConteiner.children[paragraf].style.backgroundColor = "#ffcc00";
 
     utterThis.onend = function (event) {
-      console.log("SpeechSynthesisUtterance.onend");
+      textConteiner.children[paragraf].style = "#ffcc00";
+      paragraf++;
+      if (paragraf < textConteiner.children.length) {
+        speak();
+      }
     };
 
     utterThis.onerror = function (event) {
@@ -102,8 +93,6 @@ inputForm.onsubmit = function (event) {
   event.preventDefault();
   console.dir(voices);
   speak();
-
-  inputTxt.blur();
 };
 
 pitch.onchange = function () {
