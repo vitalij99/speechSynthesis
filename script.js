@@ -1,4 +1,3 @@
-console.log("hellos");
 function createHTMLButton() {
   const floatingDiv = document.createElement("div");
   floatingDiv.id = "floatingDiv";
@@ -29,7 +28,6 @@ async function startReade() {
   }
 
   const data = await getStorageData();
-  console.log(data);
 
   const synth = window.speechSynthesis;
   const options = {

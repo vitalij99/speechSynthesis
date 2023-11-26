@@ -37,17 +37,16 @@ optionsForm.classDiv.value = options.classDiv;
 optionsForm.classEnd.value = options.classEnd;
 optionsForm.rate.value = options.rate;
 optionsForm.pitch.value = options.pitch;
-// optionsForm.selectedOptions.value = options.language;
 
 let voices;
 function populateVoiceList() {
   voices = synth.getVoices().sort(function (a, b) {
-    const aname = a.name.toUpperCase();
-    const bname = b.name.toUpperCase();
+    const alang = a.lang.toUpperCase();
+    const blang = b.lang.toUpperCase();
 
-    if (aname < bname) {
+    if (alang < blang) {
       return -1;
-    } else if (aname == bname) {
+    } else if (alang == blang) {
       return 0;
     } else {
       return +1;
