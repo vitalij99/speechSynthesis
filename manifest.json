@@ -16,7 +16,7 @@
   ],
  "content_scripts": [
     {
-      "matches": ["http://127.0.0.1:5500/*"],
+      "matches": ["https://novelreader.to/*"],
       "js": ["script.js"]
     }
   ],

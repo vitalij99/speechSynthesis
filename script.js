@@ -5,14 +5,19 @@ function createHTMLButton() {
   floatingDiv.innerHTML = `<div>
       <button id="start" type="submit">Play</button>
       
-      
       <button id="stop" >Stop</button>
+      <input type="number"  value="0"  id="inputParagraf" />
 </div > `;
+  floatingDiv.style.position = "fixed";
+  floatingDiv.style.top = "0";
+  floatingDiv.style.right = "0";
+  floatingDiv.style.padding = "20px";
   document.body.appendChild(floatingDiv);
 }
 createHTMLButton();
 const buttonStart = document.getElementById("start");
 const buttonStop = document.getElementById("stop");
+const inputParagraf = document.getElementById("inputParagraf");
 startReade();
 async function startReade() {
   function getStorageData() {
@@ -23,7 +28,6 @@ async function startReade() {
     });
   }
 
-  // Викликайте асинхронну функцію
   const data = await getStorageData();
   console.log(data);
 
@@ -36,7 +40,7 @@ async function startReade() {
     rate: Number(data.rate),
   };
 
-  const textConteiner = document.getElementsByClassName(options.classDiv)[0];
+  const textConteiner = document.getElementById(options.classDiv);
 
   let paragraf = 0;
   const voices = synth.getVoices();
@@ -55,8 +59,13 @@ async function startReade() {
       textConteiner.children[paragraf].style.backgroundColor = "#ffcc00";
 
       utterThis.onend = function (event) {
-        textConteiner.children[paragraf].style = "#ffcc00";
+        textConteiner.children[paragraf].style = "";
+        textConteiner.children[paragraf].scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
         paragraf++;
+        inputParagraf.value = paragraf;
         if (paragraf < textConteiner.children.length && reade) {
           speak();
         }
@@ -79,7 +88,6 @@ async function startReade() {
   }
 
   buttonStart.onclick = function (event) {
-    paragraf = 0;
     reade = true;
     console.log(data);
     speak();
@@ -87,5 +95,8 @@ async function startReade() {
 
   buttonStop.onclick = function () {
     reade = false;
+  };
+  inputParagraf.onchange = function () {
+    paragraf = inputParagraf.value;
   };
 }
