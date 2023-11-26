@@ -1,8 +1,50 @@
-console.log("hello");
+console.log("hellos");
+
+const floatingDiv = document.createElement("div");
+floatingDiv.id = "floatingDiv";
+floatingDiv.innerHTML = `<div><form>      <div>        <label for="rate">Rate</label
+        ><input type="range" min="0.5" max="2" value="1" step="0.1" id="rate" />
+        <div class="rate-value">1</div>
+        <div class="clearfix"></div>
+      </div>
+      <div>
+        <label for="pitch">Pitch</label
+        ><input type="range" min="0" max="2" value="1" step="0.1" id="pitch" />
+        <div class="pitch-value">1</div>
+        <div class="clearfix"></div>
+      </div>
+      <select></select>    <div>
+      <button id="start" type="submit">Play</button>
+      </div>
+      </form>
+      <button id="stop" >Stop</button>
+</div > `;
+document.body.appendChild(floatingDiv);
+
+function getStorageData() {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get("options", (result) => {
+      resolve(result.options);
+    });
+  });
+}
+const data = getStorageData().then((data) => {
+  console.log(data);
+  return data;
+});
+
+const options = {
+  classDiv: data.classDiv,
+  rate: data.rate,
+  pitch: data.pitch,
+  classEnd: data.classEnd,
+  language: data.language,
+};
 
 const synth = window.speechSynthesis;
 
 const inputForm = document.querySelector("form");
+const buttonStop = document.querySelector("#stop");
 const textConteiner = document.querySelector(".content");
 const voiceSelect = document.querySelector("select");
 
@@ -13,6 +55,8 @@ const rateValue = document.querySelector(".rate-value");
 
 let paragraf = 0;
 let voices = [];
+let reade = false;
+
 function populateVoiceList() {
   voices = synth.getVoices().sort(function (a, b) {
     const aname = a.name.toUpperCase();
@@ -65,7 +109,7 @@ function speak() {
     utterThis.onend = function (event) {
       textConteiner.children[paragraf].style = "#ffcc00";
       paragraf++;
-      if (paragraf < textConteiner.children.length) {
+      if (paragraf < textConteiner.children.length && reade) {
         speak();
       }
     };
@@ -91,10 +135,16 @@ function speak() {
 
 inputForm.onsubmit = function (event) {
   event.preventDefault();
-  console.dir(voices);
+  paragraf = 0;
+  reade = true;
+
   speak();
 };
 
+console.dir(buttonStop);
+buttonStop.onclick = function () {
+  reade = false;
+};
 pitch.onchange = function () {
   pitchValue.textContent = pitch.value;
 };

@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Reader",
+  "description": "Reader",
+  "version": "1.0",
+
+  "action": { "default_icon": "hello.png"},
+  "icons": {
+    "16": "hello.png"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "webNavigation"
+  ],
+ "content_scripts": [
+    {
+      "matches": ["http://127.0.0.1:5500/*"],
+      "js": ["script.js"]
+    }
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "commands": {    
+    "_execute_action": {
+      "suggested_key": {
+        "windows": "Alt+Q"
+      }
+    }
+  }
+}
