@@ -20,8 +20,8 @@ const rateValue = document.querySelector(".rate-value");
 optionsForm.addEventListener("change", (event) => {
   options.classDiv = optionsForm.classDiv.value;
   options.classEnd = optionsForm.classEnd.value;
-  options.rate = optionsForm.rate.value;
-  options.pitch = optionsForm.pitch.value;
+  options.rate = Number(optionsForm.rate.value);
+  options.pitch = Number(optionsForm.pitch.value);
   options.language = voiceSelect.selectedOptions[0].getAttribute("data-name");
 
   chrome.storage.sync.set({ options });
