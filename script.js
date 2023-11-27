@@ -1,23 +1,26 @@
 function createHTMLButton() {
   const floatingDiv = document.createElement("div");
   floatingDiv.id = "floatingDiv";
-  floatingDiv.innerHTML = `<div>
+  floatingDiv.innerHTML = `<div style="position:fixed; top:0; right:0; padding:20px">
       <button id="start" type="submit">Play</button>
       
       <button id="stop" >Stop</button>
-      <input type="number"  value="0"  id="inputParagraf" />
+      <input type="number"  value="0"  id="inputParagraf" style="width:40px" />
+      <p id="paragrafs"  style="width:40px;display:inline-block">0</p>
 </div > `;
-  floatingDiv.style.position = "fixed";
-  floatingDiv.style.top = "0";
-  floatingDiv.style.right = "0";
-  floatingDiv.style.padding = "20px";
+
   document.body.appendChild(floatingDiv);
 }
 createHTMLButton();
 const buttonStart = document.getElementById("start");
 const buttonStop = document.getElementById("stop");
+const buttonNextPage = document.getElementsByClassName("nextchap");
 const inputParagraf = document.getElementById("inputParagraf");
+const punktParagrafs = document.getElementById("paragrafs");
+const uriNextPage = buttonNextPage[0].attributes.href.value;
+
 startReade();
+
 async function startReade() {
   function getStorageData() {
     return new Promise((resolve) => {
@@ -39,6 +42,9 @@ async function startReade() {
   };
 
   const textConteiner = document.getElementById(options.classDiv);
+  punktParagrafs.textContent = textConteiner.children.length;
+  console.dir(textConteiner);
+  console.dir(uriNextPage);
 
   let paragraf = 0;
   const voices = synth.getVoices();
@@ -51,7 +57,14 @@ async function startReade() {
     }
 
     const paragrafText = textConteiner.children[paragraf].innerText;
-    if (paragrafText !== "") {
+    if (paragraf >= textConteiner.children.length - 1) {
+      console.log("last");
+      window.location.href = uriNextPage;
+    } else if (textConteiner.children[paragraf].clientHeight === 0) {
+      paragraf++;
+      inputParagraf.value = paragraf;
+      speak();
+    } else if (paragrafText !== "") {
       const utterThis = new SpeechSynthesisUtterance(paragrafText);
 
       textConteiner.children[paragraf].style.backgroundColor = "#ffcc00";
@@ -87,7 +100,7 @@ async function startReade() {
 
   buttonStart.onclick = function (event) {
     reade = true;
-    console.log(data);
+
     speak();
   };
 
