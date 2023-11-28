@@ -34,6 +34,7 @@ const data = await chrome.storage.sync.get("options");
 Object.assign(options, data.options);
 
 console.log(options);
+
 optionsForm.classDiv.value = options.classDiv;
 optionsForm.classEnd.value = options.classEnd;
 optionsForm.rate.value = options.rate;
@@ -53,13 +54,12 @@ function populateVoiceList() {
       return +1;
     }
   });
-  const selectedIndex =
-    voiceSelect.selectedIndex < 0 ? 0 : voiceSelect.selectedIndex;
-  voiceSelect.innerHTML = "";
 
+  let selectedIndex = 0;
+  voiceSelect.innerHTML = "";
   for (let i = 0; i < voices.length; i++) {
     const option = document.createElement("option");
-    option.textContent = `${voices[i].name} (${voices[i].lang})`;
+    option.textContent = `(${voices[i].lang}) ${voices[i].name} `;
 
     if (voices[i].default) {
       option.textContent += " -- DEFAULT";
@@ -67,8 +67,14 @@ function populateVoiceList() {
 
     option.setAttribute("data-lang", voices[i].lang);
     option.setAttribute("data-name", voices[i].name);
+
     voiceSelect.appendChild(option);
+    if (voices[i].name === options.language) {
+      console.log(voices[i].name, options.language);
+      selectedIndex = i;
+    }
   }
+
   voiceSelect.selectedIndex = selectedIndex;
 }
 populateVoiceList();
