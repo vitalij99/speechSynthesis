@@ -1,10 +1,11 @@
 // In-page cache of the user's options
 const options = {
   classDiv: "content",
-  classEnd: "end",
+  classEnd: "nextchap",
   rate: 1,
   pitch: 1,
   language: null,
+  reade: false,
 };
 
 const synth = window.speechSynthesis;

@@ -14,10 +14,8 @@ function createHTMLButton() {
 createHTMLButton();
 const buttonStart = document.getElementById("start");
 const buttonStop = document.getElementById("stop");
-const buttonNextPage = document.getElementsByClassName("nextchap");
 const inputParagraf = document.getElementById("inputParagraf");
 const punktParagrafs = document.getElementById("paragrafs");
-const uriNextPage = buttonNextPage[0].attributes.href.value;
 
 startReade();
 
@@ -35,20 +33,21 @@ async function startReade() {
   const synth = window.speechSynthesis;
   const options = {
     classDiv: data.classDiv ?? "content",
-    classEnd: data.classEnd ?? "end",
+    classEnd: data.classEnd ?? "nextchap",
     language: data.language ?? "Google español",
     pitch: Number(data.pitch),
     rate: Number(data.rate),
+    reade: data.reade,
   };
 
   const textConteiner = document.getElementById(options.classDiv);
   punktParagrafs.textContent = textConteiner.children.length;
-  console.dir(textConteiner);
-  console.dir(uriNextPage);
+
+  const buttonNextPage = document.getElementsByClassName(options.classEnd);
+  const uriNextPage = buttonNextPage[0].attributes.href.value;
 
   let paragraf = 0;
   const voices = synth.getVoices();
-  let reade = false;
 
   function speak() {
     if (synth.speaking) {
@@ -58,7 +57,6 @@ async function startReade() {
 
     const paragrafText = textConteiner.children[paragraf].innerText;
     if (paragraf >= textConteiner.children.length - 1) {
-      console.log("last");
       window.location.href = uriNextPage;
     } else if (textConteiner.children[paragraf].clientHeight === 0) {
       paragraf++;
@@ -69,7 +67,7 @@ async function startReade() {
 
       textConteiner.children[paragraf].style.backgroundColor = "#ffcc00";
 
-      utterThis.onend = function (event) {
+      utterThis.onend = function () {
         textConteiner.children[paragraf].style = "";
         textConteiner.children[paragraf].scrollIntoView({
           behavior: "smooth",
@@ -77,13 +75,15 @@ async function startReade() {
         });
         paragraf++;
         inputParagraf.value = paragraf;
-        if (paragraf < textConteiner.children.length && reade) {
+        if (paragraf < textConteiner.children.length && options.reade) {
           speak();
         }
       };
 
       utterThis.onerror = function (event) {
         console.error("SpeechSynthesisUtterance.onerror");
+        options.reade = false;
+        chrome.storage.sync.set({ options });
       };
 
       for (let i = 0; i < voices.length; i++) {
@@ -98,14 +98,20 @@ async function startReade() {
     }
   }
 
-  buttonStart.onclick = function (event) {
-    reade = true;
-
+  if (options.reade) {
     speak();
+  }
+
+  buttonStart.onclick = function (event) {
+    options.reade = true;
+    console.log(options);
+    speak();
+    chrome.storage.sync.set({ options });
   };
 
   buttonStop.onclick = function () {
-    reade = false;
+    options.reade = false;
+    chrome.storage.sync.set({ options });
   };
   inputParagraf.onchange = function () {
     paragraf = inputParagraf.value;
