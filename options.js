@@ -5,7 +5,7 @@ const options = {
   rate: 1,
   pitch: 1,
   language: null,
-  reade: false,
+  reade: null,
 };
 
 const synth = window.speechSynthesis;

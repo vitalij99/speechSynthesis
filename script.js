@@ -97,20 +97,22 @@ async function startReade() {
       synth.speak(utterThis);
     }
   }
-
-  if (options.reade) {
+  const date = new Date();
+  date.setHours(date.getHours() + 5);
+  console.log(options.reade, date, options.reade - date < 18000000);
+  if (options.reade && options.reade - date < 18000000) {
     speak();
   }
 
   buttonStart.onclick = function (event) {
-    options.reade = true;
+    options.reade = new Date();
     console.log(options);
     speak();
     chrome.storage.sync.set({ options });
   };
 
   buttonStop.onclick = function () {
-    options.reade = false;
+    options.reade = null;
     chrome.storage.sync.set({ options });
   };
   inputParagraf.onchange = function () {
