@@ -39,7 +39,7 @@ async function startReade() {
     rate: Number(data.rate),
     reade: data.reade,
   };
-
+  console.log(options);
   const textConteiner = document.getElementById(options.classDiv);
   punktParagrafs.textContent = textConteiner.children.length;
 
@@ -97,15 +97,22 @@ async function startReade() {
       synth.speak(utterThis);
     }
   }
-  const date = new Date();
-  date.setHours(date.getHours() + 5);
-  console.log(options.reade, date, options.reade - date < 18000000);
-  if (options.reade && options.reade - date < 18000000) {
+  const date = Math.floor(new Date() / (1000 * 60 * 60));
+
+  console.log(
+    options.reade,
+    date,
+    options.reade - date,
+    options.reade - date >= 0
+  );
+  if (options.reade && options.reade - date >= 0) {
     speak();
   }
 
   buttonStart.onclick = function (event) {
-    options.reade = new Date();
+    let date = new Date();
+    date.setHours(date.getHours() + 3);
+    options.reade = Math.floor(date / (1000 * 60 * 60));
     console.log(options);
     speak();
     chrome.storage.sync.set({ options });
