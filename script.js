@@ -38,6 +38,7 @@ async function startReade() {
     pitch: Number(data.pitch),
     rate: Number(data.rate),
     reade: data.reade,
+    timer: data.timer ?? 2,
   };
   console.log(options);
   const textConteiner = document.getElementById(options.classDiv);
@@ -99,21 +100,15 @@ async function startReade() {
   }
   const date = Math.floor(new Date() / (1000 * 60 * 60));
 
-  console.log(
-    options.reade,
-    date,
-    options.reade - date,
-    options.reade - date >= 0
-  );
   if (options.reade && options.reade - date >= 0) {
     speak();
   }
 
   buttonStart.onclick = function (event) {
     let date = new Date();
-    date.setHours(date.getHours() + 3);
+    date.setHours(date.getHours() + options.timer);
     options.reade = Math.floor(date / (1000 * 60 * 60));
-    console.log(options);
+
     speak();
     chrome.storage.sync.set({ options });
   };

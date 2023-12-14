@@ -6,6 +6,7 @@ const options = {
   pitch: 1,
   language: null,
   reade: null,
+  timer: 2,
 };
 
 const synth = window.speechSynthesis;
@@ -16,6 +17,8 @@ const pitch = document.querySelector("#pitch");
 const pitchValue = document.querySelector(".pitch-value");
 const rate = document.querySelector("#rate");
 const rateValue = document.querySelector(".rate-value");
+const timer = document.querySelector("#timer");
+const timerValue = document.querySelector(".timer-value");
 
 // Immediately persist options changes
 optionsForm.addEventListener("change", (event) => {
@@ -23,6 +26,7 @@ optionsForm.addEventListener("change", (event) => {
   options.classEnd = optionsForm.classEnd.value;
   options.rate = Number(optionsForm.rate.value);
   options.pitch = Number(optionsForm.pitch.value);
+  options.timer = Number(optionsForm.timer.value);
   options.language = voiceSelect.selectedOptions[0].getAttribute("data-name");
 
   chrome.storage.sync.set({ options });
@@ -39,6 +43,7 @@ optionsForm.classDiv.value = options.classDiv;
 optionsForm.classEnd.value = options.classEnd;
 optionsForm.rate.value = options.rate;
 optionsForm.pitch.value = options.pitch;
+optionsForm.timer.value = options.timer;
 
 let voices;
 function populateVoiceList() {
@@ -90,4 +95,7 @@ pitch.onchange = function () {
 
 rate.onchange = function () {
   rateValue.textContent = rate.value;
+};
+timer.onchange = function () {
+  timerValue.textContent = timer.value;
 };
