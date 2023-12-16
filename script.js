@@ -35,12 +35,12 @@ async function startReade() {
     classDiv: data.classDiv ?? "content",
     classEnd: data.classEnd ?? "nextchap",
     language: data.language ?? "Google español",
-    pitch: Number(data.pitch),
-    rate: Number(data.rate),
-    reade: data.reade,
+    pitch: Number(data.pitch) ?? 2,
+    rate: Number(data.rate) ?? 2,
+    reade: data.reade ?? false,
     timer: data.timer ?? 2,
   };
-  console.log(options);
+
   const textConteiner = document.getElementById(options.classDiv);
   punktParagrafs.textContent = textConteiner.children.length;
 
@@ -104,10 +104,17 @@ async function startReade() {
     speak();
   }
 
-  buttonStart.onclick = function (event) {
+  buttonStart.onclick = function () {
     let date = new Date();
     date.setHours(date.getHours() + options.timer);
     options.reade = Math.floor(date / (1000 * 60 * 60));
+
+    // add last book
+    options.bookURL = document.URL;
+    options.book =
+      document.title.length > 150
+        ? document.title.substring(0, 147) + "..."
+        : document.title;
 
     speak();
     chrome.storage.sync.set({ options });
