@@ -4,17 +4,12 @@
   "description": "Reader",
   "version": "1.0",
 
-  "action": { "default_icon": "hello.png"},
+  "action": { "default_icon": "hello.png", "default_popup": "popup.html" },
   "icons": {
     "16": "hello.png"
   },
-  "permissions": [
-    "activeTab",
-    "scripting",
-    "storage",
-    "webNavigation"
-  ],
- "content_scripts": [
+  "permissions": ["activeTab", "scripting", "storage", "webNavigation"],
+  "content_scripts": [
     {
       "matches": ["https://novelreader.to/*"],
       "js": ["script.js"]
@@ -24,7 +19,7 @@
     "page": "options.html",
     "open_in_tab": true
   },
-  "commands": {    
+  "commands": {
     "_execute_action": {
       "suggested_key": {
         "windows": "Alt+Q"
