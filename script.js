@@ -122,6 +122,11 @@ async function startReade() {
 
   buttonStop.onclick = function () {
     options.reade = null;
+    options.bookURL = document.URL;
+    options.book =
+      document.title.length > 150
+        ? document.title.substring(0, 147) + "..."
+        : document.title;
     chrome.storage.sync.set({ options });
   };
   inputParagraf.onchange = function () {

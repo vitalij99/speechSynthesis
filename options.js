@@ -22,7 +22,7 @@ const timer = document.querySelector("#timer");
 const timerValue = document.querySelector(".timer-value");
 
 // Immediately persist options changes
-optionsForm.addEventListener("change", (event) => {
+optionsForm.addEventListener("change", () => {
   options.classDiv = optionsForm.classDiv.value;
   options.classEnd = optionsForm.classEnd.value;
   options.rate = Number(optionsForm.rate.value);
