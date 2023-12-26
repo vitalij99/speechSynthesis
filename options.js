@@ -8,6 +8,7 @@ const options = {
   reade: null,
   timer: 2,
   book: "",
+  paragraf: 0,
 };
 
 const synth = window.speechSynthesis;

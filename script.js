@@ -1,11 +1,12 @@
 function createHTMLButton() {
   const floatingDiv = document.createElement("div");
   floatingDiv.id = "floatingDiv";
-  floatingDiv.innerHTML = `<div style="position:fixed; top:0; right:0; padding:20px">
+  floatingDiv.innerHTML = `
+  <div  id="wrappAppReader" style="position:fixed; top:0; right:0; padding:20px">
       <button id="start" type="submit">Play</button>
       
       <button id="stop" >Stop</button>
-      <input type="number"  value="0"  id="inputParagraf" style="width:40px" />
+      <input type="number"  value="0"  id="inputParagraf" style="width:50px" />
       <p id="paragrafs"  style="width:40px;display:inline-block">0</p>
 </div > `;
 
@@ -16,6 +17,7 @@ const buttonStart = document.getElementById("start");
 const buttonStop = document.getElementById("stop");
 const inputParagraf = document.getElementById("inputParagraf");
 const punktParagrafs = document.getElementById("paragrafs");
+const wrappAppReader = document.getElementById("wrappAppReader");
 
 startReade();
 
@@ -39,16 +41,22 @@ async function startReade() {
     rate: Number(data.rate) ?? 2,
     reade: data.reade ?? false,
     timer: data.timer ?? 2,
+    paragraf: data.paragraf ?? 0,
   };
-
+  console.log(options);
   const textConteiner = document.getElementById(options.classDiv);
+  if (!textConteiner || textConteiner.children.length === 0) {
+    wrappAppReader.innerHTML = "";
+    return;
+  }
   punktParagrafs.textContent = textConteiner.children.length;
 
   const buttonNextPage = document.getElementsByClassName(options.classEnd);
   const uriNextPage = buttonNextPage[0].attributes.href.value;
 
-  let paragraf = 0;
+  let paragraf = options.paragraf;
   const voices = synth.getVoices();
+  inputParagraf.value = paragraf;
 
   function speak() {
     if (synth.speaking) {
@@ -58,6 +66,10 @@ async function startReade() {
 
     const paragrafText = textConteiner.children[paragraf].innerText;
     if (paragraf >= textConteiner.children.length - 1) {
+      options.paragraf = 0;
+
+      chrome.storage.sync.set({ options });
+
       window.location.href = uriNextPage;
     } else if (textConteiner.children[paragraf].clientHeight === 0) {
       paragraf++;
@@ -84,6 +96,7 @@ async function startReade() {
       utterThis.onerror = function (event) {
         console.error("SpeechSynthesisUtterance.onerror");
         options.reade = false;
+        options.paragraf = paragraf;
         chrome.storage.sync.set({ options });
       };
 
@@ -127,6 +140,8 @@ async function startReade() {
       document.title.length > 150
         ? document.title.substring(0, 147) + "..."
         : document.title;
+    options.paragraf = paragraf;
+
     chrome.storage.sync.set({ options });
   };
   inputParagraf.onchange = function () {
