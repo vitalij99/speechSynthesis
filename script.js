@@ -35,7 +35,7 @@ async function startReade() {
   const synth = window.speechSynthesis;
   const options = {
     classDiv: data.classDiv ?? "content",
-    classEnd: data.classEnd ?? "nextchap",
+    nextPage: data.nextPage ?? "nextchap",
     language: data.language ?? "Google español",
     pitch: Number(data.pitch) ?? 2,
     rate: Number(data.rate) ?? 2,
@@ -51,7 +51,7 @@ async function startReade() {
   }
   punktParagrafs.textContent = textConteiner.children.length;
 
-  const buttonNextPage = document.getElementsByClassName(options.classEnd);
+  const buttonNextPage = document.getElementsByClassName(options.nextPage);
   const uriNextPage = buttonNextPage[0].attributes.href.value;
 
   let paragraf = options.paragraf;

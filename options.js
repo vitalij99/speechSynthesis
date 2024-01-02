@@ -1,7 +1,7 @@
 // In-page cache of the user's options
 const options = {
   classDiv: "content",
-  classEnd: "nextchap",
+  nextPage: "nextchap",
   rate: 1,
   pitch: 1,
   language: null,
@@ -25,7 +25,7 @@ const timerValue = document.querySelector(".timer-value");
 // Immediately persist options changes
 optionsForm.addEventListener("change", () => {
   options.classDiv = optionsForm.classDiv.value;
-  options.classEnd = optionsForm.classEnd.value;
+  options.nextPage = optionsForm.nextPage.value;
   options.rate = Number(optionsForm.rate.value);
   options.pitch = Number(optionsForm.pitch.value);
   options.timer = Number(optionsForm.timer.value);
@@ -42,7 +42,7 @@ Object.assign(options, data.options);
 console.log(options);
 
 optionsForm.classDiv.value = options.classDiv;
-optionsForm.classEnd.value = options.classEnd;
+optionsForm.nextPage.value = options.nextPage;
 optionsForm.rate.value = options.rate;
 optionsForm.pitch.value = options.pitch;
 optionsForm.timer.value = options.timer;
