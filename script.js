@@ -96,7 +96,7 @@ async function startReade() {
       utterThis.onerror = function (event) {
         console.error("SpeechSynthesisUtterance.onerror");
         options.reade = false;
-        options.paragraf = paragraf;
+        options.paragraf = 0;
         chrome.storage.sync.set({ options });
       };
 
