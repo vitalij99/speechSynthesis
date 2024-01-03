@@ -6,7 +6,7 @@ function createHTMLButton() {
       <button id="start" type="submit">Play</button>
       
       <button id="stop" >Stop</button>
-      <input type="number"  value="0"  id="inputParagraf" style="width:50px" />
+      <input type="number" min="0"  value="0"  id="inputParagraf" style="width:50px" />
       <p id="paragrafs"  style="width:40px;display:inline-block">0</p>
 </div > `;
 
@@ -43,7 +43,7 @@ async function startReade() {
     timer: data.timer ?? 2,
     paragraf: data.paragraf ?? 0,
   };
-  console.log(options);
+
   const textConteiner = document.getElementById(options.classDiv);
   if (!textConteiner || textConteiner.children.length === 0) {
     wrappAppReader.innerHTML = "";
