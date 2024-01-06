@@ -65,9 +65,9 @@ async function startReade() {
     }
 
     const paragrafText = textConteiner.children[paragraf].innerText;
+
     if (
-      (paragraf >= textConteiner.children.length - 4 &&
-        paragrafText.search("https://t.me/novelfire")) ||
+      paragrafText.search("https://t.me/novelfire") >= 0 ||
       paragraf >= textConteiner.children.length - 1
     ) {
       options.paragraf = 0;
