@@ -3,8 +3,7 @@ function createHTMLButton() {
   floatingDiv.id = "floatingDiv";
   floatingDiv.innerHTML = `
   <div  id="wrappAppReader" style="position:fixed; top:0; right:0; padding:20px">
-      <button id="start" type="submit">Play</button>
-      
+      <button id="start" type="submit">Play</button>      
       <button id="stop" >Stop</button>
       <input type="number" min="0"  value="0"  id="inputParagraf" style="width:50px" />
       <p id="paragrafs"  style="width:40px;display:inline-block">0</p>
@@ -83,13 +82,14 @@ async function startReade() {
       const utterThis = new SpeechSynthesisUtterance(paragrafText);
 
       textConteiner.children[paragraf].style.backgroundColor = "#ffcc00";
+      textConteiner.children[paragraf].scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
 
       utterThis.onend = function () {
         textConteiner.children[paragraf].style = "";
-        textConteiner.children[paragraf].scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
+
         paragraf++;
         inputParagraf.value = paragraf;
         if (paragraf < textConteiner.children.length && options.reade) {
@@ -97,7 +97,7 @@ async function startReade() {
         }
       };
 
-      utterThis.onerror = function (event) {
+      utterThis.onerror = function () {
         console.error("SpeechSynthesisUtterance.onerror");
         options.reade = false;
         options.paragraf = 0;
