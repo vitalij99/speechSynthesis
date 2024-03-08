@@ -11,7 +11,7 @@
   "permissions": ["activeTab", "scripting", "storage", "webNavigation"],
   "content_scripts": [
     {
-      "matches": ["https://novelreader.to/*"],
+      "matches": ["https://novelfire.net/*", "https://allwuxiaworld.com/*"],
       "js": ["script.js"]
     }
   ],

@@ -33,7 +33,7 @@ async function startReade() {
 
   const synth = window.speechSynthesis;
   const options = {
-    classDiv: data.classDiv ?? "content",
+    contentDivElem: data.contentDivElem ?? "#content",
     nextPage: data.nextPage ?? "nextchap",
     language: data.language ?? "Google español",
     pitch: Number(data.pitch) ?? 2,
@@ -43,7 +43,7 @@ async function startReade() {
     paragraf: data.paragraf ?? 0,
   };
 
-  const textConteiner = document.getElementById(options.classDiv);
+  const textConteiner = document.querySelector(options.contentDivElem);
   if (!textConteiner || textConteiner.children.length === 0) {
     wrappAppReader.innerHTML = "";
     return;
