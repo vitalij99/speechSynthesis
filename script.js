@@ -64,11 +64,8 @@ async function startReade() {
     }
 
     const paragrafText = textConteiner.children[paragraf].innerText;
-
-    if (
-      paragrafText.search("https://t.me/novelfire") >= 0 ||
-      paragraf >= textConteiner.children.length - 1
-    ) {
+    // next page
+    if (paragraf >= textConteiner.children.length - 1) {
       options.paragraf = 0;
 
       chrome.storage.sync.set({ options });
