@@ -8,6 +8,7 @@ const options = {
   reade: null,
   timer: 2,
   book: "",
+  bookURL: "",
   paragraf: 0,
 };
 
@@ -21,6 +22,7 @@ const rate = document.querySelector("#rate");
 const rateValue = document.querySelector(".rate-value");
 const timer = document.querySelector("#timer");
 const timerValue = document.querySelector(".timer-value");
+const btnBook = document.getElementById("book");
 
 // Immediately persist options changes
 optionsForm.addEventListener("change", () => {
@@ -47,6 +49,10 @@ optionsForm.rate.value = options.rate;
 optionsForm.pitch.value = options.pitch;
 optionsForm.timer.value = options.timer;
 
+btnBook.innerText = options.book ? options.book : "books";
+btnBook.href = options.bookURL;
+
+// get language
 let voices;
 function populateVoiceList() {
   voices = synth.getVoices().sort(function (a, b) {

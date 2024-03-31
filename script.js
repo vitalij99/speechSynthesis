@@ -141,6 +141,7 @@ async function startReade() {
       document.title.length > 150
         ? document.title.substring(0, 147) + "..."
         : document.title;
+
     options.paragraf = paragraf;
 
     chrome.storage.sync.set({ options });
@@ -149,3 +150,4 @@ async function startReade() {
     paragraf = inputParagraf.value;
   };
 }
+console.dir(document);
