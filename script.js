@@ -78,7 +78,8 @@ async function startReade() {
     } else if (paragrafText !== "") {
       const utterThis = new SpeechSynthesisUtterance(paragrafText);
 
-      textConteiner.children[paragraf].style.backgroundColor = "#ffcc00";
+      textConteiner.children[paragraf].style.backdropFilter = "blur(10px)";
+      textConteiner.children[paragraf].style.filter = "invert(1)";
       textConteiner.children[paragraf].scrollIntoView({
         behavior: "smooth",
         block: "center",
