@@ -11,7 +11,11 @@
   "permissions": ["activeTab", "scripting", "storage", "webNavigation"],
   "content_scripts": [
     {
-      "matches": ["https://novelfire.net/*", "https://allwuxiaworld.com/*"],
+      "matches": [
+        "https://novelfire.net/*",
+        "https://allwuxiaworld.com/*",
+        "https://topnovelupdates.com/book/*"
+      ],
       "js": ["script.js"]
     }
   ],
