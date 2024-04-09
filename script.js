@@ -21,29 +21,23 @@ const wrappAppReader = document.getElementById("wrappAppReader");
 startReade();
 
 async function startReade() {
-  function getStorageData() {
-    return new Promise((resolve) => {
-      chrome.storage.sync.get("options", (result) => {
-        resolve(result.options);
-      });
-    });
-  }
-
   const data = await getStorageData();
 
   const synth = window.speechSynthesis;
+
   const options = {
     contentDivElem: data.contentDivElem ?? "#content",
     nextPage: data.nextPage ?? "nextchap",
     language: data.language ?? "Google español",
     pitch: Number(data.pitch) ?? 2,
     rate: Number(data.rate) ?? 2,
-    reade: data.reade ?? false,
-    timer: data.timer ?? 2,
+    reade: typeof data.reade === "string" ? data.reade : false,
+    timer: data.timer ?? 20,
     paragraf: data.paragraf ?? 0,
   };
 
   const textConteiner = document.querySelector(options.contentDivElem);
+
   if (!textConteiner || textConteiner.children.length === 0) {
     wrappAppReader.innerHTML = "";
     return;
@@ -97,7 +91,7 @@ async function startReade() {
 
       utterThis.onerror = function () {
         console.error("SpeechSynthesisUtterance.onerror");
-        options.reade = false;
+
         options.paragraf = 0;
         chrome.storage.sync.set({ options });
       };
@@ -113,16 +107,19 @@ async function startReade() {
       synth.speak(utterThis);
     }
   }
-  const date = Math.floor(new Date() / (1000 * 60 * 60));
 
-  if (options.reade && options.reade - date >= 0) {
+  const dateSave = new Date(options.reade);
+  const dateNow = new Date();
+
+  if (options.reade && dateSave > dateNow) {
     speak();
   }
 
   buttonStart.onclick = function () {
-    let date = new Date();
-    date.setHours(date.getHours() + options.timer);
-    options.reade = Math.floor(date / (1000 * 60 * 60));
+    const date = new Date();
+
+    date.setMinutes(date.getMinutes() + options.timer);
+    options.reade = date + "";
 
     // add last book
     options.bookURL = document.URL;
@@ -151,4 +148,11 @@ async function startReade() {
     paragraf = inputParagraf.value;
   };
 }
-console.dir(document);
+
+function getStorageData() {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get("options", (result) => {
+      resolve(result.options);
+    });
+  });
+}
