@@ -11,7 +11,15 @@ const options = {
   bookURL: "",
   paragraf: 0,
 };
-
+const getTimeFormat = (timer, timerValue) => {
+  const futureTimestamp = new Date().getTime() + timer * 60000;
+  const futureDate = new Date(futureTimestamp);
+  const formattedTime = futureDate.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  timerValue.textContent = formattedTime;
+};
 const synth = window.speechSynthesis;
 const voiceSelect = document.querySelector("select");
 const optionsForm = document.getElementById("optionsForm");
@@ -33,6 +41,11 @@ optionsForm.addEventListener("change", () => {
   options.timer = Number(optionsForm.timer.value);
   options.language = voiceSelect.selectedOptions[0].getAttribute("data-name");
 
+  pitchValue.textContent = options.pitch;
+  rateValue.textContent = options.rate;
+
+  getTimeFormat(options.timer, timerValue);
+
   chrome.storage.sync.set({ options });
   console.log(options);
 });
@@ -48,7 +61,7 @@ optionsForm.nextPage.value = options.nextPage;
 optionsForm.rate.value = options.rate;
 optionsForm.pitch.value = options.pitch;
 optionsForm.timer.value = options.timer;
-
+getTimeFormat(options.timer, timerValue);
 btnBook.innerText = options.book ? options.book : "books";
 btnBook.href = options.bookURL;
 
@@ -97,13 +110,3 @@ if (speechSynthesis.onvoiceschanged !== undefined) {
 
 pitchValue.textContent = pitch.value;
 rateValue.textContent = rate.value;
-pitch.onchange = function () {
-  pitchValue.textContent = pitch.value;
-};
-
-rate.onchange = function () {
-  rateValue.textContent = rate.value;
-};
-timer.onchange = function () {
-  timerValue.textContent = timer.value;
-};
