@@ -1,3 +1,14 @@
+const options = {
+  contentDivElem: "#content",
+  nextPage: "nextchap",
+  language: "Google español",
+  pitch: 2,
+  rate: 2,
+  reade: false,
+  timer: 20,
+  paragraf: 0,
+};
+
 function createHTMLButton() {
   const floatingDiv = document.createElement("div");
   floatingDiv.id = "floatingDiv";
@@ -12,6 +23,7 @@ function createHTMLButton() {
   document.body.appendChild(floatingDiv);
 }
 createHTMLButton();
+
 const buttonStart = document.getElementById("start");
 const buttonStop = document.getElementById("stop");
 const inputParagraf = document.getElementById("inputParagraf");
@@ -22,19 +34,9 @@ startReade();
 
 async function startReade() {
   const data = await getStorageData();
+  Object.assign(options, data);
 
   const synth = window.speechSynthesis;
-
-  const options = {
-    contentDivElem: data.contentDivElem ?? "#content",
-    nextPage: data.nextPage ?? "nextchap",
-    language: data.language ?? "Google español",
-    pitch: Number(data.pitch) ?? 2,
-    rate: Number(data.rate) ?? 2,
-    reade: typeof data.reade === "string" ? data.reade : false,
-    timer: data.timer ?? 20,
-    paragraf: data.paragraf ?? 0,
-  };
 
   const textConteiner = document.querySelector(options.contentDivElem);
 
@@ -156,3 +158,9 @@ function getStorageData() {
     });
   });
 }
+chrome.storage.onChanged.addListener(function (changes, namespace) {
+  for (let key in changes) {
+    let storageChange = changes[key];
+    Object.assign(options, storageChange.newValue);
+  }
+});
