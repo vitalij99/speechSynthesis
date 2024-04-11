@@ -1,6 +1,18 @@
+const synth = window.speechSynthesis;
+const voiceSelect = document.querySelector("select");
+const optionsForm = document.getElementById("optionsForm");
+
+const pitch = document.querySelector("#pitch");
+const pitchValue = document.querySelector(".pitch-value");
+const rate = document.querySelector("#rate");
+const rateValue = document.querySelector(".rate-value");
+const timer = document.querySelector("#timer");
+const timerValue = document.querySelector(".timer-value");
+const btnBook = document.getElementById("book");
+
 // In-page cache of the user's options
 const options = {
-  contentDivElem: "content",
+  contentDivElem: "#content",
   nextPage: "nextchap",
   rate: 1,
   pitch: 1,
@@ -20,55 +32,36 @@ const getTimeFormat = (timer, timerValue) => {
   });
   timerValue.textContent = formattedTime;
 };
-const synth = window.speechSynthesis;
-const voiceSelect = document.querySelector("select");
-const optionsForm = document.getElementById("optionsForm");
 
-const pitch = document.querySelector("#pitch");
-const pitchValue = document.querySelector(".pitch-value");
-const rate = document.querySelector("#rate");
-const rateValue = document.querySelector(".rate-value");
-const timer = document.querySelector("#timer");
-const timerValue = document.querySelector(".timer-value");
-const btnBook = document.getElementById("book");
+// run fn
+await loadDataFromStorage();
+populateVoiceList();
 
-// Immediately persist options changes
-optionsForm.addEventListener("change", () => {
-  options.contentDivElem = optionsForm.contentDivElem.value;
-  options.nextPage = optionsForm.nextPage.value;
-  options.rate = Number(optionsForm.rate.value);
-  options.pitch = Number(optionsForm.pitch.value);
-  options.timer = Number(optionsForm.timer.value);
-  options.language = voiceSelect.selectedOptions[0].getAttribute("data-name");
+// Initialize the form with the user's option settings
+async function loadDataFromStorage() {
+  const data = await chrome.storage.sync.get("options");
+  Object.assign(options, data.options);
 
-  pitchValue.textContent = options.pitch;
-  rateValue.textContent = options.rate;
+  console.log(options);
+
+  optionsForm.contentDivElem.value = options.contentDivElem;
+  optionsForm.nextPage.value = options.nextPage;
+  optionsForm.rate.value = options.rate;
+  optionsForm.pitch.value = options.pitch;
+  optionsForm.timer.value = options.timer;
+
+  btnBook.innerText = options.book ? options.book : "books";
+  btnBook.href = options.bookURL;
 
   getTimeFormat(options.timer, timerValue);
 
-  chrome.storage.sync.set({ options });
-  console.log(options);
-});
-
-// Initialize the form with the user's option settings
-const data = await chrome.storage.sync.get("options");
-Object.assign(options, data.options);
-
-console.log(options);
-
-optionsForm.contentDivElem.value = options.contentDivElem;
-optionsForm.nextPage.value = options.nextPage;
-optionsForm.rate.value = options.rate;
-optionsForm.pitch.value = options.pitch;
-optionsForm.timer.value = options.timer;
-getTimeFormat(options.timer, timerValue);
-btnBook.innerText = options.book ? options.book : "books";
-btnBook.href = options.bookURL;
+  pitchValue.textContent = pitch.value;
+  rateValue.textContent = rate.value;
+}
 
 // get language
-let voices;
 function populateVoiceList() {
-  voices = synth.getVoices().sort(function (a, b) {
+  let voices = synth.getVoices().sort(function (a, b) {
     const alang = a.lang.toUpperCase();
     const blang = b.lang.toUpperCase();
 
@@ -103,10 +96,23 @@ function populateVoiceList() {
 
   voiceSelect.selectedIndex = selectedIndex;
 }
-populateVoiceList();
 if (speechSynthesis.onvoiceschanged !== undefined) {
   speechSynthesis.onvoiceschanged = populateVoiceList;
 }
+// Immediately persist options changes
+optionsForm.addEventListener("change", () => {
+  options.contentDivElem = optionsForm.contentDivElem.value;
+  options.nextPage = optionsForm.nextPage.value;
+  options.rate = Number(optionsForm.rate.value);
+  options.pitch = Number(optionsForm.pitch.value);
+  options.timer = Number(optionsForm.timer.value);
+  options.language = voiceSelect.selectedOptions[0].getAttribute("data-name");
 
-pitchValue.textContent = pitch.value;
-rateValue.textContent = rate.value;
+  pitchValue.textContent = options.pitch;
+  rateValue.textContent = options.rate;
+
+  getTimeFormat(options.timer, timerValue);
+
+  chrome.storage.sync.set({ options });
+  console.log(options);
+});
