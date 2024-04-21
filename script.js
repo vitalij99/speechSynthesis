@@ -30,7 +30,9 @@ const inputParagraf = document.getElementById("inputParagraf");
 const punktParagrafs = document.getElementById("paragrafs");
 const wrappAppReader = document.getElementById("wrappAppReader");
 
-startReade();
+setTimeout(() => {
+  startReade();
+}, 200);
 
 async function startReade() {
   const data = await getStorageData();
