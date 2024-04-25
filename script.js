@@ -32,7 +32,7 @@ const wrappAppReader = document.getElementById("wrappAppReader");
 
 setTimeout(() => {
   startReade();
-}, 200);
+}, 1000);
 
 async function startReade() {
   const data = await getStorageData();
