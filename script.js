@@ -22,17 +22,6 @@ function createHTMLButton() {
 
   document.body.appendChild(floatingDiv);
 }
-createHTMLButton();
-
-const buttonStart = document.getElementById("start");
-const buttonStop = document.getElementById("stop");
-const inputParagraf = document.getElementById("inputParagraf");
-const punktParagrafs = document.getElementById("paragrafs");
-const wrappAppReader = document.getElementById("wrappAppReader");
-
-setTimeout(() => {
-  startReade();
-}, 1000);
 
 async function startReade() {
   const data = await getStorageData();
@@ -40,16 +29,23 @@ async function startReade() {
 
   const synth = window.speechSynthesis;
 
-  const textConteiner = document.querySelector(options.contentDivElem);
+  const textConteiner = getHtmlElements(options.contentDivElem);
 
   if (!textConteiner || textConteiner.children.length === 0) {
-    wrappAppReader.innerHTML = "";
     return;
   }
+  createHTMLButton();
+
+  const buttonStart = document.getElementById("start");
+  const buttonStop = document.getElementById("stop");
+  const inputParagraf = document.getElementById("inputParagraf");
+  const punktParagrafs = document.getElementById("paragrafs");
+
   punktParagrafs.textContent = textConteiner.children.length;
 
-  const buttonNextPage = document.getElementsByClassName(options.nextPage);
-  const uriNextPage = buttonNextPage[0].attributes.href.value;
+  const buttonNextPage = getHtmlElements(options.nextPage);
+
+  const uriNextPage = buttonNextPage.attributes.href.value;
 
   let paragraf = options.paragraf;
   const voices = synth.getVoices();
@@ -115,9 +111,11 @@ async function startReade() {
   const dateSave = new Date(options.reade);
   const dateNow = new Date();
 
-  if (options.reade && dateSave > dateNow) {
-    speak();
-  }
+  setTimeout(() => {
+    if (options.reade && dateSave > dateNow) {
+      speak();
+    }
+  }, 1000);
 
   buttonStart.onclick = function () {
     const date = new Date();
@@ -143,8 +141,9 @@ async function startReade() {
       document.title.length > 150
         ? document.title.substring(0, 147) + "..."
         : document.title;
-
+    textConteiner.children[paragraf].style = "";
     options.paragraf = paragraf;
+    synth.cancel();
 
     chrome.storage.sync.set({ options });
   };
@@ -153,6 +152,23 @@ async function startReade() {
   };
 }
 
+function getHtmlElements(nameElements) {
+  const foundElements = [];
+
+  const massNameElements = nameElements.split("\n");
+
+  if (massNameElements.length === 0)
+    return document.querySelector(nameElements);
+
+  for (const name of massNameElements) {
+    const element = document.querySelector(name);
+    if (element) {
+      foundElements.push(element);
+    }
+  }
+
+  return foundElements[0];
+}
 function getStorageData() {
   return new Promise((resolve) => {
     chrome.storage.sync.get("options", (result) => {
@@ -166,3 +182,5 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
     Object.assign(options, storageChange.newValue);
   }
 });
+
+startReade();
