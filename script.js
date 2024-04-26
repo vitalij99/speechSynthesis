@@ -89,13 +89,6 @@ async function startReade() {
         }
       };
 
-      utterThis.onerror = function () {
-        console.error("SpeechSynthesisUtterance.onerror");
-
-        options.paragraf = 0;
-        chrome.storage.sync.set({ options });
-      };
-
       for (let i = 0; i < voices.length; i++) {
         if (voices[i].name === options.language) {
           utterThis.voice = voices[i];

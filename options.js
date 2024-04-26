@@ -26,10 +26,20 @@ const options = {
 const getTimeFormat = (timer, timerValue) => {
   const futureTimestamp = new Date().getTime() + timer * 60000;
   const futureDate = new Date(futureTimestamp);
-  const formattedTime = futureDate.toLocaleTimeString([], {
+  let formattedTime = futureDate.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
   });
+
+  if (options.reade) {
+    const lastDate = new Date(options.reade);
+    formattedTime += `  save time: `;
+    formattedTime += lastDate.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
   timerValue.textContent = formattedTime;
 };
 
