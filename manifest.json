@@ -8,7 +8,7 @@
   "icons": {
     "16": "hello.png"
   },
-  "permissions": ["activeTab", "scripting", "storage", "webNavigation"],
+  "permissions": ["scripting", "storage", "webNavigation"],
   "content_scripts": [
     {
       "matches": ["https://*/*"],
