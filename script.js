@@ -1,6 +1,6 @@
 const options = {
   contentDivElem: "#content",
-  nextPage: "nextchap",
+  nextPage: ".nextchap",
   language: "Google español",
   pitch: 2,
   rate: 2,
@@ -154,9 +154,11 @@ function getHtmlElements(nameElements) {
     return document.querySelector(nameElements);
 
   for (const name of massNameElements) {
-    const element = document.querySelector(name);
-    if (element) {
-      foundElements.push(element);
+    if (name.length !== 0) {
+      const element = document.querySelector(name);
+      if (element) {
+        foundElements.push(element);
+      }
     }
   }
 
