@@ -1,0 +1,9 @@
+.wrapp-popup {
+    width: 400px;
+    height: 400px;
+}
+.book-popup {
+    display: block;
+    font-size: larger;
+    padding: 10px 5px;
+}

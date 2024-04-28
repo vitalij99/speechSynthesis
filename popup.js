@@ -1,7 +1,7 @@
-const btnBook = document.getElementById("book");
-
 getStorage().then(({ options }) => {
+  const btnBook = document.querySelector(".book-popup");
   const { book, bookURL } = options;
+
   btnBook.innerText = book ? book : "books";
   btnBook.href = bookURL;
 });

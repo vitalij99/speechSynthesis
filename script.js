@@ -9,20 +9,6 @@ const options = {
   paragraf: 0,
 };
 
-function createHTMLButton() {
-  const floatingDiv = document.createElement("div");
-  floatingDiv.id = "floatingDiv";
-  floatingDiv.innerHTML = `
-  <div  id="wrappAppReader" style="position:fixed; top:0; right:0; padding:20px">
-      <button id="start" type="submit">Play</button>      
-      <button id="stop" >Stop</button>
-      <input type="number" min="0"  value="0"  id="inputParagraf" style="width:50px" />
-      <p id="paragrafs"  style="width:40px;display:inline-block">0</p>
-</div > `;
-
-  document.body.appendChild(floatingDiv);
-}
-
 async function startReade() {
   const data = await getStorageData();
   Object.assign(options, data);
@@ -38,17 +24,14 @@ async function startReade() {
 
   const buttonStart = document.getElementById("start");
   const buttonStop = document.getElementById("stop");
-  const inputParagraf = document.getElementById("inputParagraf");
+  const inputParagraf = document.getElementById("inputParagrafs");
   const punktParagrafs = document.getElementById("paragrafs");
 
   punktParagrafs.textContent = textConteiner.children.length;
 
-  const buttonNextPage = getHtmlElements(options.nextPage);
-
-  const uriNextPage = buttonNextPage.attributes.href.value;
-
   let paragraf = options.paragraf;
   const voices = synth.getVoices();
+
   inputParagraf.value = paragraf;
 
   function speak() {
@@ -64,7 +47,11 @@ async function startReade() {
 
       chrome.storage.sync.set({ options });
 
-      window.location.href = uriNextPage;
+      const buttonNextPage = getHtmlElements(options.nextPage);
+      if (buttonNextPage) {
+        const uriNextPage = buttonNextPage.attributes.href.value;
+        window.location.href = uriNextPage;
+      }
     } else if (textConteiner.children[paragraf].clientHeight === 0) {
       paragraf++;
       inputParagraf.value = paragraf;
@@ -171,6 +158,90 @@ function getStorageData() {
     });
   });
 }
+
+function createHTMLButton() {
+  const floatingDivHTML = `
+    <div id="floatingDiv" class="floating-div">
+      <div>
+        <button id="start" class="action-button">Play</button>
+        <button id="stop" class="action-button">Stop</button>
+      </div>
+      <div class="input-container">
+        <input type="number" id="inputParagrafs" class="input-number" value="0">
+        <p id="paragrafs" class="paragraph">0</p>
+      </div>
+    </div>
+  `;
+
+  const floatingDiv = document.createElement("div");
+  floatingDiv.innerHTML = floatingDivHTML;
+
+  const styleElement = document.createElement("style");
+  styleElement.textContent = buttonStyle;
+  document.body.appendChild(floatingDiv);
+  document.head.appendChild(styleElement);
+}
+
+const buttonStyle = styled`
+   .floating-div {
+    display:flex;
+    position: fixed;
+    top: 20px;
+    right: 15px;   
+    background-color: lightblue;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  }
+  .action-button {
+    margin-right: 10px;
+    padding: 8px 16px;
+    background-color: #4caf50;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .input-container  {
+    display: flex;
+    align-items: center;
+    justify-content: center;  
+    background-color: #fff;
+    padding-right: 5px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    
+  }
+  .input-container input {
+    border: none;
+    padding: 5px;  
+    width:55px;
+    font-size: 16px;
+    
+  }
+  .paragraph{
+    margin-left: -12px;
+  }
+  .paragraph::before {
+      content: "/";
+      margin-left: 5px;
+      margin-right: 5px;
+      font-size: 20px;
+      color: #777;
+  }
+   
+`;
+
+function styled(strings, ...values) {
+  return strings.reduce((acc, str, i) => {
+    acc += str;
+    if (i < values.length) {
+      acc += values[i];
+    }
+    return acc;
+  }, "");
+}
+
 chrome.storage.onChanged.addListener(function (changes, namespace) {
   for (let key in changes) {
     let storageChange = changes[key];
