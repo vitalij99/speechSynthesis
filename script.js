@@ -10,9 +10,6 @@ const options = {
 };
 
 async function startReade() {
-  const data = await getStorageData();
-  Object.assign(options, data);
-
   const synth = window.speechSynthesis;
 
   const textConteiner = getHtmlElements(options.contentDivElem);
@@ -20,6 +17,7 @@ async function startReade() {
   if (!textConteiner || textConteiner.children.length === 0) {
     return;
   }
+
   createHTMLButton();
 
   const buttonStart = document.getElementById("start");
@@ -160,29 +158,17 @@ function getStorageData() {
 }
 
 function createHTMLButton() {
-  const floatingDivHTML = `
-    <div id="floatingDiv" class="floating-div">
-      <div>
-        <button id="start" class="action-button">Play</button>
-        <button id="stop" class="action-button">Stop</button>
-      </div>
-      <div class="input-container">
-        <input type="number" id="inputParagrafs" class="input-number" value="0">
-        <p id="paragrafs" class="paragraph">0</p>
-      </div>
-    </div>
-  `;
+  function styled(strings, ...values) {
+    return strings.reduce((acc, str, i) => {
+      acc += str;
+      if (i < values.length) {
+        acc += values[i];
+      }
+      return acc;
+    }, "");
+  }
 
-  const floatingDiv = document.createElement("div");
-  floatingDiv.innerHTML = floatingDivHTML;
-
-  const styleElement = document.createElement("style");
-  styleElement.textContent = buttonStyle;
-  document.body.appendChild(floatingDiv);
-  document.head.appendChild(styleElement);
-}
-
-const buttonStyle = styled`
+  const buttonStyle = styled`
    .floating-div {
     display:flex;
     position: fixed;
@@ -232,14 +218,26 @@ const buttonStyle = styled`
    
 `;
 
-function styled(strings, ...values) {
-  return strings.reduce((acc, str, i) => {
-    acc += str;
-    if (i < values.length) {
-      acc += values[i];
-    }
-    return acc;
-  }, "");
+  const floatingDivHTML = `
+    <div id="floatingDiv" class="floating-div">
+      <div>
+        <button id="start" class="action-button">Play</button>
+        <button id="stop" class="action-button">Stop</button>
+      </div>
+      <div class="input-container">
+        <input type="number" id="inputParagrafs" class="input-number" value="0">
+        <p id="paragrafs" class="paragraph">0</p>
+      </div>
+    </div>
+  `;
+
+  const floatingDiv = document.createElement("div");
+  floatingDiv.innerHTML = floatingDivHTML;
+
+  const styleElement = document.createElement("style");
+  styleElement.textContent = buttonStyle;
+  document.body.appendChild(floatingDiv);
+  document.head.appendChild(styleElement);
 }
 
 chrome.storage.onChanged.addListener(function (changes, namespace) {
@@ -248,5 +246,27 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
     Object.assign(options, storageChange.newValue);
   }
 });
+chrome.runtime.onMessage.addListener(async function (message) {
+  if (message.action === "startReadeFun") {
+    const date = new Date();
 
-startReade();
+    date.setMinutes(date.getMinutes() + options.timer);
+    options.reade = date + "";
+
+    chrome.storage.sync.set({ options });
+    startReade();
+  }
+});
+
+// auto start open menu
+
+(async () => {
+  const data = await getStorageData();
+  Object.assign(options, data);
+  const dateSave = new Date(options.reade);
+  const dateNow = new Date();
+  console.log({ dateSave, dateNow, options });
+  if (options && options.reade && dateSave > dateNow) {
+    startReade();
+  }
+})();

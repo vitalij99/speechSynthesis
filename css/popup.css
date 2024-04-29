@@ -7,3 +7,10 @@
     font-size: larger;
     padding: 10px 5px;
 }
+  .startReader-popup {
+      border: none;
+      padding: 5px;
+      width: 55px;
+      font-size: 16px;
+
+  }
