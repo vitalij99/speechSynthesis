@@ -259,13 +259,12 @@ chrome.runtime.onMessage.addListener(async function (message) {
 });
 
 // auto start open menu
-
 (async () => {
   const data = await getStorageData();
   Object.assign(options, data);
   const dateSave = new Date(options.reade);
   const dateNow = new Date();
-  console.log({ dateSave, dateNow, options });
+
   if (options && options.reade && dateSave > dateNow) {
     startReade();
   }
