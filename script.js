@@ -45,7 +45,7 @@ async function startReade() {
 
       chrome.storage.sync.set({ options });
 
-      const buttonNextPage = getHtmlElements(options.nextPage);
+      const buttonNextPage = getHtmlElements(options.nextPage, true);
       if (buttonNextPage) {
         const uriNextPage = buttonNextPage.attributes.href.value;
         window.location.href = uriNextPage;
@@ -130,24 +130,31 @@ async function startReade() {
   };
 }
 
-function getHtmlElements(nameElements) {
+function getHtmlElements(nameElements, nextPage = false) {
   const foundElements = [];
-
   const massNameElements = nameElements.split("\n");
 
-  if (massNameElements.length === 0)
-    return document.querySelector(nameElements);
-
-  for (const name of massNameElements) {
-    if (name.length !== 0) {
-      const element = document.querySelector(name);
-      if (element) {
-        foundElements.push(element);
+  if (massNameElements.length === 0) {
+    if (nextPage) {
+      return findElementWithMostDirectParagraphs();
+    } else {
+      return null;
+    }
+  } else {
+    for (const name of massNameElements) {
+      if (name.length !== 0) {
+        const element = document.querySelector(name);
+        if (element) {
+          foundElements.push(element);
+        }
       }
     }
   }
+  if (!nextPage && foundElements.length === 0) {
+    return findElementWithMostDirectParagraphs();
+  }
 
-  return foundElements[0];
+  return foundElements.length > 0 ? foundElements[0] : null;
 }
 function getStorageData() {
   return new Promise((resolve) => {
@@ -238,6 +245,28 @@ function createHTMLButton() {
   styleElement.textContent = buttonStyle;
   document.body.appendChild(floatingDiv);
   document.head.appendChild(styleElement);
+}
+// auto find div wrapper
+function findElementWithMostDirectParagraphs() {
+  let elements = document.body.children;
+  let maxParagraphs = 0;
+  let elementWithMostParagraphs = null;
+
+  for (let element of elements) {
+    let paragraphs = element.querySelectorAll("div > p");
+
+    if (paragraphs.length > maxParagraphs) {
+      const perent = paragraphs[0].parentElement;
+      const perentParagr = perent.getElementsByTagName("p");
+
+      if (perentParagr.length > maxParagraphs) {
+        maxParagraphs = perentParagr.length;
+        elementWithMostParagraphs = perent;
+      }
+    }
+  }
+
+  return elementWithMostParagraphs;
 }
 
 chrome.storage.onChanged.addListener(function (changes, namespace) {
