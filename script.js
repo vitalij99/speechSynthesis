@@ -25,12 +25,12 @@ async function startReade() {
   const inputParagraf = document.getElementById("inputParagrafs");
   const punktParagrafs = document.getElementById("paragrafs");
 
-  punktParagrafs.textContent = textConteiner.children.length;
-
   let paragraf = options.paragraf;
-  const voices = synth.getVoices();
-
+  punktParagrafs.textContent = textConteiner.children.length;
+  inputParagraf.max = textConteiner.children.length;
   inputParagraf.value = paragraf;
+
+  const voices = synth.getVoices();
 
   function speak() {
     if (synth.speaking) {
@@ -232,7 +232,7 @@ function createHTMLButton() {
         <button id="stop" class="action-button">Stop</button>
       </div>
       <div class="input-container">
-        <input type="number" id="inputParagrafs" class="input-number" value="0">
+        <input type="number" id="inputParagrafs" class="input-number" value="0" min="0" max="7777" >
         <p id="paragrafs" class="paragraph">0</p>
       </div>
     </div>
