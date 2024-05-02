@@ -165,6 +165,10 @@ function getStorageData() {
 }
 
 function createHTMLButton() {
+  const wasCreated = document.getElementById("floatingDiv");
+
+  if (wasCreated) return;
+
   function styled(strings, ...values) {
     return strings.reduce((acc, str, i) => {
       acc += str;

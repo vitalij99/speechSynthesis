@@ -14,12 +14,7 @@ getStorage().then(({ options }) => {
   btnBook.innerText = book ? book : "books";
   btnBook.href = bookURL;
 
-  if (!reade) return;
-
-  const dateSave = new Date(options.reade);
-  const dateNow = new Date();
-
-  btnStartReader.disabled = dateNow > dateSave ? false : true;
+  btnStartReader.disabled = false;
 });
 
 async function getStorage() {
