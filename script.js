@@ -10,13 +10,12 @@ const options = {
 };
 
 async function startReade() {
-  const synth = window.speechSynthesis;
-
   const textConteiner = getHtmlElements(options.contentDivElem);
 
   if (!textConteiner || textConteiner.children.length === 0) {
     return;
   }
+  const synth = window.speechSynthesis;
 
   createHTMLButton();
 
