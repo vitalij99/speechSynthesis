@@ -9,6 +9,8 @@ const options = {
   paragraf: 0,
 };
 
+let paused = false;
+
 async function startReade() {
   const textConteiner = getHtmlElements(options.contentDivElem);
 
@@ -23,6 +25,8 @@ async function startReade() {
   const buttonStop = document.getElementById("stop");
   const inputParagraf = document.getElementById("inputParagrafs");
   const punktParagrafs = document.getElementById("paragrafs");
+
+  buttonStart.innerText = !paused ? "Pause" : "Play";
 
   let paragraf = options.paragraf;
   punktParagrafs.textContent = textConteiner.children.length;
@@ -95,20 +99,32 @@ async function startReade() {
   }, 1000);
 
   buttonStart.onclick = function () {
-    const date = new Date();
+    if (!synth.speaking) {
+      const date = new Date();
 
-    date.setMinutes(date.getMinutes() + options.timer);
-    options.reade = date + "";
+      date.setMinutes(date.getMinutes() + options.timer);
+      options.reade = date + "";
 
-    // add last book
-    options.bookURL = document.URL;
-    options.book =
-      document.title.length > 150
-        ? document.title.substring(0, 147) + "..."
-        : document.title;
+      // add last book
+      options.bookURL = document.URL;
+      options.book =
+        document.title.length > 150
+          ? document.title.substring(0, 147) + "..."
+          : document.title;
 
-    speak();
-    chrome.storage.sync.set({ options });
+      speak();
+      chrome.storage.sync.set({ options });
+
+      console.log(paused);
+    } else if (paused) {
+      paused = false;
+      synth.resume();
+      buttonStart.innerText = "Pause";
+    } else {
+      paused = true;
+      synth.pause();
+      buttonStart.innerText = "Play";
+    }
   };
 
   buttonStop.onclick = function () {
@@ -123,6 +139,7 @@ async function startReade() {
     synth.cancel();
 
     chrome.storage.sync.set({ options });
+    console.log(synth.speaking, synth.paused, synth.pending);
   };
   inputParagraf.onchange = function () {
     paragraf = inputParagraf.value;
