@@ -7,6 +7,7 @@ const options = {
   reade: false,
   timer: 20,
   paragraf: 0,
+  nextPageSave: null,
 };
 
 let paused = false;
@@ -50,8 +51,11 @@ async function startReade() {
 
       const buttonNextPage = getHtmlElements(options.nextPage, true);
       if (buttonNextPage) {
-        const uriNextPage = buttonNextPage.attributes.href.value;
-        window.location.href = uriNextPage;
+        options.nextPageSave = buttonNextPage.attributes.href.value;
+
+        chrome.storage.sync.set({ options });
+
+        window.location.href = options.nextPageSave;
       }
     } else if (textConteiner.children[paragraf].clientHeight === 0) {
       paragraf++;
@@ -114,8 +118,6 @@ async function startReade() {
 
       speak();
       chrome.storage.sync.set({ options });
-
-      console.log(paused);
     } else if (paused) {
       paused = false;
       synth.resume();
@@ -141,7 +143,6 @@ async function startReade() {
     buttonStart.innerText = "Play";
 
     chrome.storage.sync.set({ options });
-    console.log(synth.speaking, synth.paused, synth.pending);
   };
   inputParagraf.onchange = function () {
     paragraf = inputParagraf.value;
@@ -317,6 +318,9 @@ chrome.runtime.onMessage.addListener(async function (message) {
   const dateNow = new Date();
 
   if (options && options.reade && dateSave > dateNow) {
-    startReade();
+    const urlPage = document.URL;
+    if (urlPage === options.nextPageSave) {
+      startReade();
+    }
   }
 })();
