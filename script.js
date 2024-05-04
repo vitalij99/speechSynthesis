@@ -138,6 +138,8 @@ async function startReade() {
     options.paragraf = paragraf;
     synth.cancel();
 
+    buttonStart.innerText = "Play";
+
     chrome.storage.sync.set({ options });
     console.log(synth.speaking, synth.paused, synth.pending);
   };
