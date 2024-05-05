@@ -11,7 +11,7 @@ getStorage().then(({ options }) => {
   const btnBook = document.querySelector(".book-popup");
   const { book, bookURL, reade } = options;
 
-  btnBook.innerText = book ? book : "books";
+  btnBook.innerText = book ? book : "Last book";
   btnBook.href = bookURL;
 
   btnStartReader.disabled = false;
