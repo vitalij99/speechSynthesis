@@ -4,26 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script defer src="./js/menu.js" type="module"></script>
-    <link rel="stylesheet" href="./css/menu.css"></link>
+    <link rel="stylesheet" href="./css/menu.css" />
   </head>
   <body>
     <form id="menuForm">
-      <label for="rate">Rate</label
-      ><input type="range" min="0.5" max="2" value="1" step="0.1" id="rate" />
-      <div class="rate-value">1</div>
-      <div class="clearfix"></div>
-
+      <p for="rate">Rate <span class="rate-value">1</span></p>
+      <input type="range" min="0.5" max="2" value="1" step="0.1" id="rate" />
       <div>
-        <label for="pitch">Pitch</label
-        ><input type="range" min="0" max="2" value="1" step="0.1" id="pitch" />
-        <div class="pitch-value">1</div>
-        <div class="clearfix"></div>
+        <p for="pitch">Pitch<span class="pitch-value">1</span></p>
+        <input type="range" min="0" max="2" value="1" step="0.1" id="pitch" />
       </div>
       <div>
-        <label for="timer">auto-timer minutes</label
-        ><input type="number" min="0" value="1" step="1" id="timer" />
-        <div class="timer-value">1</div>
-        <div class="clearfix"></div>
+        <p for="timer">auto-timer minutes <span class="timer-value">1</span></p>
+        <input type="number" min="0" value="1" step="1" id="timer" />
       </div>
       <select name="selectedOptions" id="selectedOptions"></select>
     </form>
