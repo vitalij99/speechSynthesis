@@ -3,47 +3,32 @@
   <script defer src="options.js" type="module"></script>
   <link rel="stylesheet" href="./css/options.css"></link>
 </head>
-<form id="optionsForm">
-  <label for="rate">Rate</label
-  ><input type="range" min="0.5" max="2" value="1" step="0.1" id="rate" />
-  <div class="rate-value">1</div>
-  <div class="clearfix"></div>
-
-  <div>
-    <label for="pitch">Pitch</label
-    ><input type="range" min="0" max="2" value="1" step="0.1" id="pitch" />
-    <div class="pitch-value">1</div>
-    <div class="clearfix"></div>
-  </div>
-  <div>
-    <label for="timer">auto-timer minutes</label
-    ><input type="number" min="0" value="1" step="1" id="timer" />
-    <div class="timer-value">1</div>
-    <div class="clearfix"></div>
-  </div>
-  <select name="selectedOptions" id="selectedOptions"></select>
-  <div>
-    <h3>Contents Div Elem</h3>
+  <body>
+    <form id="optionsForm">
+    <iframe scrolling="no" src="./menu.html" width="100%"  height="280px" frameborder="0"></iframe>
     <div>
-      <label for="contentDivElem">
-        <textarea
-          type="text"
-          name="contentDivElem"
-          id="contentDivElem"
-        ></textarea>
+      <h3>Contents Div Elem</h3>
+      <div>
+        <label for="contentDivElem">
+          <textarea
+            type="text"
+            name="contentDivElem"
+            id="contentDivElem"
+          ></textarea>
+        </label>
+      </div>
+      <h3>nextPage</h3>
+      <label for="nextPage">
+        <textarea name="nextPage" id="nextPage"></textarea>
       </label>
     </div>
-    <h3>nextPage</h3>
-    <label for="nextPage">
-      <textarea name="nextPage" id="nextPage"></textarea>
-    </label>
-  </div>
-  <div>
-    <a
-      href="."
-      style="display: block; font-size: larger"
-      id="book"
-      target="_blank"
-    ></a>
-  </div>
-</form>
+    <div>
+      <a
+        href="."
+        style="display: block; font-size: larger"
+        id="book"
+        target="_blank"
+      ></a>
+    </div>
+  </form>
+</body>
