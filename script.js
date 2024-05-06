@@ -141,6 +141,7 @@ async function startReade() {
     synth.cancel();
 
     buttonStart.innerText = "Play";
+    paused = false;
 
     chrome.storage.sync.set({ options });
   };
