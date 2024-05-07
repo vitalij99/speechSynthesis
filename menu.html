@@ -15,7 +15,10 @@
       </div>
       <div>
         <p for="timer">Auto-timer minutes <span class="timer-value">1</span></p>
-        <input type="number" min="0" value="1" step="1" id="timer" />
+        <div class="wrapp-timer">
+          <input type="checkbox" id="timerCheckbox" />
+          <input type="number" min="0" value="1" step="1" id="timer" />
+        </div>
       </div>
       <select name="selectedOptions" id="selectedOptions"></select>
     </form>

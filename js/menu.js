@@ -2,11 +2,8 @@ const synth = window.speechSynthesis;
 const voiceSelect = document.querySelector("select");
 const menuForm = document.getElementById("menuForm");
 
-const pitch = document.querySelector("#pitch");
 const pitchValue = document.querySelector(".pitch-value");
-const rate = document.querySelector("#rate");
 const rateValue = document.querySelector(".rate-value");
-const timer = document.querySelector("#timer");
 const timerValue = document.querySelector(".timer-value");
 
 // In-page cache of the user's options
@@ -23,6 +20,7 @@ const options = {
   paragraf: 0,
   contentDivElem: "#content",
   nextPageSave: null,
+  timerCheckbox: true,
 };
 const getTimeFormat = (timer, timerValue) => {
   const futureTimestamp = new Date().getTime() + timer * 60000;
@@ -56,11 +54,14 @@ async function loadDataFromStorage() {
   menuForm.rate.value = options.rate;
   menuForm.pitch.value = options.pitch;
   menuForm.timer.value = options.timer;
+  menuForm.timerCheckbox.checked = options.timerCheckbox;
+
+  menuForm.timer.disabled = !options.timerCheckbox;
 
   getTimeFormat(options.timer, timerValue);
 
-  pitchValue.textContent = pitch.value;
-  rateValue.textContent = rate.value;
+  pitchValue.textContent = menuForm.pitch.value;
+  rateValue.textContent = menuForm.rate.value;
 }
 
 // get language
@@ -108,12 +109,16 @@ menuForm.addEventListener("change", () => {
   options.rate = Number(menuForm.rate.value);
   options.pitch = Number(menuForm.pitch.value);
   options.timer = Number(menuForm.timer.value);
+  options.timerCheckbox = menuForm.timerCheckbox.checked;
   options.language = voiceSelect.selectedOptions[0].getAttribute("data-name");
+
+  menuForm.timer.disabled = !options.timerCheckbox;
 
   pitchValue.textContent = options.pitch;
   rateValue.textContent = options.rate;
 
   getTimeFormat(options.timer, timerValue);
 
+  console.log(options);
   chrome.storage.sync.set({ options });
 });

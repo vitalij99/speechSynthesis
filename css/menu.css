@@ -12,7 +12,7 @@ textarea,
 select {
   width: 100%;
   padding: 8px;
-  margin-bottom: 15px;
+
   border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
@@ -26,7 +26,6 @@ input[type="range"] {
   border-radius: 5px;
   background: #f1f1f1;
   outline: none;
-  margin-bottom: 10px;
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -37,4 +36,9 @@ input[type="range"]::-webkit-slider-thumb {
   border-radius: 50%;
   background: #4caf50;
   cursor: pointer;
+}
+.wrapp-timer {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
 }

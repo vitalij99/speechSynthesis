@@ -8,6 +8,7 @@ const options = {
   timer: 20,
   paragraf: 0,
   nextPageSave: null,
+  timerCheckbox: true,
 };
 
 let paused = false;
@@ -318,7 +319,7 @@ chrome.runtime.onMessage.addListener(async function (message) {
   const dateSave = new Date(options.reade);
   const dateNow = new Date();
 
-  if (options && options.reade && dateSave > dateNow) {
+  if (options && options.reade && options.timerCheckbox && dateSave > dateNow) {
     const urlPage = document.URL;
     if (urlPage === options.nextPageSave) {
       startReade();
