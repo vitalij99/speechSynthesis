@@ -50,14 +50,16 @@ async function startReade() {
 
       chrome.storage.sync.set({ options });
 
+      // next page
       const buttonNextPage = getHtmlElements(options.nextPage, true);
-      if (buttonNextPage) {
-        options.nextPageSave = buttonNextPage.attributes.href.value;
 
-        chrome.storage.sync.set({ options });
+      options.nextPageSave = buttonNextPage
+        ? buttonNextPage.attributes.href.value
+        : getNextPage();
 
-        window.location.href = options.nextPageSave;
-      }
+      chrome.storage.sync.set({ options });
+
+      window.location.href = options.nextPageSave;
     } else if (textConteiner.children[paragraf].clientHeight === 0) {
       paragraf++;
       inputParagraf.value = paragraf;
@@ -292,6 +294,25 @@ function findElementWithMostDirectParagraphs() {
   }
 
   return elementWithMostParagraphs;
+}
+// auto generation next url
+function getNextPage() {
+  const urlPage = document.URL;
+  const numbers = [];
+
+  if (isNaN(urlPage.length - 1)) return urlPage;
+
+  for (let index = 1; index < urlPage.length; index++) {
+    const element = urlPage[urlPage.length - index];
+    if (!isNaN(element)) {
+      numbers.unshift(element);
+    } else {
+      const newUrlPage = urlPage.slice(0, urlPage.length - index + 1);
+      const number = parseInt(numbers.join("")) + 1;
+
+      return newUrlPage + number;
+    }
+  }
 }
 
 chrome.storage.onChanged.addListener(function (changes, namespace) {
