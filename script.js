@@ -333,6 +333,7 @@ chrome.runtime.onMessage.addListener(async function (message) {
   }
 });
 
+// try add backgraund
 // auto start open menu
 (async () => {
   const data = await getStorageData();
