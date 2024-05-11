@@ -21,4 +21,7 @@ body {
   &:hover {
     background-color: #45a049;
   }
+  &:disabled {
+    background-color: #314632;
+  }
 }
