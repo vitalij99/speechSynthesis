@@ -12,6 +12,7 @@ const options = {
 };
 
 let paused = false;
+let saveStyledParagraf = null;
 
 async function startReade() {
   const textConteiner = getHtmlElements(options.contentDivElem);
@@ -73,9 +74,10 @@ async function startReade() {
         behavior: "smooth",
         block: "center",
       });
+      saveStyledParagraf = paragraf;
 
       utterThis.onend = function () {
-        textConteiner.children[paragraf].style = "";
+        textConteiner.children[saveStyledParagraf || paragraf].style = "";
 
         paragraf++;
         inputParagraf.value = paragraf;
