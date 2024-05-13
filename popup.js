@@ -9,12 +9,17 @@ btnStartReader.addEventListener("click", function () {
 
 getStorage().then(({ options }) => {
   const btnBook = document.querySelector(".book-popup");
-  const { book, bookURL, reade } = options;
+  const { book, bookURL, reade, timerCheckbox } = options;
 
   btnBook.innerText = book ? book : "Last book";
   btnBook.href = bookURL;
 
-  btnStartReader.disabled = false;
+  const dateSave = new Date(reade);
+  const dateNow = new Date();
+
+  if (reade && timerCheckbox && dateSave > dateNow) {
+    btnStartReader.disabled = true;
+  } else btnStartReader.disabled = false;
 });
 
 async function getStorage() {
