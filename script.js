@@ -214,6 +214,7 @@ function createHTMLButton() {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    z-index: 999;
   }
   .action-button {
     margin-right: 10px;
