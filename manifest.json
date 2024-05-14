@@ -15,14 +15,10 @@
     "128": "./img/icon_128.png",
     "264": "./img/icon_256.png"
   },
-  "permissions": ["scripting", "storage", "webNavigation"],
-  "content_scripts": [
-    {
-      "matches": ["https://*/*"],
-      "js": ["script.js"]
-    }
-  ],
-
+  "permissions": ["scripting", "storage", "webNavigation", "activeTab"],
+  "background": {
+    "service_worker": "background.js"
+  },
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true

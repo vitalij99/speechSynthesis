@@ -326,6 +326,7 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
 });
 chrome.runtime.onMessage.addListener(async function (message) {
   if (message.action === "startReadeFun") {
+    console.log("startReadeFun");
     const date = new Date();
 
     date.setMinutes(date.getMinutes() + options.timer);
@@ -336,7 +337,6 @@ chrome.runtime.onMessage.addListener(async function (message) {
   }
 });
 
-// try add backgraund
 // auto start open menu
 (async () => {
   const data = await getStorageData();
@@ -345,9 +345,6 @@ chrome.runtime.onMessage.addListener(async function (message) {
   const dateNow = new Date();
 
   if (options && options.reade && options.timerCheckbox && dateSave > dateNow) {
-    const urlPage = document.URL;
-    if (urlPage === options.nextPageSave) {
-      startReade();
-    }
+    startReade();
   }
 })();
