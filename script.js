@@ -327,7 +327,6 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
 });
 chrome.runtime.onMessage.addListener(async function (message) {
   if (message.action === "startReadeFun") {
-    console.log("startReadeFun");
     const date = new Date();
 
     date.setMinutes(date.getMinutes() + options.timer);
