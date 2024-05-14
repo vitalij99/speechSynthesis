@@ -1,3 +1,4 @@
+// script.js
 const options = {
   contentDivElem: "#content",
   nextPage: ".nextchap",
@@ -345,6 +346,9 @@ chrome.runtime.onMessage.addListener(async function (message) {
   const dateNow = new Date();
 
   if (options && options.reade && options.timerCheckbox && dateSave > dateNow) {
-    startReade();
+    const urlPage = document.URL;
+    if (urlPage === options.nextPageSave) {
+      startReade();
+    }
   }
 })();
