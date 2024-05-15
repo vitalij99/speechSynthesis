@@ -48,7 +48,7 @@ function configureButtons(textContainer, synth) {
     }
 
     const paragrafText = textContainer.children[paragraf].innerText;
-
+    setNextPage();
     // next page
     if (paragraf >= textContainer.children.length - 1) {
       moveToNextPage();
@@ -156,12 +156,15 @@ function moveToNextPage() {
   options.paragraf = 0;
   chrome.storage.sync.set({ options });
 
+  window.location.href = options.nextPageSave;
+}
+
+function setNextPage() {
   const nextPageButton = getHtmlElements(options.nextPage, true);
   options.nextPageSave = nextPageButton
     ? nextPageButton.attributes.href.value
     : getNextPage();
   chrome.storage.sync.set({ options });
-  window.location.href = options.nextPageSave;
 }
 
 function getHtmlElements(selector, nextPage = false) {
