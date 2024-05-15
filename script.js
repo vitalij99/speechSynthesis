@@ -175,8 +175,8 @@ function getHtmlElements(selector, nextPage = false) {
   return elements.length > 0
     ? elements[0]
     : nextPage
-    ? findElementWithMostDirectParagraphs()
-    : null;
+    ? null
+    : findElementWithMostDirectParagraphs();
 }
 
 function getStorageData() {
