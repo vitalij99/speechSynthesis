@@ -16,15 +16,17 @@ let paused = false;
 let saveStyledParagraf = null;
 
 async function startReade() {
-  const textConteiner = getHtmlElements(options.contentDivElem);
-
-  if (!textConteiner || textConteiner.children.length === 0) {
+  const textContainer = getHtmlElements(options.contentDivElem);
+  if (!textContainer || textContainer.children.length === 0) {
+    console.error("No readable content found.");
     return;
   }
   const synth = window.speechSynthesis;
-
   createHTMLButton();
+  configureButtons(textContainer, synth);
+}
 
+function configureButtons(textContainer, synth) {
   const buttonStart = document.getElementById("start");
   const buttonStop = document.getElementById("stop");
   const inputParagraf = document.getElementById("inputParagrafs");
@@ -33,8 +35,8 @@ async function startReade() {
   buttonStart.innerText = !paused ? "Pause" : "Play";
 
   let paragraf = options.paragraf;
-  punktParagrafs.textContent = textConteiner.children.length;
-  inputParagraf.max = textConteiner.children.length;
+  punktParagrafs.textContent = textContainer.children.length;
+  inputParagraf.max = textContainer.children.length;
   inputParagraf.value = paragraf;
 
   const voices = synth.getVoices();
@@ -45,54 +47,30 @@ async function startReade() {
       return;
     }
 
-    const paragrafText = textConteiner.children[paragraf].innerText;
+    const paragrafText = textContainer.children[paragraf].innerText;
+
     // next page
-    if (paragraf >= textConteiner.children.length - 1) {
-      options.paragraf = 0;
-
-      chrome.storage.sync.set({ options });
-
-      // next page
-      const buttonNextPage = getHtmlElements(options.nextPage, true);
-
-      options.nextPageSave = buttonNextPage
-        ? buttonNextPage.attributes.href.value
-        : getNextPage();
-
-      chrome.storage.sync.set({ options });
-
-      window.location.href = options.nextPageSave;
-    } else if (textConteiner.children[paragraf].clientHeight === 0) {
+    if (paragraf >= textContainer.children.length - 1) {
+      moveToNextPage();
+    } else if (textContainer.children[paragraf].clientHeight === 0) {
       paragraf++;
       inputParagraf.value = paragraf;
       speak();
     } else if (paragrafText !== "") {
       const utterThis = new SpeechSynthesisUtterance(paragrafText);
-
-      textConteiner.children[paragraf].style.backdropFilter = "blur(10px)";
-      textConteiner.children[paragraf].style.filter = "invert(1)";
-      textConteiner.children[paragraf].scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
+      styleCurrentParagraph(textContainer, paragraf);
       saveStyledParagraf = paragraf;
 
-      utterThis.onend = function () {
-        textConteiner.children[saveStyledParagraf || paragraf].style = "";
-
+      utterThis.onend = () => {
+        clearParagraphStyle(textContainer, saveStyledParagraf || paragraf);
         paragraf++;
         inputParagraf.value = paragraf;
-        if (paragraf < textConteiner.children.length && options.reade) {
+        if (paragraf < textContainer.children.length && options.reade) {
           speak();
         }
       };
 
-      for (let i = 0; i < voices.length; i++) {
-        if (voices[i].name === options.language) {
-          utterThis.voice = voices[i];
-          break;
-        }
-      }
+      setVoice(utterThis, voices);
       utterThis.pitch = options.pitch;
       utterThis.rate = options.rate;
       synth.speak(utterThis);
@@ -108,153 +86,153 @@ async function startReade() {
     }
   }, 1000);
 
-  buttonStart.onclick = function () {
-    if (!synth.speaking) {
-      const date = new Date();
+  buttonStart.onclick = () => handleStartClick(synth, buttonStart, speak);
+  buttonStop.onclick = () =>
+    handleStopClick(synth, buttonStart, textContainer, paragraf);
+  inputParagraf.onchange = () => (paragraf = inputParagraf.value);
+}
 
-      date.setMinutes(date.getMinutes() + options.timer);
-      options.reade = date + "";
+function handleStartClick(synth, buttonStart, speak) {
+  if (!synth.speaking) {
+    const date = new Date();
+    date.setMinutes(date.getMinutes() + options.timer);
+    options.reade = date.toString();
 
-      // add last book
-      options.bookURL = document.URL;
-      options.book =
-        document.title.length > 150
-          ? document.title.substring(0, 147) + "..."
-          : document.title;
-
-      speak();
-      chrome.storage.sync.set({ options });
-    } else if (paused) {
-      paused = false;
-      synth.resume();
-      buttonStart.innerText = "Pause";
-    } else {
-      paused = true;
-      synth.pause();
-      buttonStart.innerText = "Play";
-    }
-  };
-
-  buttonStop.onclick = function () {
-    options.reade = null;
+    // add last book
     options.bookURL = document.URL;
     options.book =
       document.title.length > 150
         ? document.title.substring(0, 147) + "..."
         : document.title;
-    textConteiner.children[paragraf].style = "";
-    options.paragraf = paragraf;
-    synth.cancel();
-
-    buttonStart.innerText = "Play";
-    paused = false;
-
+    speak();
     chrome.storage.sync.set({ options });
-  };
-  inputParagraf.onchange = function () {
-    paragraf = inputParagraf.value;
-  };
-}
-
-function getHtmlElements(nameElements, nextPage = false) {
-  const foundElements = [];
-  const massNameElements = nameElements.split("\n");
-
-  if (massNameElements.length === 0) {
-    if (nextPage) {
-      return findElementWithMostDirectParagraphs();
-    } else {
-      return null;
-    }
+  } else if (paused) {
+    paused = false;
+    synth.resume();
+    buttonStart.innerText = "Pause";
   } else {
-    for (const name of massNameElements) {
-      if (name.length !== 0) {
-        const element = document.querySelector(name);
-        if (element) {
-          foundElements.push(element);
-        }
-      }
+    paused = true;
+    synth.pause();
+    buttonStart.innerText = "Play";
+  }
+}
+
+function handleStopClick(synth, buttonStart, textContainer, paragraf) {
+  options.reade = null;
+  options.bookURL = document.URL;
+  options.book =
+    document.title.length > 150
+      ? document.title.substring(0, 147) + "..."
+      : document.title;
+  clearParagraphStyle(textContainer, paragraf);
+  options.paragraf = paragraf;
+  synth.cancel();
+  buttonStart.innerText = "Play";
+  paused = false;
+  chrome.storage.sync.set({ options });
+}
+
+function styleCurrentParagraph(container, index) {
+  const paragraph = container.children[index];
+  paragraph.style.backdropFilter = "blur(10px)";
+  paragraph.style.filter = "invert(1)";
+  paragraph.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function clearParagraphStyle(container, index) {
+  container.children[index].style = "";
+}
+
+function setVoice(utterThis, voices) {
+  for (const voice of voices) {
+    if (voice.name === options.language) {
+      utterThis.voice = voice;
+      break;
     }
   }
-  if (!nextPage && foundElements.length === 0) {
-    return findElementWithMostDirectParagraphs();
-  }
-
-  return foundElements.length > 0 ? foundElements[0] : null;
 }
+
+function moveToNextPage() {
+  options.paragraf = 0;
+  chrome.storage.sync.set({ options });
+
+  const nextPageButton = getHtmlElements(options.nextPage, true);
+  options.nextPageSave = nextPageButton
+    ? nextPageButton.attributes.href.value
+    : getNextPage();
+  chrome.storage.sync.set({ options });
+  window.location.href = options.nextPageSave;
+}
+
+function getHtmlElements(selector, nextPage = false) {
+  const elements = selector
+    .split("\n")
+    .map((name) => name && document.querySelector(name))
+    .filter(Boolean);
+  return elements.length > 0
+    ? elements[0]
+    : nextPage
+    ? findElementWithMostDirectParagraphs()
+    : null;
+}
+
 function getStorageData() {
   return new Promise((resolve) => {
-    chrome.storage.sync.get("options", (result) => {
-      resolve(result.options);
-    });
+    chrome.storage.sync.get("options", (result) => resolve(result.options));
   });
 }
 
 function createHTMLButton() {
-  const wasCreated = document.getElementById("floatingDiv");
+  if (document.getElementById("floatingDiv")) return;
 
-  if (wasCreated) return;
-
-  function styled(strings, ...values) {
-    return strings.reduce((acc, str, i) => {
-      acc += str;
-      if (i < values.length) {
-        acc += values[i];
-      }
-      return acc;
-    }, "");
-  }
-
-  const buttonStyle = styled`
-   .floating-div {
-    display:flex;
-    position: fixed;
-    top: 20px;
-    right: 15px;   
-    background-color: lightblue;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-    z-index: 999;
-  }
-  .action-button {
-    margin-right: 10px;
-    padding: 8px 16px;
-    background-color: #4caf50;
-    border: none;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  .input-container  {
-    display: flex;
-    align-items: center;
-    justify-content: center;  
-    background-color: #fff;
-    padding-right: 5px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    
-  }
-  .input-container input {
-    border: none;
-    padding: 5px;  
-    width:55px;
-    font-size: 16px;
-    
-  }
-  .paragraph{
-    margin-left: -12px;
-  }
-  .paragraph::before {
+  const buttonStyle = `
+    .floating-div {
+      display: flex;
+      position: fixed;
+      top: 20px;
+      right: 15px;
+      background-color: lightblue;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+    .action-button {
+      margin-right: 10px;
+      padding: 8px 16px;
+      background-color: #4caf50;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .input-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color
+      : #fff;
+      padding-right: 5px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .input-container input {
+      border: none;
+      padding: 5px;
+      width: 55px;
+      font-size: 16px;
+    }
+    .paragraph {
+      margin-left: -12px;
+    }
+    .paragraph::before {
       content: "/";
       margin-left: 5px;
       margin-right: 5px;
       font-size: 20px;
       color: #777;
-  }
-   
-`;
+    }
+  `;
 
   const floatingDivHTML = `
     <div id="floatingDiv" class="floating-div">
@@ -263,7 +241,7 @@ function createHTMLButton() {
         <button id="stop" class="action-button">Stop</button>
       </div>
       <div class="input-container">
-        <input type="number" id="inputParagrafs" class="input-number" value="0" min="0" max="7777" >
+        <input type="number" id="inputParagrafs" class="input-number" value="0" min="0" max="7777">
         <p id="paragrafs" class="paragraph">0</p>
       </div>
     </div>
@@ -287,12 +265,12 @@ function findElementWithMostDirectParagraphs() {
     let paragraphs = element.querySelectorAll("div > p");
 
     if (paragraphs.length > maxParagraphs) {
-      const perent = paragraphs[0].parentElement;
-      const perentParagr = perent.getElementsByTagName("p");
+      const parent = paragraphs[0].parentElement;
+      const parentParagraphs = parent.getElementsByTagName("p");
 
-      if (perentParagr.length > maxParagraphs) {
-        maxParagraphs = perentParagr.length;
-        elementWithMostParagraphs = perent;
+      if (parentParagraphs.length > maxParagraphs) {
+        maxParagraphs = parentParagraphs.length;
+        elementWithMostParagraphs = parent;
       }
     }
   }
@@ -303,8 +281,6 @@ function findElementWithMostDirectParagraphs() {
 function getNextPage() {
   const urlPage = document.URL;
   const numbers = [];
-
-  if (isNaN(urlPage.length - 1)) return urlPage;
 
   for (let index = 1; index < urlPage.length; index++) {
     const element = urlPage[urlPage.length - index];
@@ -317,21 +293,23 @@ function getNextPage() {
       return newUrlPage + number;
     }
   }
+
+  return urlPage;
 }
 
-chrome.storage.onChanged.addListener(function (changes, namespace) {
+chrome.storage.onChanged.addListener((changes, namespace) => {
   for (let key in changes) {
     let storageChange = changes[key];
     Object.assign(options, storageChange.newValue);
   }
 });
-chrome.runtime.onMessage.addListener(async function (message) {
+
+chrome.runtime.onMessage.addListener(async (message) => {
   if (message.action === "startReadeFun") {
     const date = new Date();
-
     date.setMinutes(date.getMinutes() + options.timer);
-    options.reade = date + "";
-
+    options.reade = date.toString();
+    options.paragraf = 0;
     chrome.storage.sync.set({ options });
     startReade();
   }
