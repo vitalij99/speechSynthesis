@@ -32,7 +32,7 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
 
     chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      files: ["script.js"],
+      files: ["/js/script.js"],
     });
   }
 });
