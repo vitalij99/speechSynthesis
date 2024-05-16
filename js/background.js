@@ -12,7 +12,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
     chrome.scripting
       .executeScript({
         target: { tabId: tab.id },
-        files: ["script.js"],
+        files: ["/js/script.js"],
       })
       .then(() => {
         chrome.tabs.query(
