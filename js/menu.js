@@ -1,3 +1,4 @@
+// menu.js
 const synth = window.speechSynthesis;
 const voiceSelect = document.querySelector("select");
 const menuForm = document.getElementById("menuForm");
@@ -121,4 +122,11 @@ menuForm.addEventListener("change", () => {
 
   console.log(options);
   chrome.storage.sync.set({ options });
+});
+
+menuForm.rate.addEventListener("input", (event) => {
+  rateValue.textContent = event.target.value;
+});
+menuForm.pitch.addEventListener("input", (event) => {
+  pitchValue.textContent = event.target.value;
 });
