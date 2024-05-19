@@ -7,14 +7,16 @@
   </head>
   <body>
     <form id="menuForm">
-      <p for="rate">Rate <span class="rate-value">1</span></p>
+      <p for="rate">Rate <output name="rateValue">1</output></p>
       <input type="range" min="0.5" max="2" value="1" step="0.1" id="rate" />
       <div>
-        <p for="pitch">Pitch <span class="pitch-value">1</span></p>
+        <p for="pitch">Pitch <output name="pitchValue">1</output></p>
         <input type="range" min="0" max="2" value="1" step="0.1" id="pitch" />
       </div>
       <div>
-        <p for="timer">Auto-timer minutes <span class="timer-value">1</span></p>
+        <p for="timer">
+          Auto-timer minutes <output name="timerValue">1</output>
+        </p>
         <div class="wrapp-timer">
           <input type="checkbox" id="timerCheckbox" />
           <input type="number" min="0" value="1" step="1" id="timer" />

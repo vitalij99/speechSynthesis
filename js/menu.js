@@ -3,10 +3,6 @@ const synth = window.speechSynthesis;
 const voiceSelect = document.querySelector("select");
 const menuForm = document.getElementById("menuForm");
 
-const pitchValue = document.querySelector(".pitch-value");
-const rateValue = document.querySelector(".rate-value");
-const timerValue = document.querySelector(".timer-value");
-
 // In-page cache of the user's options
 const options = {
   contentDivElem: "#content",
@@ -23,7 +19,7 @@ const options = {
   nextPageSave: null,
   timerCheckbox: true,
 };
-const getTimeFormat = (timer, timerValue) => {
+const getTimeFormat = (timer, form) => {
   const futureTimestamp = new Date().getTime() + timer * 60000;
   const futureDate = new Date(futureTimestamp);
   let formattedTime = futureDate.toLocaleTimeString([], {
@@ -40,7 +36,7 @@ const getTimeFormat = (timer, timerValue) => {
     });
   }
 
-  timerValue.textContent = formattedTime;
+  form.timerValue.value = formattedTime;
 };
 
 // run fn
@@ -57,12 +53,12 @@ async function loadDataFromStorage() {
   menuForm.timer.value = options.timer;
   menuForm.timerCheckbox.checked = options.timerCheckbox;
 
+  menuForm.rateValue.value = Number(menuForm.rate.value);
+  menuForm.pitchValue.value = Number(menuForm.pitch.value);
+
   menuForm.timer.disabled = !options.timerCheckbox;
 
-  getTimeFormat(options.timer, timerValue);
-
-  pitchValue.textContent = menuForm.pitch.value;
-  rateValue.textContent = menuForm.rate.value;
+  getTimeFormat(options.timer, menuForm);
 }
 
 // get language
@@ -115,18 +111,14 @@ menuForm.addEventListener("change", () => {
 
   menuForm.timer.disabled = !options.timerCheckbox;
 
-  pitchValue.textContent = options.pitch;
-  rateValue.textContent = options.rate;
-
-  getTimeFormat(options.timer, timerValue);
+  getTimeFormat(options.timer, menuForm);
 
   console.log(options);
   chrome.storage.sync.set({ options });
 });
 
-menuForm.rate.addEventListener("input", (event) => {
-  rateValue.textContent = event.target.value;
+menuForm.addEventListener("input", (event) => {
+  menuForm.rateValue.value = Number(menuForm.rate.value);
+  menuForm.pitchValue.value = Number(menuForm.pitch.value);
 });
-menuForm.pitch.addEventListener("input", (event) => {
-  pitchValue.textContent = event.target.value;
-});
+console.dir(menuForm);
