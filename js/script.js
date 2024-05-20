@@ -2,7 +2,7 @@
 const options = {
   contentDivElem: "#content",
   nextPage: ".nextchap",
-  language: "Google español",
+  language: null,
   pitch: 2,
   rate: 2,
   reade: false,
@@ -10,6 +10,8 @@ const options = {
   paragraf: 0,
   nextPageSave: null,
   timerCheckbox: true,
+  bookURL: null,
+  book: null,
 };
 
 let paused = false;
@@ -94,18 +96,10 @@ function configureButtons(textContainer, synth) {
 
 function handleStartClick(synth, buttonStart, speak) {
   if (!synth.speaking) {
-    const date = new Date();
-    date.setMinutes(date.getMinutes() + options.timer);
-    options.reade = date.toString();
+    setStorageDate();
 
-    // add last book
-    options.bookURL = document.URL;
-    options.book =
-      document.title.length > 150
-        ? document.title.substring(0, 147) + "..."
-        : document.title;
+    setStorageBook();
     speak();
-    chrome.storage.sync.set({ options });
   } else if (paused) {
     paused = false;
     synth.resume();
@@ -144,6 +138,7 @@ function clearParagraphStyle(container, index) {
 }
 
 function setVoice(utterThis, voices) {
+  if (!options.language) return;
   for (const voice of voices) {
     if (voice.name === options.language) {
       utterThis.voice = voice;
@@ -300,6 +295,23 @@ function getNextPage() {
   return urlPage;
 }
 
+const setStorageDate = () => {
+  const date = new Date();
+  date.setMinutes(date.getMinutes() + options.timer);
+  options.reade = date.toString();
+  chrome.storage.sync.set({ options });
+};
+// add last book
+const setStorageBook = () => {
+  options.bookURL = document.URL;
+  options.book =
+    document.title.length > 150
+      ? document.title.substring(0, 147) + "..."
+      : document.title;
+
+  chrome.storage.sync.set({ options });
+};
+
 chrome.storage.onChanged.addListener((changes, namespace) => {
   for (let key in changes) {
     let storageChange = changes[key];
@@ -309,11 +321,10 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 
 chrome.runtime.onMessage.addListener(async (message) => {
   if (message.action === "startReadeFun") {
-    const date = new Date();
-    date.setMinutes(date.getMinutes() + options.timer);
-    options.reade = date.toString();
     options.paragraf = 0;
     chrome.storage.sync.set({ options });
+    setStorageDate();
+    setStorageBook();
     startReade();
   }
 });
