@@ -5,8 +5,8 @@ btnStartReader.addEventListener("click", function () {
   chrome.runtime.sendMessage("firstTimeScript", () => {
     btnStartReader.disabled = true;
   });
+
   window.close();
-  console.log("stop");
 });
 
 chrome.storage.onChanged.addListener((changes, namespace) => {

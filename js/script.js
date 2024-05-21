@@ -124,6 +124,7 @@ function handleStopClick(synth, buttonStart, textContainer, paragraf) {
   buttonStart.innerText = "Play";
   paused = false;
   chrome.storage.sync.set({ options });
+  chrome.runtime.sendMessage("stopScript");
 }
 
 function styleCurrentParagraph(container, index) {

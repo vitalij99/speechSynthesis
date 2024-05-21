@@ -15,7 +15,13 @@
     "128": "./img/icon_128.png",
     "264": "./img/icon_256.png"
   },
-  "permissions": ["scripting", "storage", "webNavigation", "activeTab"],
+  "permissions": [
+    "scripting",
+    "storage",
+    "webNavigation",
+    "activeTab",
+    "readingList"
+  ],
   "background": {
     "service_worker": "./js/background.js"
   },
