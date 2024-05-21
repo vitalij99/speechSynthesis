@@ -5,10 +5,11 @@ btnStartReader.addEventListener("click", function () {
   chrome.runtime.sendMessage("firstTimeScript", () => {
     btnStartReader.disabled = true;
   });
+  window.close();
+  console.log("stop");
 });
 
 chrome.storage.onChanged.addListener((changes, namespace) => {
-  console.log("hello");
   for (let key in changes) {
     let storageChange = changes[key];
     updatePopup(storageChange.newValue);
