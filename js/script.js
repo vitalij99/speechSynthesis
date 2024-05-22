@@ -1,5 +1,5 @@
 // script.js
-const options = {
+let options = {
   contentDivElem: "#content",
   nextPage: ".nextchap",
   language: null,
@@ -8,7 +8,10 @@ const options = {
   reade: false,
   timer: 20,
   paragraf: 0,
-  nextPageSave: null,
+  navigator: {
+    nextPageSave: null,
+    thisPageSave: null,
+  },
   timerCheckbox: true,
   bookURL: null,
   book: null,
@@ -41,7 +44,11 @@ function configureButtons(textContainer, synth) {
   inputParagraf.max = textContainer.children.length;
   inputParagraf.value = paragraf;
 
-  const voices = synth.getVoices();
+  let voices = synth.getVoices();
+
+  synth.onvoiceschanged = (event) => {
+    voices = synth.getVoices();
+  };
 
   function speak() {
     if (synth.speaking) {
@@ -68,6 +75,8 @@ function configureButtons(textContainer, synth) {
         paragraf++;
         inputParagraf.value = paragraf;
         if (paragraf < textContainer.children.length && options.reade) {
+          options.paragraf = paragraf;
+          chrome.storage.sync.set({ options });
           speak();
         }
       };
@@ -75,6 +84,7 @@ function configureButtons(textContainer, synth) {
       setVoice(utterThis, voices);
       utterThis.pitch = options.pitch;
       utterThis.rate = options.rate;
+
       synth.speak(utterThis);
     }
   }
@@ -152,14 +162,15 @@ function moveToNextPage() {
   options.paragraf = 0;
   chrome.storage.sync.set({ options });
 
-  window.location.href = options.nextPageSave;
+  window.location.href = options.navigator.nextPageSave;
 }
 
 function setNextPage() {
   const nextPageButton = getHtmlElements(options.nextPage, true);
-  options.nextPageSave = nextPageButton
+  options.navigator.nextPageSave = nextPageButton
     ? nextPageButton.attributes.href.value
     : getNextPage();
+  options.navigator.thisPageSave = document.URL;
   chrome.storage.sync.set({ options });
 }
 
@@ -339,7 +350,10 @@ chrome.runtime.onMessage.addListener(async (message) => {
 
   if (options && options.reade && options.timerCheckbox && dateSave > dateNow) {
     const urlPage = document.URL;
-    if (urlPage === options.nextPageSave) {
+    if (
+      urlPage === options.navigator.nextPageSave ||
+      urlPage === options.navigator.thisPageSave
+    ) {
       startReade();
     }
   }
