@@ -18,6 +18,7 @@ const options = {
   contentDivElem: "#content",
   nextPageSave: null,
   timerCheckbox: true,
+  volume: 1,
 };
 const getTimeFormat = (timer, form) => {
   const futureTimestamp = new Date().getTime() + timer * 60000;
@@ -42,24 +43,6 @@ const getTimeFormat = (timer, form) => {
 // run fn
 await loadDataFromStorage();
 populateVoiceList();
-
-// Initialize the form with the user's option settings
-async function loadDataFromStorage() {
-  const data = await chrome.storage.sync.get("options");
-  Object.assign(options, data.options);
-
-  menuForm.rate.value = options.rate;
-  menuForm.pitch.value = options.pitch;
-  menuForm.timer.value = options.timer;
-  menuForm.timerCheckbox.checked = options.timerCheckbox;
-
-  menuForm.rateValue.value = Number(menuForm.rate.value);
-  menuForm.pitchValue.value = Number(menuForm.pitch.value);
-
-  menuForm.timer.disabled = !options.timerCheckbox;
-
-  getTimeFormat(options.timer, menuForm);
-}
 
 // get language
 function populateVoiceList() {
@@ -101,24 +84,56 @@ function populateVoiceList() {
 if (speechSynthesis.onvoiceschanged !== undefined) {
   speechSynthesis.onvoiceschanged = populateVoiceList;
 }
+// Initialize the form with the user's option settings
+async function loadDataFromStorage() {
+  try {
+    const data = await chrome.storage.sync.get("options");
+    Object.assign(options, data.options);
+
+    setFormValues(options);
+    updateTimerState(options.timerCheckbox);
+    updateDisplayedValues();
+
+    getTimeFormat(options.timer, menuForm);
+  } catch (error) {
+    console.error("Error loading data from storage:", error);
+  }
+}
 // Immediately persist options changes
 menuForm.addEventListener("change", () => {
-  options.rate = Number(menuForm.rate.value);
-  options.pitch = Number(menuForm.pitch.value);
-  options.timer = Number(menuForm.timer.value);
-  options.timerCheckbox = menuForm.timerCheckbox.checked;
-  options.language = voiceSelect.selectedOptions[0].getAttribute("data-name");
-
-  menuForm.timer.disabled = !options.timerCheckbox;
-
+  updateOptionsFromForm();
+  updateTimerState(options.timerCheckbox);
   getTimeFormat(options.timer, menuForm);
 
   console.log(options);
   chrome.storage.sync.set({ options });
 });
 
-menuForm.addEventListener("input", (event) => {
-  menuForm.rateValue.value = Number(menuForm.rate.value);
-  menuForm.pitchValue.value = Number(menuForm.pitch.value);
+menuForm.addEventListener("input", () => {
+  updateDisplayedValues();
 });
 console.dir(menuForm);
+
+function setFormValues(options) {
+  menuForm.volume.value = options.volume;
+  menuForm.rate.value = options.rate;
+  menuForm.pitch.value = options.pitch;
+  menuForm.timer.value = options.timer;
+  menuForm.timerCheckbox.checked = options.timerCheckbox;
+}
+function updateTimerState(isEnabled) {
+  menuForm.timer.disabled = !isEnabled;
+}
+function updateOptionsFromForm() {
+  options.volume = Number(menuForm.volume.value);
+  options.rate = Number(menuForm.rate.value);
+  options.pitch = Number(menuForm.pitch.value);
+  options.timer = Number(menuForm.timer.value);
+  options.timerCheckbox = menuForm.timerCheckbox.checked;
+  options.language = voiceSelect.selectedOptions[0].getAttribute("data-name");
+}
+function updateDisplayedValues() {
+  menuForm.rateValue.value = Number(menuForm.rate.value);
+  menuForm.pitchValue.value = Number(menuForm.pitch.value);
+  menuForm.volumeValue.value = Number(menuForm.volume.value);
+}

@@ -7,16 +7,17 @@
   </head>
   <body>
     <form id="menuForm">
+      <div>
+        <p for="volume">Volume soud <output name="volumeValue">1</output></p>
+        <input type="range" min="0" max="1" value="1" step="0.1" id="volume" />
+      </div>
       <p for="rate">Rate <output name="rateValue">1</output></p>
       <input type="range" min="0.5" max="2" value="1" step="0.1" id="rate" />
       <div>
         <p for="pitch">Pitch <output name="pitchValue">1</output></p>
         <input type="range" min="0" max="2" value="1" step="0.1" id="pitch" />
       </div>
-      <div>
-        <p for="volume">volume soud <output name="volumeValue">1</output></p>
-        <input type="range" min="0" max="2" value="1" step="0.1" id="volume" />
-      </div>
+
       <div>
         <p for="timer">
           Auto-timer minutes <output name="timerValue">1</output>
