@@ -15,6 +15,7 @@ let options = {
   timerCheckbox: true,
   bookURL: null,
   book: null,
+  volume: 1,
 };
 
 let paused = false;
@@ -84,6 +85,7 @@ function configureButtons(textContainer, synth) {
       setVoice(utterThis, voices);
       utterThis.pitch = options.pitch;
       utterThis.rate = options.rate;
+      utterThis.volume = options.volume;
 
       synth.speak(utterThis);
     }
@@ -341,6 +343,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
   }
 });
 
+// TODO if nextpage p = 0
 // auto start open menu
 (async () => {
   const data = await getStorageData();
