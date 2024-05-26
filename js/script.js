@@ -357,6 +357,9 @@ chrome.runtime.onMessage.addListener(async (message) => {
       urlPage === options.navigator.nextPageSave ||
       urlPage === options.navigator.thisPageSave
     ) {
+      if (urlPage === options.navigator.nextPageSave) {
+        options.paragraf = 0;
+      }
       startReade();
     }
   }
