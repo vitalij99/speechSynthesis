@@ -335,15 +335,18 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 
 chrome.runtime.onMessage.addListener(async (message) => {
   if (message.action === "startReadeFun") {
-    options.paragraf = 0;
-    chrome.storage.sync.set({ options });
+    const urlPage = document.URL;
+    if (urlPage !== options.navigator.thisPageSave) {
+      options.paragraf = 0;
+      chrome.storage.sync.set({ options });
+    }
+
     setStorageDate();
     setStorageBook();
     startReade();
   }
 });
 
-// TODO if nextpage p = 0
 // auto start open menu
 (async () => {
   const data = await getStorageData();

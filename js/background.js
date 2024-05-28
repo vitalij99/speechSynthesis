@@ -58,6 +58,7 @@ function getBookUrl(urlPage) {
 }
 async function getFindBook(urlPage) {
   const items = await chrome.readingList.query({});
+
   if (items.length === 0) return;
   const currentUrlBook = getBookUrl(urlPage);
 
