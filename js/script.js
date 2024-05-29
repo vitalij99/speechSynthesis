@@ -161,9 +161,6 @@ function setVoice(utterThis, voices) {
 }
 
 function moveToNextPage() {
-  options.paragraf = 0;
-  chrome.storage.sync.set({ options });
-
   window.location.href = options.navigator.nextPageSave;
 }
 
