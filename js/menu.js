@@ -135,5 +135,6 @@ function updateOptionsFromForm() {
 function updateDisplayedValues() {
   menuForm.rateValue.value = Number(menuForm.rate.value);
   menuForm.pitchValue.value = Number(menuForm.pitch.value);
-  menuForm.volumeValue.value = Number(menuForm.volume.value);
+  menuForm.volumeValue.value =
+    Math.floor(Number(menuForm.volume.value) * 100) + "%";
 }
