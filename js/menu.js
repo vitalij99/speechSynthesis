@@ -74,7 +74,6 @@ function populateVoiceList() {
 
     voiceSelect.appendChild(option);
     if (voices[i].name === options.language) {
-      console.log(voices[i].name, options.language);
       selectedIndex = i;
     }
   }
@@ -112,7 +111,6 @@ menuForm.addEventListener("change", () => {
 menuForm.addEventListener("input", () => {
   updateDisplayedValues();
 });
-console.dir(menuForm);
 
 function setFormValues(options) {
   menuForm.volume.value = options.volume;
