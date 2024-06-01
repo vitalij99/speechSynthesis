@@ -60,7 +60,10 @@ function configureButtons(textContainer, synth) {
     const paragrafText = textContainer.children[paragraf].innerText;
     setNextPage();
     // next page
-    if (paragraf >= textContainer.children.length - 1) {
+    if (
+      paragraf >= textContainer.children.length - 1 &&
+      options.timerCheckbox
+    ) {
       moveToNextPage();
     } else if (textContainer.children[paragraf].clientHeight === 0) {
       paragraf++;
