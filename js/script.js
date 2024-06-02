@@ -65,7 +65,7 @@ function configureButtons(textContainer, synth) {
       options.timerCheckbox
     ) {
       moveToNextPage();
-    } else if (textContainer.children[paragraf].clientHeight === 0) {
+    } else if (paragrafText.clientHeight === 0 || !paragrafText) {
       paragraf++;
       inputParagraf.value = paragraf;
       speak();
