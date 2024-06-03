@@ -57,15 +57,16 @@ function configureButtons(textContainer, synth) {
       return;
     }
 
-    const paragrafText = textContainer.children[paragraf].innerText;
+    const textElement = textContainer.children[paragraf];
+    const paragrafText = textElement.innerText;
     setNextPage();
-    // next page
+
     if (
       paragraf >= textContainer.children.length - 1 &&
       options.timerCheckbox
     ) {
       moveToNextPage();
-    } else if (paragrafText.clientHeight === 0 || !paragrafText) {
+    } else if (textElement.clientHeight === 0 || !paragrafText) {
       paragraf++;
       inputParagraf.value = paragraf;
       speak();
@@ -267,7 +268,7 @@ function createHTMLButton() {
   document.body.appendChild(floatingDiv);
   document.head.appendChild(styleElement);
 }
-// auto find div wrapper
+
 function findElementWithMostDirectParagraphs() {
   let elements = document.body.children;
   let maxParagraphs = 0;
@@ -315,7 +316,7 @@ const setStorageDate = () => {
   options.reade = date.toString();
   chrome.storage.sync.set({ options });
 };
-// add last book
+
 const setStorageBook = () => {
   options.bookURL = document.URL;
   options.book =
@@ -347,8 +348,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
   }
 });
 
-// auto start open menu
-(async () => {
+(async function autoStartOpenMenu() {
   const data = await getStorageData();
   Object.assign(options, data);
   const dateSave = new Date(options.reade);
