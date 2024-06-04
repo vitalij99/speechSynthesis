@@ -107,7 +107,15 @@ function configureButtons(textContainer, synth) {
   buttonStart.onclick = () => handleStartClick(synth, buttonStart, speak);
   buttonStop.onclick = () =>
     handleStopClick(synth, buttonStart, textContainer, paragraf);
-  inputParagraf.onchange = () => (paragraf = inputParagraf.value);
+  inputParagraf.onchange = () => {
+    clearParagraphStyle(textContainer, paragraf);
+    paragraf = inputParagraf.value;
+
+    if (synth.speaking) {
+      synth.cancel();
+      speak();
+    }
+  };
 }
 
 function handleStartClick(synth, buttonStart, speak) {
