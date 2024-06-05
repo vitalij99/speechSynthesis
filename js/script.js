@@ -298,7 +298,7 @@ function findElementWithMostDirectParagraphs() {
 
   return elementWithMostParagraphs;
 }
-// auto generation next url
+
 function getNextPage() {
   const urlPage = document.URL;
   const numbers = [];
