@@ -41,9 +41,7 @@ const getTimeFormat = (timer, form) => {
 };
 
 // run fn
-await loadDataFromStorage();
-populateVoiceList();
-
+loadDataFromStorage().then(() => populateVoiceList());
 // get language
 function populateVoiceList() {
   let voices = synth.getVoices().sort(function (a, b) {

@@ -18,7 +18,7 @@ const options = {
 };
 
 // run fn
-await loadDataFromStorage();
+loadDataFromStorage();
 
 // Initialize the form with the user's option settings
 async function loadDataFromStorage() {
