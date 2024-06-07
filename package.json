@@ -4,13 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "minify": "node minify.js"
+    "build": "node minify.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "clean-css-cli": "^5.6.3",
     "uglify-js": "^3.17.4"
   }
 }
