@@ -1,28 +1,30 @@
 // script.js
-let options = {
-  contentDivElem: "#content",
-  nextPage: ".nextchap",
-  language: null,
-  pitch: 2,
-  rate: 2,
+const options = {
   reade: false,
   timer: 20,
   paragraf: 0,
+  timerCheckbox: true,
   navigator: {
+    nextPageBtn: ".nextchap",
     nextPageSave: null,
     thisPageSave: null,
+    contentDivElem: "#content",
+    bookURL: null,
+    book: null,
   },
-  timerCheckbox: true,
-  bookURL: null,
-  book: null,
-  volume: 1,
+  utterThis: {
+    language: null,
+    pitch: 2,
+    rate: 2,
+    volume: 1,
+  },
 };
 
 let paused = false;
 let saveStyledParagraf = null;
 
 async function startReade() {
-  const textContainer = getHtmlElements(options.contentDivElem);
+  const textContainer = getHtmlElements(options.navigator.contentDivElem);
   if (!textContainer || textContainer.children.length === 0) {
     console.error("No readable content found.");
     return;
@@ -87,9 +89,9 @@ function configureButtons(textContainer, synth) {
       };
 
       setVoice(utterThis, voices);
-      utterThis.pitch = options.pitch;
-      utterThis.rate = options.rate;
-      utterThis.volume = options.volume;
+      utterThis.pitch = options.utterThis.pitch;
+      utterThis.rate = options.utterThis.rate;
+      utterThis.volume = options.utterThis.volume;
 
       synth.speak(utterThis);
     }
@@ -137,8 +139,8 @@ function handleStartClick(synth, buttonStart, speak) {
 
 function handleStopClick(synth, buttonStart, textContainer, paragraf) {
   options.reade = null;
-  options.bookURL = document.URL;
-  options.book =
+  options.navigator.bookURL = document.URL;
+  options.navigator.book =
     document.title.length > 150
       ? document.title.substring(0, 147) + "..."
       : document.title;
@@ -163,9 +165,9 @@ function clearParagraphStyle(container, index) {
 }
 
 function setVoice(utterThis, voices) {
-  if (!options.language) return;
+  if (!options.utterThis.language) return;
   for (const voice of voices) {
-    if (voice.name === options.language) {
+    if (voice.name === options.utterThis.language) {
       utterThis.voice = voice;
       break;
     }
@@ -177,7 +179,7 @@ function moveToNextPage() {
 }
 
 function setNextPage() {
-  const nextPageButton = getHtmlElements(options.nextPage, true);
+  const nextPageButton = getHtmlElements(options.navigator.nextPageBtn, true);
   options.navigator.nextPageSave = nextPageButton
     ? nextPageButton.attributes.href.value
     : getNextPage();
@@ -326,8 +328,8 @@ const setStorageDate = () => {
 };
 
 const setStorageBook = () => {
-  options.bookURL = document.URL;
-  options.book =
+  options.navigator.bookURL = document.URL;
+  options.navigator.book =
     document.title.length > 150
       ? document.title.substring(0, 147) + "..."
       : document.title;

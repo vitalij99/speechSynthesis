@@ -5,20 +5,24 @@ const menuForm = document.getElementById("menuForm");
 
 // In-page cache of the user's options
 const options = {
-  contentDivElem: "#content",
-  nextPage: "nextchap",
-  rate: 1,
-  pitch: 1,
-  language: "Google español",
   reade: false,
   timer: 20,
-  book: "",
-  bookURL: "",
   paragraf: 0,
-  contentDivElem: "#content",
-  nextPageSave: null,
   timerCheckbox: true,
-  volume: 1,
+  navigator: {
+    nextPageBtn: ".nextchap",
+    nextPageSave: null,
+    thisPageSave: null,
+    contentDivElem: "#content",
+    bookURL: null,
+    book: null,
+  },
+  utterThis: {
+    language: null,
+    pitch: 2,
+    rate: 2,
+    volume: 1,
+  },
 };
 const getTimeFormat = (timer, form) => {
   const futureTimestamp = new Date().getTime() + timer * 60000;
@@ -71,7 +75,7 @@ function populateVoiceList() {
     option.setAttribute("data-name", voices[i].name);
 
     voiceSelect.appendChild(option);
-    if (voices[i].name === options.language) {
+    if (voices[i].name === options.utterThis.language) {
       selectedIndex = i;
     }
   }
@@ -111,9 +115,9 @@ menuForm.addEventListener("input", () => {
 });
 
 function setFormValues(options) {
-  menuForm.volume.value = options.volume;
-  menuForm.rate.value = options.rate;
-  menuForm.pitch.value = options.pitch;
+  menuForm.volume.value = options.utterThis.volume;
+  menuForm.rate.value = options.utterThis.rate;
+  menuForm.pitch.value = options.utterThis.pitch;
   menuForm.timer.value = options.timer;
   menuForm.timerCheckbox.checked = options.timerCheckbox;
 }
@@ -121,12 +125,13 @@ function updateTimerState(isEnabled) {
   menuForm.timer.disabled = !isEnabled;
 }
 function updateOptionsFromForm() {
-  options.volume = Number(menuForm.volume.value);
-  options.rate = Number(menuForm.rate.value);
-  options.pitch = Number(menuForm.pitch.value);
+  options.utterThis.volume = Number(menuForm.volume.value);
+  options.utterThis.rate = Number(menuForm.rate.value);
+  options.utterThis.pitch = Number(menuForm.pitch.value);
   options.timer = Number(menuForm.timer.value);
   options.timerCheckbox = menuForm.timerCheckbox.checked;
-  options.language = voiceSelect.selectedOptions[0].getAttribute("data-name");
+  options.utterThis.language =
+    voiceSelect.selectedOptions[0].getAttribute("data-name");
 }
 function updateDisplayedValues() {
   menuForm.rateValue.value = Number(menuForm.rate.value);

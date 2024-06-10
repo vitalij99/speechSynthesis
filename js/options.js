@@ -3,18 +3,24 @@ const btnBook = document.getElementById("book");
 
 // In-page cache of the user's options
 const options = {
-  contentDivElem: "#content",
-  nextPage: "nextchap",
-  rate: 1,
-  pitch: 1,
-  language: "Google español",
   reade: false,
   timer: 20,
-  book: "",
-  bookURL: "",
   paragraf: 0,
-  contentDivElem: "#content",
-  nextPageSave: null,
+  timerCheckbox: true,
+  navigator: {
+    nextPageBtn: ".nextchap",
+    nextPageSave: null,
+    thisPageSave: null,
+    contentDivElem: "#content",
+    bookURL: null,
+    book: null,
+  },
+  utterThis: {
+    language: null,
+    pitch: 2,
+    rate: 2,
+    volume: 1,
+  },
 };
 
 // run fn
@@ -27,17 +33,17 @@ async function loadDataFromStorage() {
 
   console.log(options);
 
-  optionsForm.contentDivElem.value = options.contentDivElem;
-  optionsForm.nextPage.value = options.nextPage;
+  optionsForm.contentDivElem.value = options.navigator.contentDivElem;
+  optionsForm.nextPage.value = options.navigator.nextPageBtn;
 
-  btnBook.innerText = options.book ? options.book : "books";
-  btnBook.href = options.bookURL;
+  btnBook.innerText = options.navigator.book ? options.navigator.book : "books";
+  btnBook.href = options.navigator.bookURL;
 }
 
 // Immediately persist options changes
 optionsForm.addEventListener("change", () => {
-  options.contentDivElem = optionsForm.contentDivElem.value;
-  options.nextPage = optionsForm.nextPage.value;
+  options.navigator.contentDivElem = optionsForm.contentDivElem.value;
+  options.navigator.nextPageBtn = optionsForm.nextPage.value;
 
   chrome.storage.sync.set({ options });
   console.log(options);
