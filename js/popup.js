@@ -28,8 +28,9 @@ async function getStorage() {
 
 const updatePopup = (options) => {
   const btnBook = document.querySelector(".book-popup");
-  const { book, bookURL } = options;
 
-  btnBook.innerText = book ? book : "Last start reade";
-  btnBook.href = bookURL;
+  btnBook.innerText = options.navigator.book
+    ? options.navigator.book
+    : "Last start reade";
+  btnBook.href = options.navigator.bookURL;
 };
