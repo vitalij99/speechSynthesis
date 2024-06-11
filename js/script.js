@@ -60,7 +60,9 @@ function configureButtons(textContainer, synth) {
     }
 
     const textElement = textContainer.children[paragraf];
-    const paragrafText = textElement.innerText;
+
+    const paragrafText = removeEmojis(textElement.innerText);
+
     setNextPage();
 
     if (
@@ -340,6 +342,10 @@ const setStorageBook = () => {
 
   chrome.storage.sync.set({ options });
 };
+
+function removeEmojis(str) {
+  return str.replace(/[\p{Emoji}+]/u, "");
+}
 
 chrome.storage.onChanged.addListener((changes, namespace) => {
   for (let key in changes) {
