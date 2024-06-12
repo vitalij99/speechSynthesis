@@ -18,6 +18,7 @@ const options = {
     rate: 2,
     volume: 1,
   },
+  mouse: { x: 0, y: 0 },
 };
 
 let paused = false;
@@ -218,8 +219,9 @@ function createHTMLButton() {
     .floating-div {
       display: flex;
       position: fixed;
-      top: 20px;
-      right: 15px;
+      top: ${options.mouse.y}px;
+      left: ${options.mouse.x}px;
+      width: max-content;
       background-color: lightblue;
       padding: 20px;
       border-radius: 10px;
@@ -283,6 +285,60 @@ function createHTMLButton() {
   styleElement.textContent = buttonStyle;
   document.body.appendChild(floatingDiv);
   document.head.appendChild(styleElement);
+
+  const draggableElement = document.getElementById("floatingDiv");
+  let isDragging = false;
+  let startX, startY, initialX, initialY, newX, currY;
+
+  draggableElement.addEventListener("mousedown", (e) => {
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    initialX = draggableElement.offsetLeft;
+    initialY = draggableElement.offsetTop;
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  });
+
+  const onMouseMove = (e) => {
+    if (!isDragging) return;
+
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    currX = initialX + dx;
+    currY = initialY + dy;
+
+    newX = initialX + dx;
+    newY = initialY + dy;
+
+    // Обмеження для не виходу за межі екрану
+    const elementWidth = draggableElement.offsetWidth;
+    const elementHeight = draggableElement.offsetHeight;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    if (newX < 0) newX = 0;
+    if (newY < 0) newY = 0;
+    if (newX + elementWidth > viewportWidth)
+      newX = viewportWidth - elementWidth;
+    if (newY + elementHeight > viewportHeight)
+      newY = viewportHeight - elementHeight;
+
+    draggableElement.style.left = `${newX}px`;
+    draggableElement.style.top = `${newY}px`;
+  };
+
+  const onMouseUp = () => {
+    isDragging = false;
+    document.removeEventListener("mousemove", onMouseMove);
+    document.removeEventListener("mouseup", onMouseUp);
+
+    options.mouse.x = newX;
+    options.mouse.y = newY;
+    chrome.storage.sync.set({ options });
+  };
 }
 
 function findElementWithMostDirectParagraphs() {
