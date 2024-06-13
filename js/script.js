@@ -71,7 +71,7 @@ function configureButtons(textContainer, synth) {
       options.timerCheckbox
     ) {
       moveToNextPage();
-    } else if (textElement.clientHeight === 0 || !paragrafText) {
+    } else if (textElement.clientHeight < "5px" || !paragrafText) {
       paragraf++;
       inputParagraf.value = paragraf;
       speak();
@@ -313,7 +313,6 @@ function createHTMLButton() {
     newX = initialX + dx;
     newY = initialY + dy;
 
-    // Обмеження для не виходу за межі екрану
     const elementWidth = draggableElement.offsetWidth;
     const elementHeight = draggableElement.offsetHeight;
     const viewportWidth = window.innerWidth;
