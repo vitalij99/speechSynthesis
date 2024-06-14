@@ -288,7 +288,7 @@ function createHTMLButton() {
 
   const draggableElement = document.getElementById("floatingDiv");
   let isDragging = false;
-  let startX, startY, initialX, initialY, newX, currY;
+  let startX, startY, initialX, initialY, newX, newY;
 
   draggableElement.addEventListener("mousedown", (e) => {
     isDragging = true;
