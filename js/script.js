@@ -219,8 +219,8 @@ function createHTMLButton() {
     .floating-div {
       display: flex;
       position: fixed;
-      top: ${options.mouse.y}px;
-      left: ${options.mouse.x}px;
+      top: ${options.mouse.y ? options.mouse.y : 0}px;
+      left: ${options.mouse.x ? options.mouse.x : 0}px;
       width: max-content;
       background-color: lightblue;
       padding: 20px;
@@ -334,9 +334,11 @@ function createHTMLButton() {
     document.removeEventListener("mousemove", onMouseMove);
     document.removeEventListener("mouseup", onMouseUp);
 
-    options.mouse.x = newX;
-    options.mouse.y = newY;
-    chrome.storage.sync.set({ options });
+    if (options.mouse.x && options.mouse.y) {
+      options.mouse.x = newX;
+      options.mouse.y = newY;
+      chrome.storage.sync.set({ options });
+    }
   };
 }
 
