@@ -334,7 +334,7 @@ function createHTMLButton() {
     document.removeEventListener("mousemove", onMouseMove);
     document.removeEventListener("mouseup", onMouseUp);
 
-    if (options.mouse.x && options.mouse.y) {
+    if (newX && newY) {
       options.mouse.x = newX;
       options.mouse.y = newY;
       chrome.storage.sync.set({ options });
