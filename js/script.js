@@ -219,14 +219,15 @@ function createHTMLButton() {
     .floating-div {
       display: flex;
       position: fixed;
-      top: ${options.mouse.y ? options.mouse.y : 0}px;
-      left: ${options.mouse.x ? options.mouse.x : 0}px;
+      top: ${options.mouse.y && options.mouse.y <= 100 ? options.mouse.y : 1}%;
+      left: ${options.mouse.x && options.mouse.x <= 100 ? options.mouse.x : 1}%;
       width: max-content;
       background-color: lightblue;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
       z-index: 999;
+    
     }
     .action-button {
       margin-right: 10px;
@@ -263,6 +264,15 @@ function createHTMLButton() {
       font-size: 20px;
       color: #777;
     }
+
+    #draggable {
+      user-select: none;
+    .no-select {
+      user-select: none; 
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+}
   `;
 
   const floatingDivHTML = `
@@ -275,6 +285,7 @@ function createHTMLButton() {
         <input type="number" id="inputParagrafs" class="input-number" value="0" min="0" max="7777">
         <p id="paragrafs" class="paragraph">0</p>
       </div>
+  
     </div>
   `;
 
@@ -287,6 +298,7 @@ function createHTMLButton() {
   document.head.appendChild(styleElement);
 
   const draggableElement = document.getElementById("floatingDiv");
+
   let isDragging = false;
   let startX, startY, initialX, initialY, newX, newY;
 
@@ -294,8 +306,10 @@ function createHTMLButton() {
     isDragging = true;
     startX = e.clientX;
     startY = e.clientY;
-    initialX = draggableElement.offsetLeft;
-    initialY = draggableElement.offsetTop;
+    initialX = (draggableElement.offsetLeft / window.innerWidth) * 100;
+    initialY = (draggableElement.offsetTop / window.innerHeight) * 100;
+
+    document.body.classList.add("no-select");
 
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
@@ -304,35 +318,31 @@ function createHTMLButton() {
   const onMouseMove = (e) => {
     if (!isDragging) return;
 
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
+    const dx = ((e.clientX - startX) / window.innerWidth) * 100;
+    const dy = ((e.clientY - startY) / window.innerHeight) * 100;
 
-    currX = initialX + dx;
-    currY = initialY + dy;
+    newX = Math.floor(initialX + dx);
+    newY = Math.floor(initialY + dy);
 
-    newX = initialX + dx;
-    newY = initialY + dy;
-
-    const elementWidth = draggableElement.offsetWidth;
-    const elementHeight = draggableElement.offsetHeight;
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+    const elementWidth =
+      (draggableElement.offsetWidth / window.innerWidth) * 100;
+    const elementHeight =
+      (draggableElement.offsetHeight / window.innerHeight) * 100;
 
     if (newX < 0) newX = 0;
     if (newY < 0) newY = 0;
-    if (newX + elementWidth > viewportWidth)
-      newX = viewportWidth - elementWidth;
-    if (newY + elementHeight > viewportHeight)
-      newY = viewportHeight - elementHeight;
+    if (newX + elementWidth > 100) newX = 100 - elementWidth;
+    if (newY + elementHeight > 100) newY = 100 - elementHeight;
 
-    draggableElement.style.left = `${newX}px`;
-    draggableElement.style.top = `${newY}px`;
+    draggableElement.style.left = `${newX}%`;
+    draggableElement.style.top = `${newY}%`;
   };
 
   const onMouseUp = () => {
     isDragging = false;
     document.removeEventListener("mousemove", onMouseMove);
     document.removeEventListener("mouseup", onMouseUp);
+    document.body.classList.remove("no-select");
 
     if (newX && newY) {
       options.mouse.x = newX;
