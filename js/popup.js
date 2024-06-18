@@ -1,14 +1,6 @@
 // popup.js
 const btnStartReader = document.getElementById("startReader");
 
-btnStartReader.addEventListener("click", function () {
-  chrome.runtime.sendMessage("firstTimeScript", () => {
-    btnStartReader.disabled = true;
-  });
-
-  window.close();
-});
-
 chrome.storage.onChanged.addListener((changes, namespace) => {
   for (let key in changes) {
     let storageChange = changes[key];
@@ -19,15 +11,34 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 getStorage().then(({ options }) => {
   updatePopup(options);
 
-  btnStartReader.disabled = false;
+  btnStartReader.addEventListener("click", function () {
+    const isReader = getDateReade(options.reade);
+
+    if (isReader) {
+      chrome.runtime.sendMessage("stopScript");
+      options.reade = null;
+      chrome.storage.sync.set({ options });
+    } else {
+      chrome.runtime.sendMessage("firstTimeScript");
+    }
+
+    window.close();
+  });
 });
 
+function getDateReade(reade) {
+  const dateSave = new Date(reade);
+  const dateNow = new Date();
+
+  return reade && dateSave > dateNow;
+}
 async function getStorage() {
   return await chrome.storage.sync.get("options");
 }
 
 const updatePopup = (options) => {
   const btnBook = document.querySelector(".book-popup");
+  btnStartReader.textContent = options.reade ? "stop" : "play";
 
   btnBook.innerText = options.navigator.book
     ? options.navigator.book

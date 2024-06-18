@@ -1,4 +1,5 @@
 // script.js
+
 const options = {
   reade: false,
   timer: 20,
