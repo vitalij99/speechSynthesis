@@ -38,7 +38,9 @@ async function getStorage() {
 
 const updatePopup = (options) => {
   const btnBook = document.querySelector(".book-popup");
-  btnStartReader.textContent = options.reade ? "stop" : "play";
+
+  const isReader = getDateReade(options.reade);
+  btnStartReader.textContent = isReader ? "stop" : "Play";
 
   btnBook.innerText = options.navigator.book
     ? options.navigator.book
