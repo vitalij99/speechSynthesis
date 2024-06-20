@@ -267,13 +267,14 @@ function createHTMLButton() {
     }
 
     #draggable {
-      user-select: none;
+      user-select: none;    
+    }
     .no-select {
       user-select: none; 
       -webkit-user-select: none;
       -moz-user-select: none;
       -ms-user-select: none;
-}
+      }
   `;
 
   const floatingDivHTML = `
