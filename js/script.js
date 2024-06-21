@@ -1,4 +1,4 @@
-// script.js
+//script.js
 
 const options = {
   reade: false,
@@ -323,8 +323,8 @@ function createHTMLButton() {
     const dx = ((e.clientX - startX) / window.innerWidth) * 100;
     const dy = ((e.clientY - startY) / window.innerHeight) * 100;
 
-    newX = Math.floor(initialX + dx);
-    newY = Math.floor(initialY + dy);
+    newX = (initialX + dx).toFixed(2);
+    newY = (initialY + dy).toFixed(2);
 
     const elementWidth =
       (draggableElement.offsetWidth / window.innerWidth) * 100;
