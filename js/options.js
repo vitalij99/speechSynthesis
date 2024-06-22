@@ -48,3 +48,6 @@ optionsForm.addEventListener("change", () => {
   chrome.storage.sync.set({ options });
   console.log(options);
 });
+function clearStorage() {
+  chrome.storage.sync.remove("options");
+}
