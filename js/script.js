@@ -443,16 +443,18 @@ chrome.runtime.onMessage.addListener(async (message) => {
   const dateSave = new Date(options.reade);
   const dateNow = new Date();
 
-  if (options && options.reade && options.timerCheckbox && dateSave > dateNow) {
-    const urlPage = document.URL;
-    if (
-      urlPage === options.navigator.nextPageSave ||
-      urlPage === options.navigator.thisPageSave
-    ) {
-      if (urlPage === options.navigator.nextPageSave) {
-        options.paragraf = 0;
-      }
-      startReade();
+  const urlPage = document.URL;
+
+  if (
+    options?.reade &&
+    options?.timerCheckbox &&
+    dateSave > dateNow &&
+    (urlPage === options.navigator.nextPageSave ||
+      urlPage === options.navigator.thisPageSave)
+  ) {
+    if (urlPage === options.navigator.nextPageSave) {
+      options.paragraf = 0;
     }
+    startReade();
   }
 })();
