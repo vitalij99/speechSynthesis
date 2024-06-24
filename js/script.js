@@ -1,7 +1,7 @@
 //script.js
 
 const options = {
-  reade: false,
+  reade: null,
   timer: 20,
   paragraf: 0,
   timerCheckbox: true,
@@ -190,7 +190,7 @@ function setNextPage() {
   options.navigator.thisPageSave = document.URL;
   chrome.storage.sync.set({ options });
 }
-
+// TODO try next page
 function getHtmlElements(selector, nextPage = false) {
   try {
     const elements = selector
