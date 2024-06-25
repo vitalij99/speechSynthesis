@@ -23,7 +23,8 @@ const options = {
   },
 };
 
-// run fn
+// TODO add sckep last p
+
 loadDataFromStorage();
 
 // Initialize the form with the user's option settings
