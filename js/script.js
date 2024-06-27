@@ -4,6 +4,7 @@ const options = {
   reade: null,
   timer: 20,
   paragraf: 0,
+  lastParagraf: 0,
   timerCheckbox: true,
   navigator: {
     nextPageBtn: ".nextchap",
@@ -68,7 +69,8 @@ function configureButtons(textContainer, synth) {
     setNextPage();
 
     if (
-      paragraf >= textContainer.children.length - 1 &&
+      paragraf >=
+        textContainer.children.length - 1 - (options.lastParagraf || 0) &&
       options.timerCheckbox
     ) {
       moveToNextPage();

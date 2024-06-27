@@ -6,6 +6,7 @@ const options = {
   reade: false,
   timer: 20,
   paragraf: 0,
+  lastParagraf: 0,
   timerCheckbox: true,
   navigator: {
     nextPageBtn: ".nextchap",
@@ -34,6 +35,7 @@ async function loadDataFromStorage() {
 
   optionsForm.contentDivElem.value = options.navigator.contentDivElem;
   optionsForm.nextPage.value = options.navigator.nextPageBtn;
+  optionsForm.lastParagraf.value = options.lastParagraf;
 
   btnBook.innerText = options.navigator.book ? options.navigator.book : "books";
   btnBook.href = options.navigator.bookURL;
@@ -43,6 +45,7 @@ async function loadDataFromStorage() {
 optionsForm.addEventListener("change", () => {
   options.navigator.contentDivElem = optionsForm.contentDivElem.value;
   options.navigator.nextPageBtn = optionsForm.nextPage.value;
+  options.lastParagraf = optionsForm.lastParagraf.value;
 
   chrome.storage.sync.set({ options });
   console.log(options);
