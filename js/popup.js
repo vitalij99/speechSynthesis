@@ -20,9 +20,8 @@ getStorage().then(({ options }) => {
       chrome.storage.sync.set({ options });
     } else {
       chrome.runtime.sendMessage("firstTimeScript");
+      window.close();
     }
-
-    window.close();
   });
 });
 
