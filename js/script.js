@@ -192,20 +192,16 @@ function setNextPage() {
   options.navigator.thisPageSave = document.URL;
   chrome.storage.sync.set({ options });
 }
-// TODO try next page
+
 function getHtmlElements(selector, nextPage = false) {
   try {
     const elements = selector
       .split("\n")
       .map((name) => name && document.querySelector(name))
       .filter(Boolean);
-    return elements.length > 0
-      ? elements[0]
-      : nextPage
-      ? null
-      : findElementWithMostDirectParagraphs();
+    return elements.length > 0 ? elements[0] : getNextPage();
   } catch (error) {
-    return findElementWithMostDirectParagraphs();
+    return nextPage ? getNextPage() : findElementWithMostDirectParagraphs();
   }
 }
 
