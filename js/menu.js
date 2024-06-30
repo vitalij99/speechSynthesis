@@ -3,7 +3,6 @@ const synth = window.speechSynthesis;
 const voiceSelect = document.querySelector("select");
 const menuForm = document.getElementById("menuForm");
 
-// In-page cache of the user's options
 const options = {
   reade: false,
   timer: 20,
@@ -23,6 +22,7 @@ const options = {
     rate: 2,
     volume: 1,
   },
+  mouse: { x: 0, y: 0 },
 };
 const getTimeFormat = (timer, form) => {
   const futureTimestamp = new Date().getTime() + timer * 60000;
@@ -44,9 +44,8 @@ const getTimeFormat = (timer, form) => {
   form.timerValue.value = formattedTime;
 };
 
-// run fn
 loadDataFromStorage().then(() => populateVoiceList());
-// get language
+
 function populateVoiceList() {
   let voices = synth.getVoices().sort(function (a, b) {
     const alang = a.lang.toUpperCase();
@@ -85,7 +84,7 @@ function populateVoiceList() {
 if (speechSynthesis.onvoiceschanged !== undefined) {
   speechSynthesis.onvoiceschanged = populateVoiceList;
 }
-// Initialize the form with the user's option settings
+
 async function loadDataFromStorage() {
   try {
     const data = await chrome.storage.sync.get("options");
@@ -100,7 +99,7 @@ async function loadDataFromStorage() {
     console.error("Error loading data from storage:", error);
   }
 }
-// Immediately persist options changes
+
 menuForm.addEventListener("change", () => {
   updateOptionsFromForm();
   updateTimerState(options.timerCheckbox);

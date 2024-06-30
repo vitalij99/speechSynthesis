@@ -199,9 +199,13 @@ function getHtmlElements(selector, nextPage = false) {
       .split("\n")
       .map((name) => name && document.querySelector(name))
       .filter(Boolean);
-    return elements.length > 0 ? elements[0] : getNextPage();
+    return elements.length > 0
+      ? elements[0]
+      : nextPage
+      ? null
+      : findElementWithMostDirectParagraphs();
   } catch (error) {
-    return nextPage ? getNextPage() : findElementWithMostDirectParagraphs();
+    return nextPage ? null : findElementWithMostDirectParagraphs();
   }
 }
 
