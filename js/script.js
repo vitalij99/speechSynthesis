@@ -28,7 +28,7 @@ let saveStyledParagraf = null;
 
 async function startReade() {
   const textContainer = getHtmlElements(options.navigator.contentDivElem);
-  if (!textContainer || textContainer.children.length === 0) {
+  if (!textContainer || textContainer.children.length <= 5) {
     console.error("No readable content found.");
     return;
   }
