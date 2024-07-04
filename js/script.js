@@ -415,7 +415,7 @@ const setStorageBook = () => {
 };
 
 function removeEmojis(str) {
-  return str.replace(/[\p{Emoji}+]/u, "");
+  return str.replace(/\p{Emoji}/gu, "");
 }
 
 chrome.storage.onChanged.addListener((changes, namespace) => {
