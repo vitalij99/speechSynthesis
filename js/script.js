@@ -43,7 +43,7 @@ function configureButtons(textContainer, synth) {
   const inputParagraf = document.getElementById("inputParagrafs");
   const punktParagrafs = document.getElementById("paragrafs");
 
-  buttonStart.innerText = !paused ? "Pause" : "Play";
+  buttonStart.textContent = !paused ? "Pause" : "Play";
 
   let paragraf = options.paragraf;
   punktParagrafs.textContent = textContainer.children.length;
@@ -64,7 +64,7 @@ function configureButtons(textContainer, synth) {
 
     const textElement = textContainer.children[paragraf];
 
-    const paragrafText = removeEmojis(textElement.innerText);
+    const paragrafText = removeEmojis(textElement.textContent);
 
     setNextPage();
 
@@ -135,11 +135,11 @@ function handleStartClick(synth, buttonStart, speak) {
   } else if (paused) {
     paused = false;
     synth.resume();
-    buttonStart.innerText = "Pause";
+    buttonStart.textContent = "Pause";
   } else {
     paused = true;
     synth.pause();
-    buttonStart.innerText = "Play";
+    buttonStart.textContent = "Play";
   }
 }
 
@@ -153,7 +153,7 @@ function handleStopClick(synth, buttonStart, textContainer, paragraf) {
   clearParagraphStyle(textContainer, paragraf);
   options.paragraf = paragraf;
   synth.cancel();
-  buttonStart.innerText = "Play";
+  buttonStart.textContent = "Play";
   paused = false;
   chrome.storage.sync.set({ options });
   chrome.runtime.sendMessage("stopScript");
@@ -413,7 +413,7 @@ const setStorageBook = () => {
 
   chrome.storage.sync.set({ options });
 };
-
+// TODO fix remove number
 function removeEmojis(str) {
   return str.replace(/\p{Emoji}/gu, "");
 }

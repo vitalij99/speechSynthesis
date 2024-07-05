@@ -41,7 +41,7 @@ const updatePopup = (options) => {
   const isReader = getDateReade(options.reade);
   btnStartReader.textContent = isReader ? "stop" : "Play";
 
-  btnBook.innerText = options.navigator.book
+  btnBook.textContent = options.navigator.book
     ? options.navigator.book
     : "Last start reade";
   btnBook.href = options.navigator.bookURL;

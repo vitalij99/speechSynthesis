@@ -37,7 +37,9 @@ async function loadDataFromStorage() {
   optionsForm.nextPage.value = options.navigator.nextPageBtn;
   optionsForm.lastParagraf.value = options.lastParagraf;
 
-  btnBook.innerText = options.navigator.book ? options.navigator.book : "books";
+  btnBook.textContent = options.navigator.book
+    ? options.navigator.book
+    : "books";
   btnBook.href = options.navigator.bookURL;
 }
 
