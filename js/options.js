@@ -8,6 +8,7 @@ const options = {
   paragraf: 0,
   lastParagraf: 0,
   timerCheckbox: true,
+  timeout: 2000,
   navigator: {
     nextPageBtn: ".nextchap",
     nextPageSave: null,
@@ -36,6 +37,7 @@ async function loadDataFromStorage() {
   optionsForm.contentDivElem.value = options.navigator.contentDivElem;
   optionsForm.nextPage.value = options.navigator.nextPageBtn;
   optionsForm.lastParagraf.value = options.lastParagraf;
+  optionsForm.timeout.value = options.timeout;
 
   btnBook.textContent = options.navigator.book
     ? options.navigator.book
@@ -48,10 +50,12 @@ optionsForm.addEventListener("change", () => {
   options.navigator.contentDivElem = optionsForm.contentDivElem.value;
   options.navigator.nextPageBtn = optionsForm.nextPage.value;
   options.lastParagraf = optionsForm.lastParagraf.value;
+  options.timeout = optionsForm.timeout.value;
 
   chrome.storage.sync.set({ options });
   console.log(options);
 });
+// TODO add button
 function clearStorage() {
   chrome.storage.sync.remove("options");
 }

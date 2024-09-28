@@ -6,6 +6,7 @@ const options = {
   paragraf: 0,
   lastParagraf: 0,
   timerCheckbox: true,
+  timeout: 2000,
   navigator: {
     nextPageBtn: ".nextchap",
     nextPageSave: null,
@@ -106,11 +107,14 @@ function configureButtons(textContainer, synth) {
   const dateSave = new Date(options.reade);
   const dateNow = new Date();
 
-  setTimeout(() => {
-    if (options.reade && dateSave > dateNow) {
-      speak();
-    }
-  }, 1000);
+  setTimeout(
+    () => {
+      if (options.reade && dateSave > dateNow) {
+        speak();
+      }
+    },
+    Number(options.timeout) ? Number(options.timeout) : 1000
+  );
 
   buttonStart.onclick = () => handleStartClick(synth, buttonStart, speak);
   buttonStop.onclick = () =>
