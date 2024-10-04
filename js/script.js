@@ -417,9 +417,9 @@ const setStorageBook = () => {
 
   chrome.storage.sync.set({ options });
 };
-// TODO fix remove number
+
 function removeEmojis(str) {
-  return str.replace(/\p{Emoji}/gu, "");
+  return str.replace(/(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu, "");
 }
 
 chrome.storage.onChanged.addListener((changes, namespace) => {
