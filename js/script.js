@@ -262,7 +262,7 @@ function createHTMLButton() {
       font-size: 16px;
     }
     .paragraph {
-      margin-left: -12px;
+      margin: 0 0 0 -12px;
     }
     .paragraph::before {
       content: "/";
@@ -369,7 +369,8 @@ function findElementWithMostDirectParagraphs() {
     let paragraphs = element.querySelectorAll("div > p");
 
     if (paragraphs.length > maxParagraphs) {
-      const parent = paragraphs[0].parentElement;
+      const parent =
+        paragraphs[Math.floor(paragraphs.length / 2)].parentElement;
       const parentParagraphs = parent.getElementsByTagName("p");
 
       if (parentParagraphs.length > maxParagraphs) {
