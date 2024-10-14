@@ -65,7 +65,7 @@ function configureButtons(textContainer, synth) {
 
     const textElement = textContainer.children[paragraf];
 
-    const paragrafText = removeEmojis(textElement.textContent);
+    const paragrafText = checkText(textElement.textContent);
 
     setNextPage();
 
@@ -419,8 +419,10 @@ const setStorageBook = () => {
   chrome.storage.sync.set({ options });
 };
 
-function removeEmojis(str) {
-  return str.replace(/(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu, "");
+function checkText(str) {
+  const regex = /[\p{L}\p{N}]/u;
+  if (regex.test(str))
+    return str.replace(/(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu, "");
 }
 
 chrome.storage.onChanged.addListener((changes, namespace) => {
