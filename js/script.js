@@ -65,9 +65,9 @@ function configureButtons(textContainer, synth) {
 
     const textElement = textContainer.children[paragraf];
 
-    const textContent = Array.from(textElement.childNodes)
-      .map((node) => node.textContent)
-      .join("");
+    const textContent = Array.from(textElement.childNodes).filter(
+      (value) => value.textContent.trim().length > 0
+    )[0].textContent;
 
     const paragrafText = checkText(textContent);
 
