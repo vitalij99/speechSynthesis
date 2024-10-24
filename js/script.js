@@ -65,9 +65,9 @@ function configureButtons(textContainer, synth) {
 
     const textElement = textContainer.children[paragraf];
 
-    const textContent = Array.from(textElement.childNodes).filter(
-      (value) => value.textContent.trim().length > 0
-    )[0].textContent;
+    const textContent = Array.from(textElement.childNodes)
+      .map((node) => node.textContent)
+      .join("");
 
     const paragrafText = checkText(textContent);
 
@@ -79,7 +79,7 @@ function configureButtons(textContainer, synth) {
       options.timerCheckbox
     ) {
       moveToNextPage();
-    } else if (textElement.clientHeight < 6 || !paragrafText) {
+    } else if (textElement.clientHeight < 8 || !paragrafText) {
       paragraf++;
       inputParagraf.value = paragraf;
       speak();
@@ -425,7 +425,7 @@ const setStorageBook = () => {
 
 function checkText(str) {
   const regex = /[\p{L}\p{N}]/u;
-  if (regex.test(str))
+  if (str && regex.test(str))
     return str.replace(/(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu, "");
 }
 
