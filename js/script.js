@@ -11,7 +11,7 @@ const options = {
     nextPageBtn: ".nextchap",
     nextPageSave: null,
     thisPageSave: null,
-    contentDivElem: "#content",
+    contentDivElem: "#content /n .cha-words ",
     bookURL: null,
     book: null,
   },
@@ -31,6 +31,7 @@ async function startReade() {
   const textContainer = getHtmlElements(options.navigator.contentDivElem);
   if (!textContainer || textContainer.children.length <= 5) {
     console.error("No readable content found.");
+    console.dir(textContainer);
     return;
   }
   const synth = window.speechSynthesis;
@@ -189,7 +190,25 @@ function setVoice(utterThis, voices) {
 }
 
 function moveToNextPage() {
-  window.location.href = options.navigator.nextPageSave;
+  const initialURL = window.location.href;
+  const params = {
+    key: "ArrowRight",
+    code: "ArrowRight",
+    keyCode: 39,
+    which: 39,
+    bubbles: true,
+  };
+  const rightArrowEvent = new KeyboardEvent("keydown", params);
+  const rightArrowEventUp = new KeyboardEvent("keyup", params);
+
+  window.dispatchEvent(rightArrowEvent);
+  window.dispatchEvent(rightArrowEventUp);
+
+  setTimeout(() => {
+    if (window.location.href === initialURL) {
+      window.location.href = options.navigator.nextPageSave;
+    }
+  }, 1000);
 }
 
 function setNextPage() {
