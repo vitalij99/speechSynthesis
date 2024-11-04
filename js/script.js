@@ -414,7 +414,7 @@ function getNextPage() {
     const element = urlPage[urlPage.length - index];
     if (!isNaN(element)) {
       numbers.unshift(element);
-    } else {
+    } else if (index !== 1) {
       const newUrlPage = urlPage.slice(0, urlPage.length - index + 1);
       const number = parseInt(numbers.join("")) + 1;
 
