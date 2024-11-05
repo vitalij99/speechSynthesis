@@ -32,7 +32,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
     await setReadingList(tab);
   }
 });
-chrome.webNavigation.onCompleted.addListener(async (details) => {
+chrome.webNavigation.onCommitted.addListener(async (details) => {
   if (details.frameId === 0) {
     const tab = await getCurrentTab();
 
