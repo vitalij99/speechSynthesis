@@ -28,7 +28,9 @@ let paused = false;
 let saveStyledParagraf = null;
 
 async function startReade() {
-  let textContainer = getHtmlElements(options.navigator.contentDivElem)?.[0];
+  let textContainer = getHtmlElements(options.navigator.contentDivElem);
+
+  console.dir(textContainer);
 
   if (!textContainer || textContainer.length <= 1) {
     textContainer = findElementWithMostDirectParagraphs();
@@ -60,11 +62,20 @@ function setNextPage() {
 
 function getHtmlElements(selector) {
   try {
-    return selector
-      .split("\n")
-      .map((name) => name && document.querySelector(name))
-      .filter(Boolean);
-  } catch (error) {
+    return (
+      selector
+        .split("\n")
+        .map((name) => {
+          if (!name.trim()) return null;
+          try {
+            return document.querySelector(name);
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean)?.[0] || null
+    );
+  } catch {
     return null;
   }
 }
@@ -391,29 +402,19 @@ function createHTMLButton() {
 }
 
 function findElementWithMostDirectParagraphs() {
-  let elements = document.body.children;
+  let allElements = document.querySelectorAll("body *");
   let maxCount = 0;
-  let elementWithMost = null;
-  const tags = ["p", "span"];
+  let bestElement = null;
 
-  for (let element of elements) {
-    let divs = element.querySelectorAll("div");
-
-    if (divs.length > maxCount) {
-      const parent = divs[Math.floor(divs.length / 2)].parentElement;
-      let count = 0;
-      for (const tag of tags) {
-        count += parent.getElementsByTagName(tag).length;
-      }
-
-      if (count > maxCount) {
-        maxCount = count;
-        elementWithMost = parent;
-      }
+  for (let el of allElements) {
+    const count = el.querySelectorAll("p, span").length;
+    if (count > maxCount) {
+      maxCount = count;
+      bestElement = el;
     }
   }
 
-  return elementWithMost;
+  return bestElement;
 }
 
 function getNextPage() {
@@ -458,7 +459,7 @@ function checkText(str) {
     return str.replace(/(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu, "");
 }
 
-chrome.storage.onChanged.addListener((changes, namespace) => {
+chrome.storage.onChanged.addListener((changes) => {
   for (let key in changes) {
     let storageChange = changes[key];
     Object.assign(options, storageChange.newValue);
