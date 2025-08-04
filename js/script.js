@@ -28,7 +28,14 @@ let paused = false;
 let saveStyledParagraf = null;
 
 async function startReade() {
-  const textContainer = getHtmlElements(options.navigator.contentDivElem);
+  let textContainer = getHtmlElements(options.navigator.contentDivElem)?.[0];
+
+  if (!textContainer || textContainer.length <= 1) {
+    textContainer = findElementWithMostDirectParagraphs();
+  }
+
+  console.dir(textContainer.children.length);
+
   if (!textContainer || textContainer.children.length <= 5) {
     console.error("No readable content found.");
     console.dir(textContainer);
@@ -37,6 +44,31 @@ async function startReade() {
   const synth = window.speechSynthesis;
   createHTMLButton();
   configureButtons(textContainer, synth);
+}
+
+function setNextPage() {
+  const nextPageButton = getHtmlElements(options.navigator.nextPageBtn);
+
+  options.navigator.thisPageSave = document.URL;
+  if (!nextPageButton) {
+    chrome.storage.sync.set({ options });
+    return;
+  }
+  options.navigator.nextPageSave = nextPageButton
+    ? nextPageButton?.attributes?.href?.value
+    : getNextPage();
+  chrome.storage.sync.set({ options });
+}
+
+function getHtmlElements(selector) {
+  try {
+    return selector
+      .split("\n")
+      .map((name) => name && document.querySelector(name))
+      .filter(Boolean);
+  } catch (error) {
+    return null;
+  }
 }
 
 function configureButtons(textContainer, synth) {
@@ -51,6 +83,7 @@ function configureButtons(textContainer, synth) {
   punktParagrafs.textContent = textContainer.children.length;
   inputParagraf.max = textContainer.children.length;
   inputParagraf.value = paragraf;
+  console.log(`Paragraf: ${paragraf}, Total: ${textContainer.children.length}`);
 
   let voices = synth.getVoices();
 
@@ -211,31 +244,6 @@ function moveToNextPage() {
   }, 1000);
 }
 
-function setNextPage() {
-  const nextPageButton = getHtmlElements(options.navigator.nextPageBtn, true);
-  options.navigator.nextPageSave = nextPageButton
-    ? nextPageButton.attributes.href.value
-    : getNextPage();
-  options.navigator.thisPageSave = document.URL;
-  chrome.storage.sync.set({ options });
-}
-
-function getHtmlElements(selector, nextPage = false) {
-  try {
-    const elements = selector
-      .split("\n")
-      .map((name) => name && document.querySelector(name))
-      .filter(Boolean);
-    return elements.length > 0
-      ? elements[0]
-      : nextPage
-      ? null
-      : findElementWithMostDirectParagraphs();
-  } catch (error) {
-    return nextPage ? null : findElementWithMostDirectParagraphs();
-  }
-}
-
 function getStorageData() {
   return new Promise((resolve) => {
     chrome.storage.sync.get("options", (result) => resolve(result.options));
@@ -385,25 +393,28 @@ function createHTMLButton() {
 
 function findElementWithMostDirectParagraphs() {
   let elements = document.body.children;
-  let maxParagraphs = 0;
-  let elementWithMostParagraphs = null;
+  let maxCount = 0;
+  let elementWithMost = null;
+  const tags = ["p", "span"];
 
   for (let element of elements) {
-    let paragraphs = element.querySelectorAll("div > p");
+    let divs = element.querySelectorAll("div");
 
-    if (paragraphs.length > maxParagraphs) {
-      const parent =
-        paragraphs[Math.floor(paragraphs.length / 2)].parentElement;
-      const parentParagraphs = parent.getElementsByTagName("p");
+    if (divs.length > maxCount) {
+      const parent = divs[Math.floor(divs.length / 2)].parentElement;
+      let count = 0;
+      for (const tag of tags) {
+        count += parent.getElementsByTagName(tag).length;
+      }
 
-      if (parentParagraphs.length > maxParagraphs) {
-        maxParagraphs = parentParagraphs.length;
-        elementWithMostParagraphs = parent;
+      if (count > maxCount) {
+        maxCount = count;
+        elementWithMost = parent;
       }
     }
   }
 
-  return elementWithMostParagraphs;
+  return elementWithMost;
 }
 
 function getNextPage() {
