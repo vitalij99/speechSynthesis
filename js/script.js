@@ -497,6 +497,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
     if (urlPage === options.navigator.nextPageSave) {
       options.paragraf = 0;
     }
+    chrome.runtime.sendMessage({ active: "autoPowerOn", date: options.reade });
     startReade();
   }
 })();
