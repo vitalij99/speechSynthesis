@@ -30,8 +30,6 @@ let saveStyledParagraf = null;
 async function startReade() {
   let textContainer = getHtmlElements(options.navigator.contentDivElem);
 
-  console.dir(textContainer);
-
   if (!textContainer || textContainer.length <= 1) {
     textContainer = findElementWithMostDirectParagraphs();
   }
@@ -402,12 +400,19 @@ function createHTMLButton() {
 }
 
 function findElementWithMostDirectParagraphs() {
-  let allElements = document.querySelectorAll("body *");
+  const allElements = document.querySelectorAll("body *");
   let maxCount = 0;
   let bestElement = null;
 
   for (let el of allElements) {
-    const count = el.querySelectorAll("p, span").length;
+    let count = 0;
+
+    for (let child of el.children) {
+      if (child.tagName === "P" || child.tagName === "SPAN") {
+        count++;
+      }
+    }
+
     if (count > maxCount) {
       maxCount = count;
       bestElement = el;
