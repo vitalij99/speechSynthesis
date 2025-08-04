@@ -34,8 +34,6 @@ async function startReade() {
     textContainer = findElementWithMostDirectParagraphs();
   }
 
-  console.dir(textContainer.children.length);
-
   if (!textContainer || textContainer.children.length <= 5) {
     console.error("No readable content found.");
     console.dir(textContainer);
@@ -83,11 +81,10 @@ function configureButtons(textContainer, synth) {
   punktParagrafs.textContent = textContainer.children.length;
   inputParagraf.max = textContainer.children.length;
   inputParagraf.value = paragraf;
-  console.log(`Paragraf: ${paragraf}, Total: ${textContainer.children.length}`);
 
   let voices = synth.getVoices();
 
-  synth.onvoiceschanged = (event) => {
+  synth.onvoiceschanged = () => {
     voices = synth.getVoices();
   };
 
@@ -291,9 +288,11 @@ function createHTMLButton() {
       padding: 5px;
       width: 55px;
       font-size: 16px;
+      color: #000;
     }
     .paragraph {
       margin: 0 0 0 -12px;
+      color: #000;
     }
     .paragraph::before {
       content: "/";
