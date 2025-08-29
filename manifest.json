@@ -20,8 +20,7 @@
     "storage",
     "webNavigation",
     "activeTab",
-    "readingList",
-    "power"
+    "readingList"
   ],
   "background": {
     "service_worker": "./js/background.js"

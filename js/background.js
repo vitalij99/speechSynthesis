@@ -1,5 +1,5 @@
 // background.js
-let powerTimeoutId = null;
+
 async function getCurrentTab() {
   const queryOptions = { active: true, lastFocusedWindow: true };
 
@@ -29,35 +29,10 @@ chrome.runtime.onMessage.addListener(async (message) => {
       });
   } else if (message === "stopScript") {
     const tab = await getCurrentTab();
-    powerOff();
+
     await setReadingList(tab);
-  } else if (message?.action === "autoPowerOn") {
-    chrome.power.requestKeepAwake("display");
-    if (powerTimeoutId) {
-      clearTimeout(powerTimeoutId);
-    }
-
-    const dateOff = new Date(message.date);
-    const now = Date.now();
-    const msUntilOff = dateOff.getTime() - now;
-
-    if (msUntilOff > 0) {
-      powerTimeoutId = setTimeout(() => {
-        powerOff();
-      }, msUntilOff);
-    } else {
-      powerOff();
-    }
   }
 });
-
-function powerOff() {
-  chrome.power.releaseKeepAwake();
-  if (powerTimeoutId) {
-    clearTimeout(powerTimeoutId);
-    powerTimeoutId = null;
-  }
-}
 
 chrome.webNavigation.onCommitted.addListener(async (details) => {
   if (details.frameId === 0) {
