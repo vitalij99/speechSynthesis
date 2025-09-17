@@ -105,21 +105,31 @@ function configureButtons(textContainer, synth) {
       return;
     }
 
+    console.log({
+      bool:
+        paragraf >= textContainer.children.length - (options.lastParagraf || 0),
+      ti: options.timerCheckbox,
+      paragraf,
+      le: textContainer.children.length,
+      opP: options.lastParagraf,
+    });
+
+    if (
+      paragraf >= textContainer.children.length - (options.lastParagraf || 0) &&
+      options.timerCheckbox
+    ) {
+      moveToNextPage();
+    }
+
     const textElement = textContainer.children[paragraf];
 
-    const textContent = Array.from(textElement.childNodes)
+    const textContent = Array.from(textElement?.childNodes)
       .map((node) => node.textContent)
       .join("");
 
     const paragrafText = checkText(textContent);
 
-    if (
-      paragraf >=
-        textContainer.children.length - 1 - (options.lastParagraf || 0) &&
-      options.timerCheckbox
-    ) {
-      moveToNextPage();
-    } else if (textElement.clientHeight < 8 || !paragrafText) {
+    if (textElement.clientHeight < 8 || !paragrafText) {
       paragraf++;
       inputParagraf.value = paragraf;
       speak();
@@ -132,7 +142,7 @@ function configureButtons(textContainer, synth) {
         clearParagraphStyle(textContainer, saveStyledParagraf || paragraf);
         paragraf++;
         inputParagraf.value = paragraf;
-        if (paragraf < textContainer.children.length && options.reade) {
+        if (options.reade) {
           options.paragraf = paragraf;
           chrome.storage.sync.set({ options });
           speak();
@@ -208,14 +218,22 @@ function handleStopClick(synth, buttonStart, textContainer, paragraf) {
 }
 
 function styleCurrentParagraph(container, index) {
-  const paragraph = container.children[index];
-  paragraph.style.backdropFilter = "blur(10px)";
-  paragraph.style.filter = "invert(1)";
-  paragraph.scrollIntoView({ behavior: "smooth", block: "center" });
+  try {
+    const paragraph = container.children[index];
+    paragraph.style.backdropFilter = "blur(10px)";
+    paragraph.style.filter = "invert(1)";
+    paragraph.scrollIntoView({ behavior: "smooth", block: "center" });
+  } catch (error) {
+    console.error("Error styling paragraph:", error);
+  }
 }
 
 function clearParagraphStyle(container, index) {
-  container.children[index].style = "";
+  try {
+    container.children[index].style = "";
+  } catch {
+    return;
+  }
 }
 
 function setVoice(utterThis, voices) {
@@ -459,6 +477,7 @@ const setStorageBook = () => {
 };
 
 function checkText(str) {
+  if (!str) return "";
   const regex = /[\p{L}\p{N}]/u;
   if (str && regex.test(str))
     return str.replace(/(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu, "");
