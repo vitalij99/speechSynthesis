@@ -97,6 +97,8 @@ function configureButtons(textContainer, synth) {
     voices = synth.getVoices();
   };
 
+  setNextPage();
+
   function speak() {
     if (synth.speaking) {
       console.error("speechSynthesis.speaking");
@@ -110,8 +112,6 @@ function configureButtons(textContainer, synth) {
       .join("");
 
     const paragrafText = checkText(textContent);
-
-    setNextPage();
 
     if (
       paragraf >=
@@ -494,16 +494,18 @@ chrome.runtime.onMessage.addListener(async (message) => {
   const urlPage = document.URL;
 
   if (
-    options?.reade &&
-    options?.timerCheckbox &&
-    dateSave > dateNow &&
-    (urlPage === options.navigator.nextPageSave ||
-      urlPage === options.navigator.thisPageSave)
+    (options?.reade &&
+      options?.timerCheckbox &&
+      dateSave > dateNow &&
+      urlPage.includes(options.navigator.thisPageSave)) ||
+    urlPage.includes(options.navigator.nextPageSave)
   ) {
-    if (urlPage === options.navigator.nextPageSave) {
+    if (urlPage.includes(options.navigator.nextPageSave)) {
       options.paragraf = 0;
     }
 
-    startReade();
+    setTimeout(() => {
+      startReade();
+    }, 1000);
   }
 })();

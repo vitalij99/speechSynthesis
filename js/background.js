@@ -34,7 +34,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
   }
 });
 
-chrome.webNavigation.onCommitted.addListener(async (details) => {
+chrome.webNavigation.onCompleted.addListener(async (details) => {
   if (details.frameId === 0) {
     const tab = await getCurrentTab();
 
