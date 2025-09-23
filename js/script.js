@@ -26,6 +26,7 @@ const options = {
 
 let paused = false;
 let saveStyledParagraf = null;
+let timerId = null;
 
 async function startReade() {
   let textContainer = getHtmlElements(options.navigator.contentDivElem);
@@ -137,6 +138,11 @@ function configureButtons(textContainer, synth) {
           options.paragraf = paragraf;
           chrome.storage.sync.set({ options });
           speak();
+        }
+      };
+      utterThis.onboundary = (event) => {
+        if (event.name === "word") {
+          resetTimer(synth, buttonStart, textContainer, paragraf, speak);
         }
       };
 
@@ -495,6 +501,19 @@ chrome.runtime.onMessage.addListener(async (message) => {
     startReade();
   }
 });
+function resetTimer(synth, buttonStart, textContainer, paragraf, speak) {
+  if (timerId) {
+    clearTimeout(timerId);
+  }
+  timerId = window.setTimeout(() => {
+    console.log("⏹ Озвучка зупинилася або нема нових слів.");
+
+    if (!options.timerCheckbox || !options.reade) return;
+
+    handleStopClick(synth, buttonStart, textContainer, paragraf);
+    handleStartClick(synth, buttonStart, speak);
+  }, 10000);
+}
 
 (async function autoStartOpenMenu() {
   const data = await getStorageData();
