@@ -114,7 +114,7 @@ function configureButtons(textContainer, synth) {
 
     const textElement = textContainer.children[paragraf];
 
-    const textContent = Array.from(textElement.childNodes)
+    const textContent = Array.from(textElement?.childNodes)
       .map((node) => node.textContent)
       .join("");
 
@@ -210,14 +210,22 @@ function handleStopClick(synth, buttonStart, textContainer, paragraf) {
 }
 
 function styleCurrentParagraph(container, index) {
-  const paragraph = container.children[index];
-  paragraph.style.backdropFilter = "blur(10px)";
-  paragraph.style.filter = "invert(1)";
-  paragraph.scrollIntoView({ behavior: "smooth", block: "center" });
+  try {
+    const paragraph = container.children[index];
+    paragraph.style.backdropFilter = "blur(10px)";
+    paragraph.style.filter = "invert(1)";
+    paragraph.scrollIntoView({ behavior: "smooth", block: "center" });
+  } catch (error) {
+    console.error("Error styling paragraph:", error);
+  }
 }
 
 function clearParagraphStyle(container, index) {
-  container.children[index].style = "";
+  try {
+    container.children[index].style = "";
+  } catch {
+    return;
+  }
 }
 
 function setVoice(utterThis, voices) {
@@ -461,6 +469,7 @@ const setStorageBook = () => {
 };
 
 function checkText(str) {
+  if (!str) return "";
   const regex = /[\p{L}\p{N}]/u;
   if (str && regex.test(str))
     return str.replace(/(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu, "");
