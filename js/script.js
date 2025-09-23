@@ -105,6 +105,13 @@ function configureButtons(textContainer, synth) {
       return;
     }
 
+    if (
+      paragraf >= textContainer.children.length - (options.lastParagraf || 0) &&
+      options.timerCheckbox
+    ) {
+      moveToNextPage();
+    }
+
     const textElement = textContainer.children[paragraf];
 
     const textContent = Array.from(textElement.childNodes)
@@ -113,13 +120,7 @@ function configureButtons(textContainer, synth) {
 
     const paragrafText = checkText(textContent);
 
-    if (
-      paragraf >=
-        textContainer.children.length - 1 - (options.lastParagraf || 0) &&
-      options.timerCheckbox
-    ) {
-      moveToNextPage();
-    } else if (textElement.clientHeight < 8 || !paragrafText) {
+    if (textElement.clientHeight < 8 || !paragrafText) {
       paragraf++;
       inputParagraf.value = paragraf;
       speak();
@@ -132,7 +133,7 @@ function configureButtons(textContainer, synth) {
         clearParagraphStyle(textContainer, saveStyledParagraf || paragraf);
         paragraf++;
         inputParagraf.value = paragraf;
-        if (paragraf < textContainer.children.length && options.reade) {
+        if (options.reade) {
           options.paragraf = paragraf;
           chrome.storage.sync.set({ options });
           speak();
@@ -154,6 +155,7 @@ function configureButtons(textContainer, synth) {
   setTimeout(
     () => {
       if (options.reade && dateSave > dateNow) {
+        setNextPage();
         speak();
       }
     },
@@ -504,8 +506,6 @@ chrome.runtime.onMessage.addListener(async (message) => {
       options.paragraf = 0;
     }
 
-    setTimeout(() => {
-      startReade();
-    }, 1000);
+    startReade();
   }
 })();
