@@ -142,7 +142,7 @@ function configureButtons(textContainer, synth) {
       };
       utterThis.onboundary = (event) => {
         if (event.name === "word") {
-          resetTimer(synth, buttonStart, textContainer, paragraf, speak);
+          resetTimer({ synth, textContainer, paragraf, speak });
         }
       };
 
@@ -501,7 +501,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
     startReade();
   }
 });
-function resetTimer(synth, textContainer, paragraf, speak) {
+function resetTimer({ synth, textContainer, paragraf, speak }) {
   if (timerId) {
     clearTimeout(timerId);
   }
