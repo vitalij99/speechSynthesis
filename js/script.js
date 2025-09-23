@@ -501,7 +501,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
     startReade();
   }
 });
-function resetTimer(synth, buttonStart, textContainer, paragraf, speak) {
+function resetTimer(synth, textContainer, paragraf, speak) {
   if (timerId) {
     clearTimeout(timerId);
   }
@@ -510,9 +510,13 @@ function resetTimer(synth, buttonStart, textContainer, paragraf, speak) {
 
     if (!options.timerCheckbox || !options.reade) return;
 
-    handleStopClick(synth, buttonStart, textContainer, paragraf);
-    handleStartClick(synth, buttonStart, speak);
-  }, 10000);
+    clearParagraphStyle(textContainer, paragraf);
+    synth.cancel();
+
+    if (!synth.speaking) {
+      speak();
+    }
+  }, 5000);
 }
 
 (async function autoStartOpenMenu() {
