@@ -27,7 +27,7 @@ const options = {
 let paused = false;
 let saveStyledParagraf = null;
 let timerId = null;
-let timerCounter = 0;
+let timerCounter = { count: 0, paragraf: 0 };
 
 async function startReade() {
   let textContainer = getHtmlElements(options.navigator.contentDivElem);
@@ -144,6 +144,18 @@ function configureButtons(textContainer, synth) {
       utterThis.onboundary = (event) => {
         resetTimer({ synth, textContainer, paragraf, speak });
       };
+      utterThis.onerror = (event) => {
+        if (event.error === "interrupted") return;
+        console.error("SpeechSynthesisUtterance.onerror", event.error);
+        timerCounter.count++;
+
+        timerCounter.paragraf = paragraf;
+        if (timerCounter.count >= 2 && timerCounter.paragraf === paragraf) {
+          paragraf++;
+          timerCounter.count = 0;
+        }
+        resetTimer({ synth, textContainer, paragraf, speak });
+      };
 
       setVoice(utterThis, voices);
       utterThis.pitch = options.utterThis.pitch;
@@ -172,6 +184,7 @@ function configureButtons(textContainer, synth) {
     handleStopClick(synth, buttonStart, textContainer, paragraf);
   inputParagraf.onchange = () => {
     clearParagraphStyle(textContainer, paragraf);
+
     paragraf = inputParagraf.value;
 
     if (synth.speaking) {
@@ -500,20 +513,10 @@ chrome.runtime.onMessage.addListener(async (message) => {
     startReade();
   }
 });
+
 function resetTimer({ synth, textContainer, paragraf, speak }) {
   if (timerId) {
     clearTimeout(timerId);
-    timerCounter = 0;
-  }
-
-  if (timerCounter >= 2) {
-    console.log("⏹ Озвучка зупинена через відсутність взаємодії.");
-
-    synth.cancel();
-    clearParagraphStyle(textContainer, paragraf);
-    paragraf++;
-    speak();
-    return;
   }
 
   timerId = window.setTimeout(() => {
@@ -525,7 +528,6 @@ function resetTimer({ synth, textContainer, paragraf, speak }) {
     synth.cancel();
 
     if (!synth.speaking) {
-      timerCounter++;
       speak();
     }
   }, 5000);
