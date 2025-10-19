@@ -151,6 +151,7 @@ function configureButtons(textContainer, synth) {
 
         timerCounter.paragraf = paragraf;
         if (timerCounter.count >= 2 && timerCounter.paragraf === paragraf) {
+          clearParagraphStyle(textContainer, paragraf);
           paragraf++;
           timerCounter.count = 0;
         }
