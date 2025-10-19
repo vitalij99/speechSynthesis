@@ -27,6 +27,7 @@ const options = {
 let paused = false;
 let saveStyledParagraf = null;
 let timerId = null;
+let timerCounter = 0;
 
 async function startReade() {
   let textContainer = getHtmlElements(options.navigator.contentDivElem);
@@ -141,9 +142,7 @@ function configureButtons(textContainer, synth) {
         }
       };
       utterThis.onboundary = (event) => {
-        if (event.name === "word") {
-          resetTimer({ synth, textContainer, paragraf, speak });
-        }
+        resetTimer({ synth, textContainer, paragraf, speak });
       };
 
       setVoice(utterThis, voices);
@@ -504,7 +503,19 @@ chrome.runtime.onMessage.addListener(async (message) => {
 function resetTimer({ synth, textContainer, paragraf, speak }) {
   if (timerId) {
     clearTimeout(timerId);
+    timerCounter = 0;
   }
+
+  if (timerCounter >= 2) {
+    console.log("⏹ Озвучка зупинена через відсутність взаємодії.");
+
+    synth.cancel();
+    clearParagraphStyle(textContainer, paragraf);
+    paragraf++;
+    speak();
+    return;
+  }
+
   timerId = window.setTimeout(() => {
     console.log("⏹ Озвучка зупинилася або нема нових слів.");
 
@@ -514,6 +525,7 @@ function resetTimer({ synth, textContainer, paragraf, speak }) {
     synth.cancel();
 
     if (!synth.speaking) {
+      timerCounter++;
       speak();
     }
   }, 5000);
