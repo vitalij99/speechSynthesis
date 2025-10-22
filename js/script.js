@@ -141,21 +141,19 @@ function configureButtons(textContainer, synth) {
           speak();
         }
       };
-      utterThis.onboundary = (event) => {
-        resetTimer({ synth, textContainer, paragraf, speak });
-      };
+
       utterThis.onerror = (event) => {
         if (event.error === "interrupted") return;
         console.error("SpeechSynthesisUtterance.onerror", event.error);
         timerCounter.count++;
 
         timerCounter.paragraf = paragraf;
-        if (timerCounter.count >= 2 && timerCounter.paragraf === paragraf) {
+        if (timerCounter.count >= 3 && timerCounter.paragraf === paragraf) {
           clearParagraphStyle(textContainer, paragraf);
           paragraf++;
           timerCounter.count = 0;
         }
-        resetTimer({ synth, textContainer, paragraf, speak });
+        resetReader({ synth, textContainer, paragraf, speak });
       };
 
       setVoice(utterThis, voices);
@@ -515,23 +513,17 @@ chrome.runtime.onMessage.addListener(async (message) => {
   }
 });
 
-function resetTimer({ synth, textContainer, paragraf, speak }) {
-  if (timerId) {
-    clearTimeout(timerId);
+function resetReader({ synth, textContainer, paragraf, speak }) {
+  console.log("⏹ Озвучка зупинилася або нема нових слів.");
+
+  if (!options.timerCheckbox || !options.reade) return;
+
+  clearParagraphStyle(textContainer, paragraf);
+  synth.cancel();
+
+  if (!synth.speaking) {
+    speak();
   }
-
-  timerId = window.setTimeout(() => {
-    console.log("⏹ Озвучка зупинилася або нема нових слів.");
-
-    if (!options.timerCheckbox || !options.reade) return;
-
-    clearParagraphStyle(textContainer, paragraf);
-    synth.cancel();
-
-    if (!synth.speaking) {
-      speak();
-    }
-  }, 5000);
 }
 
 (async function autoStartOpenMenu() {
