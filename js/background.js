@@ -15,6 +15,9 @@ chrome.runtime.onMessage.addListener(async (message) => {
         target: { tabId: tab.id },
         files: ["/js/script.js"],
       })
+      .then(() => {
+        setNewHistory(tab.title, tab.url);
+      })
       .then(async () => {
         chrome.tabs.query(
           { active: true, currentWindow: true },
@@ -87,4 +90,38 @@ async function setReadingList(tab) {
       hasBeenRead: false,
     });
   }
+}
+async function getStorageData(key) {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get([key], (result) => {
+      resolve(result.history);
+    });
+  });
+}
+async function setStorageData(key, value) {
+  return new Promise((resolve) => {
+    chrome.storage.sync.set({ [key]: value }, () => {
+      resolve();
+    });
+  });
+}
+async function setNewHistory(name, link) {
+  const history = (await getStorageData("history")) || [];
+
+  const linkArray = link.split("/");
+  const bookLink = linkArray.slice(0, linkArray.length - 1).join("/");
+
+  const filteredHistory = history.filter((item) => item.bookLink !== bookLink);
+
+  const shortName = name.length > 150 ? name.substring(0, 147) + "..." : name;
+
+  const newHistory = {
+    name: shortName,
+    link,
+    bookLink,
+  };
+
+  const updatedHistory = [newHistory, ...filteredHistory].slice(0, 20);
+
+  await setStorageData("history", updatedHistory);
 }
