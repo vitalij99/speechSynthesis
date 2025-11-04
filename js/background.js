@@ -41,10 +41,14 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
   if (details.frameId === 0) {
     const tab = await getCurrentTab();
 
-    chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ["/js/script.js"],
-    });
+    chrome.scripting
+      .executeScript({
+        target: { tabId: tab.id },
+        files: ["/js/script.js"],
+      })
+      .then(() => {
+        setNewHistory(tab.title, tab.url);
+      });
   }
 });
 function getBookUrl(urlPage) {
