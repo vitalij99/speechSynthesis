@@ -46,3 +46,34 @@ const updatePopup = (options) => {
     : "Last start reade";
   btnBook.href = options.navigator.bookURL;
 };
+async function loadHistory() {
+  const storage = await chrome.storage.sync.get("history");
+  const history = storage.history || [];
+  const historyMenu = document.getElementById("historyMenu");
+
+  if (!history.length) {
+    historyMenu.innerHTML = "";
+    return;
+  }
+
+  historyMenu.innerHTML = history
+    .map(
+      (item) =>
+        `<a href="${item.link}" target="_blank" class="history-item">${item.name}</a>`
+    )
+    .join("");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const toggleBtn = document.getElementById("toggleHistory");
+  const historyMenu = document.getElementById("historyMenu");
+
+  toggleBtn.addEventListener("click", async () => {
+    if (historyMenu.classList.contains("hidden")) {
+      await loadHistory();
+      historyMenu.classList.remove("hidden");
+    } else {
+      historyMenu.classList.add("hidden");
+    }
+  });
+});
