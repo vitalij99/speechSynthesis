@@ -493,9 +493,8 @@ function checkText(str) {
 }
 
 chrome.storage.onChanged.addListener((changes) => {
-  for (let key in changes) {
-    let storageChange = changes[key];
-    Object.assign(options, storageChange.newValue);
+  if (changes.options) {
+    Object.assign(options, changes.options.newValue);
   }
 });
 
