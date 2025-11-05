@@ -6,30 +6,24 @@ async function getCurrentTab() {
   const [tab] = await chrome.tabs.query(queryOptions);
   return tab;
 }
+chrome.commands.onCommand.addListener(async (command) => {
+  switch (command) {
+    case "com-start":
+      startOrStopReadingMode();
+      break;
+
+    case "com-add-p":
+      adjustParagraphCount(true);
+      break;
+
+    case "com-rem-p":
+      adjustParagraphCount(false);
+      break;
+  }
+});
 chrome.runtime.onMessage.addListener(async (message) => {
   if (message === "firstTimeScript") {
-    const tab = await getCurrentTab();
-
-    chrome.scripting
-      .executeScript({
-        target: { tabId: tab.id },
-        files: ["/js/script.js"],
-      })
-      .then(() => {
-        setNewHistory(tab.title, tab.url);
-      })
-      .then(async () => {
-        chrome.tabs.query(
-          { active: true, currentWindow: true },
-          function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, {
-              action: "startReadeFun",
-            });
-          }
-        );
-
-        await setReadingList(tab);
-      });
+    await startOrStopReadingMode();
   } else if (message === "stopScript") {
     const tab = await getCurrentTab();
 
@@ -51,6 +45,37 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
       });
   }
 });
+
+async function startOrStopReadingMode() {
+  const tab = await getCurrentTab();
+
+  chrome.scripting
+    .executeScript({
+      target: { tabId: tab.id },
+      files: ["/js/script.js"],
+    })
+    .then(() => {
+      setNewHistory(tab.title, tab.url);
+    })
+    .then(async () => {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          action: "startReadeFun",
+        });
+      });
+
+      await setReadingList(tab);
+    });
+}
+
+async function adjustParagraphCount(delta) {
+  const tab = await getCurrentTab();
+  chrome.tabs.sendMessage(tab.id, {
+    action: "objustParagraphs",
+    value: delta,
+  });
+}
+
 function getBookUrl(urlPage) {
   const numbers = [];
 

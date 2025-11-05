@@ -22,6 +22,26 @@
     "activeTab",
     "readingList"
   ],
+  "commands": {
+    "com-start": {
+      "suggested_key": {
+        "default": "Alt+S"
+      },
+      "description": "Start or stop reading mode"
+    },
+    "com-add-p": {
+      "suggested_key": {
+        "default": "Alt+X"
+      },
+      "description": "Add +1 paragraph"
+    },
+    "com-rem-p": {
+      "suggested_key": {
+        "default": "Alt+Z"
+      },
+      "description": "-1 paragraph"
+    }
+  },
   "background": {
     "service_worker": "./js/background.js"
   },

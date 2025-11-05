@@ -183,14 +183,27 @@ function configureButtons(textContainer, synth) {
     handleStopClick(synth, buttonStart, textContainer, paragraf);
   inputParagraf.onchange = () => {
     clearParagraphStyle(textContainer, paragraf);
-
-    paragraf = inputParagraf.value;
-
+    paragraf = Number(inputParagraf.value);
+    if (paragraf < 0) paragraf = 0;
     if (synth.speaking) {
       synth.cancel();
       speak();
     }
   };
+}
+
+function handleParagraphChange(isAdd) {
+  const inputParagraf = document.getElementById("inputParagrafs");
+
+  if (isAdd) {
+    inputParagraf.value = Math.min(
+      Number(inputParagraf.value) + 1,
+      Number(inputParagraf.max)
+    );
+  } else {
+    inputParagraf.value = Math.max(Number(inputParagraf.value) - 1, 0);
+  }
+  inputParagraf.onchange();
 }
 
 function handleStartClick(synth, buttonStart, speak) {
@@ -509,6 +522,11 @@ chrome.runtime.onMessage.addListener(async (message) => {
     setStorageDate();
     setStorageBook();
     startReade();
+  } else if (message.action === "objustParagraphs") {
+    const delta = message.value;
+    if (delta === undefined) return;
+
+    handleParagraphChange(delta);
   }
 });
 
