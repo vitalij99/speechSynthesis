@@ -22,9 +22,9 @@ chrome.commands.onCommand.addListener(async (command) => {
   }
 });
 chrome.runtime.onMessage.addListener(async (message) => {
-  if (message === "firstTimeScript") {
+  if (message.action === "firstTimeScript") {
     await startOrStopReadingMode();
-  } else if (message === "stopScript") {
+  } else if (message.action === "stopScript") {
     const tab = await getCurrentTab();
 
     await setReadingList(tab);

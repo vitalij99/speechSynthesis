@@ -1,79 +1,143 @@
 // popup.js
 const btnStartReader = document.getElementById("startReader");
+const historyMenu = document.getElementById("historyMenu");
+const toggleBtn = document.getElementById("toggleHistory");
 
-chrome.storage.onChanged.addListener((changes, namespace) => {
-  for (let key in changes) {
-    let storageChange = changes[key];
-    updatePopup(storageChange.newValue);
+let reader = null;
+let isInitialized = false;
+
+function isReaderActive(reader) {
+  if (!reader) return false;
+  const savedDate = new Date(reader);
+  const now = new Date();
+  return savedDate > now;
+}
+
+function updateReaderButton(reader) {
+  const isActive = isReaderActive(reader);
+  btnStartReader.textContent = !!isActive ? "Stop" : "Play";
+  btnStartReader.setAttribute("aria-pressed", isActive.toString());
+}
+
+function updateNavigatorLink(navigator) {
+  const btnBook = document.querySelector(".book-popup");
+  if (!btnBook) return;
+
+  btnBook.textContent = navigator?.book || "Last started reader";
+  btnBook.href = navigator?.bookURL || "#";
+
+  if (!navigator?.bookURL) {
+    btnBook.setAttribute("aria-disabled", "true");
+    btnBook.style.pointerEvents = "none";
   }
-});
+}
 
-getStorage().then(({ options }) => {
-  updatePopup(options);
+async function loadHistory() {
+  try {
+    const { history = [] } = await chrome.storage.sync.get("history");
 
-  btnStartReader.addEventListener("click", function () {
-    const isReader = getDateReade(options.reade);
+    if (!history.length) {
+      historyMenu.innerHTML =
+        '<p class="empty-state">No reading history yet</p>';
+      return;
+    }
 
-    if (isReader) {
-      chrome.runtime.sendMessage("stopScript");
-      options.reade = null;
-      chrome.storage.sync.set({ options });
+    historyMenu.innerHTML = history
+      .map(
+        (item) => `
+        <a href="${escapeHtml(item.link)}" 
+           target="_blank" 
+           rel="noopener noreferrer"
+           class="history-item">
+          ${escapeHtml(item.name)}
+        </a>
+      `
+      )
+      .join("");
+  } catch (error) {
+    console.error("Failed to load history:", error);
+    historyMenu.innerHTML = '<p class="error">Failed to load history</p>';
+  }
+}
+
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+async function handleReaderToggle() {
+  try {
+    const isActive = isReaderActive(reader);
+
+    if (isActive) {
+      await chrome.runtime.sendMessage({ action: "stopScript" });
+      reader = null;
+      await chrome.storage.sync.set({ reader });
     } else {
-      chrome.runtime.sendMessage("firstTimeScript");
+      await chrome.runtime.sendMessage({ action: "firstTimeScript" });
       window.close();
     }
-  });
-});
+  } catch (error) {
+    console.error("Failed to toggle reader:", error);
 
-function getDateReade(reade) {
-  const dateSave = new Date(reade);
-  const dateNow = new Date();
-
-  return reade && dateSave > dateNow;
-}
-async function getStorage() {
-  return await chrome.storage.sync.get("options");
+    btnStartReader.textContent = "Error - Try again";
+    setTimeout(() => updateReaderButton(reader), 2000);
+  }
 }
 
-const updatePopup = (options) => {
-  const btnBook = document.querySelector(".book-popup");
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== "sync") return;
 
-  const isReader = getDateReade(options.reade);
-  btnStartReader.textContent = isReader ? "stop" : "Play";
-
-  btnBook.textContent = options.navigator.book
-    ? options.navigator.book
-    : "Last start reade";
-  btnBook.href = options.navigator.bookURL;
-};
-async function loadHistory() {
-  const storage = await chrome.storage.sync.get("history");
-  const history = storage.history || [];
-  const historyMenu = document.getElementById("historyMenu");
-
-  if (!history.length) {
-    historyMenu.innerHTML = "";
-    return;
+  if (changes.reader) {
+    reader = changes.reader.newValue;
+    updateReaderButton(reader);
   }
 
-  historyMenu.innerHTML = history
-    .map(
-      (item) =>
-        `<a href="${item.link}" target="_blank" class="history-item">${item.name}</a>`
-    )
-    .join("");
+  if (changes.navigator) {
+    updateNavigatorLink(changes.navigator.newValue);
+  }
+
+  if (changes.history && !historyMenu.classList.contains("hidden")) {
+    loadHistory();
+  }
+});
+
+async function init() {
+  if (isInitialized) return;
+  isInitialized = true;
+
+  try {
+    const { reader: storedReader, navigator } = await chrome.storage.sync.get([
+      "reader",
+      "navigator",
+    ]);
+
+    reader = storedReader;
+    updateReaderButton(reader);
+    updateNavigatorLink(navigator);
+
+    btnStartReader.addEventListener("click", handleReaderToggle);
+
+    toggleBtn.addEventListener("click", async () => {
+      const isHidden = historyMenu.classList.contains("hidden");
+
+      if (isHidden) {
+        await loadHistory();
+        historyMenu.classList.remove("hidden");
+        toggleBtn.setAttribute("aria-expanded", "true");
+      } else {
+        historyMenu.classList.add("hidden");
+        toggleBtn.setAttribute("aria-expanded", "false");
+      }
+    });
+  } catch (error) {
+    console.error("Failed to initialize popup:", error);
+  }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const toggleBtn = document.getElementById("toggleHistory");
-  const historyMenu = document.getElementById("historyMenu");
-
-  toggleBtn.addEventListener("click", async () => {
-    if (historyMenu.classList.contains("hidden")) {
-      await loadHistory();
-      historyMenu.classList.remove("hidden");
-    } else {
-      historyMenu.classList.add("hidden");
-    }
-  });
-});
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}

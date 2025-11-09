@@ -1,36 +1,41 @@
 //script.js
 
+// storage keys - reader, navigator, mouse, options, paragraf
+// ----------------------------------------
+let reader = null;
+let paragraf = 0;
+
+const navigator = {
+  nextPageSave: null,
+  thisPageSave: null,
+  bookURL: null,
+  book: null,
+};
+
+const mouse = { x: 0, y: 0 };
+
 const options = {
-  reade: null,
+  contentDivElem: "#content  ",
+  nextPageBtn: ".nextchap",
   timer: 20,
-  paragraf: 0,
   lastParagraf: 0,
   timerCheckbox: true,
   timeout: 2000,
-  navigator: {
-    nextPageBtn: ".nextchap",
-    nextPageSave: null,
-    thisPageSave: null,
-    contentDivElem: "#content /n .cha-words ",
-    bookURL: null,
-    book: null,
-  },
   utterThis: {
     language: null,
     pitch: 2,
     rate: 2,
     volume: 1,
   },
-  mouse: { x: 0, y: 0 },
 };
-
+// ----------------------------------------
 let paused = false;
 let saveStyledParagraf = null;
 let timerId = null;
 let timerCounter = { count: 0, paragraf: 0 };
 
 async function startReade() {
-  let textContainer = getHtmlElements(options.navigator.contentDivElem);
+  let textContainer = getHtmlElements(options.contentDivElem);
 
   if (!textContainer || textContainer.length <= 1) {
     textContainer = findElementWithMostDirectParagraphs();
@@ -47,17 +52,18 @@ async function startReade() {
 }
 
 function setNextPage() {
-  const nextPageButton = getHtmlElements(options.navigator.nextPageBtn);
+  const nextPageButton = getHtmlElements(options.nextPageBtn);
 
-  options.navigator.thisPageSave = document.URL;
+  navigator.thisPageSave = document.URL;
   if (!nextPageButton) {
-    chrome.storage.sync.set({ options });
+    setSaveData({ navigator });
+
     return;
   }
-  options.navigator.nextPageSave = nextPageButton
+  navigator.nextPageSave = nextPageButton
     ? nextPageButton?.attributes?.href?.value
     : getNextPage();
-  chrome.storage.sync.set({ options });
+  setSaveData({ navigator });
 }
 
 function getHtmlElements(selector) {
@@ -88,7 +94,6 @@ function configureButtons(textContainer, synth) {
 
   buttonStart.textContent = !paused ? "Pause" : "Play";
 
-  let paragraf = options.paragraf;
   punktParagrafs.textContent = textContainer.children.length;
   inputParagraf.max = textContainer.children.length;
   inputParagraf.value = paragraf;
@@ -135,9 +140,10 @@ function configureButtons(textContainer, synth) {
         clearParagraphStyle(textContainer, saveStyledParagraf || paragraf);
         paragraf++;
         inputParagraf.value = paragraf;
-        if (options.reade) {
-          options.paragraf = paragraf;
-          chrome.storage.sync.set({ options });
+
+        if (reader) {
+          setSaveData({ paragraf });
+
           speak();
         }
       };
@@ -165,12 +171,12 @@ function configureButtons(textContainer, synth) {
     }
   }
 
-  const dateSave = new Date(options.reade);
+  const dateSave = new Date(reader);
   const dateNow = new Date();
 
   setTimeout(
     () => {
-      if (options.reade && dateSave > dateNow) {
+      if (reader && dateSave > dateNow) {
         setNextPage();
         speak();
       }
@@ -224,18 +230,20 @@ function handleStartClick(synth, buttonStart, speak) {
 }
 
 function handleStopClick(synth, buttonStart, textContainer, paragraf) {
-  options.reade = null;
-  options.navigator.bookURL = document.URL;
-  options.navigator.book =
+  reader = null;
+  navigator.bookURL = document.URL;
+  navigator.book =
     document.title.length > 150
       ? document.title.substring(0, 147) + "..."
       : document.title;
   clearParagraphStyle(textContainer, paragraf);
-  options.paragraf = paragraf;
+
   synth.cancel();
   buttonStart.textContent = "Play";
   paused = false;
-  chrome.storage.sync.set({ options });
+
+  setSaveData({ reader, navigator });
+
   chrome.runtime.sendMessage("stopScript");
 }
 
@@ -285,14 +293,19 @@ function moveToNextPage() {
 
   setTimeout(() => {
     if (window.location.href === initialURL) {
-      window.location.href = options.navigator.nextPageSave;
+      window.location.href = navigator.nextPageSave;
     }
   }, 1000);
 }
 
 function getStorageData() {
   return new Promise((resolve) => {
-    chrome.storage.sync.get("options", (result) => resolve(result.options));
+    chrome.storage.sync.get(
+      ["reader", "navigator", "mouse", "options", "paragraf"],
+      (result) => {
+        resolve(result);
+      }
+    );
   });
 }
 
@@ -303,8 +316,8 @@ function createHTMLButton() {
     .floating-div {
       display: flex;
       position: fixed;
-      top: ${options.mouse.y && options.mouse.y <= 100 ? options.mouse.y : 1}%;
-      left: ${options.mouse.x && options.mouse.x <= 100 ? options.mouse.x : 1}%;
+      top: ${mouse.y && mouse.y <= 100 ? mouse.y : 1}%;
+      left: ${mouse.x && mouse.x <= 100 ? mouse.x : 1}%;
       width: max-content;
       background-color: lightblue;
       padding: 20px;
@@ -432,9 +445,9 @@ function createHTMLButton() {
     document.body.classList.remove("no-select");
 
     if (newX && newY) {
-      options.mouse.x = newX;
-      options.mouse.y = newY;
-      chrome.storage.sync.set({ options });
+      mouse.x = newX;
+      mouse.y = newY;
+      setSaveData({ mouse });
     }
   };
 }
@@ -484,18 +497,17 @@ function getNextPage() {
 const setStorageDate = () => {
   const date = new Date();
   date.setMinutes(date.getMinutes() + options.timer);
-  options.reade = date.toString();
-  chrome.storage.sync.set({ options });
+  reader = date.toString();
+  setSaveData({ reader });
 };
 
 const setStorageBook = () => {
-  options.navigator.bookURL = document.URL;
-  options.navigator.book =
+  navigator.bookURL = document.URL;
+  navigator.book =
     document.title.length > 150
       ? document.title.substring(0, 147) + "..."
       : document.title;
-
-  chrome.storage.sync.set({ options });
+  setSaveData({ navigator });
 };
 
 function checkText(str) {
@@ -506,6 +518,18 @@ function checkText(str) {
 }
 
 chrome.storage.onChanged.addListener((changes) => {
+  if (changes.reader) {
+    reader = changes.reader.newValue;
+  }
+  if (changes.paragraf) {
+    paragraf = changes.paragraf.newValue;
+  }
+  if (changes.navigator) {
+    Object.assign(navigator, changes.navigator.newValue);
+  }
+  if (changes.mouse) {
+    Object.assign(mouse, changes.mouse.newValue);
+  }
   if (changes.options) {
     Object.assign(options, changes.options.newValue);
   }
@@ -514,9 +538,10 @@ chrome.storage.onChanged.addListener((changes) => {
 chrome.runtime.onMessage.addListener(async (message) => {
   if (message.action === "startReadeFun") {
     const urlPage = document.URL;
-    if (urlPage !== options.navigator.thisPageSave) {
-      options.paragraf = 0;
-      chrome.storage.sync.set({ options });
+    if (urlPage !== navigator.thisPageSave) {
+      paragraf = 0;
+
+      setSaveData({ paragraf });
     }
 
     setStorageDate();
@@ -533,7 +558,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
 function resetReader({ synth, textContainer, paragraf, speak }) {
   console.log("⏹ Озвучка зупинилася або нема нових слів.");
 
-  if (!options.timerCheckbox || !options.reade) return;
+  if (!options.timerCheckbox || !reader) return;
 
   clearParagraphStyle(textContainer, paragraf);
   synth.cancel();
@@ -543,23 +568,36 @@ function resetReader({ synth, textContainer, paragraf, speak }) {
   }
 }
 
+function setSaveData(data) {
+  chrome.storage.sync.set(
+    Object.fromEntries(Object.entries(data).filter(([_, v]) => v !== undefined))
+  );
+}
+
 (async function autoStartOpenMenu() {
   const data = await getStorageData();
-  Object.assign(options, data);
-  const dateSave = new Date(options.reade);
+
+  // TODO перевірити чи потрібно це
+  if (data.reader !== undefined) reader = data.reader;
+  if (data.paragraf !== undefined) paragraf = data.paragraf;
+  if (data.navigator) Object.assign(navigator, data.navigator);
+  if (data.mouse) Object.assign(mouse, data.mouse);
+  if (data.options) Object.assign(options, data.options);
+
+  const dateSave = new Date(reader);
   const dateNow = new Date();
 
   const urlPage = document.URL;
 
   if (
-    (options?.reade &&
+    (reader &&
       options?.timerCheckbox &&
       dateSave > dateNow &&
-      urlPage.includes(options.navigator.thisPageSave)) ||
-    urlPage.includes(options.navigator.nextPageSave)
+      urlPage.includes(navigator.thisPageSave)) ||
+    urlPage.includes(navigator.nextPageSave)
   ) {
-    if (urlPage.includes(options.navigator.nextPageSave)) {
-      options.paragraf = 0;
+    if (urlPage.includes(navigator.nextPageSave)) {
+      paragraf = 0;
     }
 
     startReade();

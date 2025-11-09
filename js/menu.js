@@ -3,27 +3,26 @@ const synth = window.speechSynthesis;
 const voiceSelect = document.querySelector("select");
 const menuForm = document.getElementById("menuForm");
 
+// storage keys - reader, options,
+// ----------------------------------------
+let reader = null;
+
 const options = {
-  reade: false,
+  contentDivElem: "#content  ",
+  nextPageBtn: ".nextchap",
   timer: 20,
-  paragraf: 0,
+  lastParagraf: 0,
   timerCheckbox: true,
-  navigator: {
-    nextPageBtn: ".nextchap",
-    nextPageSave: null,
-    thisPageSave: null,
-    contentDivElem: "#content",
-    bookURL: null,
-    book: null,
-  },
+  timeout: 2000,
   utterThis: {
     language: null,
     pitch: 2,
     rate: 2,
     volume: 1,
   },
-  mouse: { x: 0, y: 0 },
 };
+// ----------------------------------------
+
 const getTimeFormat = (timer, form) => {
   const futureTimestamp = new Date().getTime() + timer * 60000;
   const futureDate = new Date(futureTimestamp);
@@ -32,8 +31,8 @@ const getTimeFormat = (timer, form) => {
     minute: "2-digit",
   });
 
-  if (options.reade) {
-    const lastDate = new Date(options.reade);
+  if (reader) {
+    const lastDate = new Date(reader);
     formattedTime += `  save time: `;
     formattedTime += lastDate.toLocaleTimeString([], {
       hour: "2-digit",
@@ -87,14 +86,25 @@ if (speechSynthesis.onvoiceschanged !== undefined) {
 
 async function loadDataFromStorage() {
   try {
-    const data = await chrome.storage.sync.get("options");
-    Object.assign(options, data.options);
+    const stored = await chrome.storage.sync.get(["options", "reader"]);
+
+    reader = stored.reader;
+
+    // Якщо є збережені options, об'єднуємо їх з дефолтними
+    if (stored.options) {
+      Object.assign(options, stored.options);
+      // Переконуємось, що utterThis теж правильно об'єднано
+      if (stored.options.utterThis) {
+        Object.assign(options.utterThis, stored.options.utterThis);
+      }
+    }
 
     setFormValues(options);
     updateTimerState(options.timerCheckbox);
     updateDisplayedValues();
 
     getTimeFormat(options.timer, menuForm);
+    console.log({ options, reader });
   } catch (error) {
     console.error("Error loading data from storage:", error);
   }

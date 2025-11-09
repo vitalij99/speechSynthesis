@@ -1,22 +1,23 @@
 const optionsForm = document.getElementById("optionsForm");
 const btnBook = document.getElementById("book");
 
-// In-page cache of the user's options
+// storage keys -  navigator,  options,
+//  ----------------------------------------
+
+const navigator = {
+  nextPageSave: null,
+  thisPageSave: null,
+  bookURL: null,
+  book: null,
+};
+
 const options = {
-  reade: false,
+  contentDivElem: "#content  ",
+  nextPageBtn: ".nextchap",
   timer: 20,
-  paragraf: 0,
   lastParagraf: 0,
   timerCheckbox: true,
   timeout: 2000,
-  navigator: {
-    nextPageBtn: ".nextchap",
-    nextPageSave: null,
-    thisPageSave: null,
-    contentDivElem: "#content",
-    bookURL: null,
-    book: null,
-  },
   utterThis: {
     language: null,
     pitch: 2,
@@ -24,38 +25,39 @@ const options = {
     volume: 1,
   },
 };
+// ----------------------------------------
 
 loadDataFromStorage();
 
 // Initialize the form with the user's option settings
 async function loadDataFromStorage() {
-  const data = await chrome.storage.sync.get("options");
-  Object.assign(options, data.options);
+  const data = await chrome.storage.sync.get(["navigator", "options"]);
 
-  console.log(options);
+  if (data.navigator) {
+    Object.assign(navigator, data.navigator);
+  }
 
-  optionsForm.contentDivElem.value = options.navigator.contentDivElem;
-  optionsForm.nextPage.value = options.navigator.nextPageBtn;
+  if (data.options) {
+    Object.assign(options, data.options);
+  }
+
+  console.log({ navigator, options });
+
+  optionsForm.contentDivElem.value = options.contentDivElem;
+  optionsForm.nextPage.value = options.nextPageBtn;
   optionsForm.lastParagraf.value = options.lastParagraf;
   optionsForm.timeout.value = options.timeout;
 
-  btnBook.textContent = options.navigator.book
-    ? options.navigator.book
-    : "books";
-  btnBook.href = options.navigator.bookURL;
+  btnBook.textContent = navigator.book || "books";
+  btnBook.href = navigator.bookURL;
 }
 
-// Immediately persist options changes
 optionsForm.addEventListener("change", () => {
-  options.navigator.contentDivElem = optionsForm.contentDivElem.value;
-  options.navigator.nextPageBtn = optionsForm.nextPage.value;
+  options.contentDivElem = optionsForm.contentDivElem.value;
+  options.nextPageBtn = optionsForm.nextPage.value;
   options.lastParagraf = optionsForm.lastParagraf.value;
   options.timeout = optionsForm.timeout.value;
 
   chrome.storage.sync.set({ options });
-  console.log(options);
+  console.log({ options });
 });
-// TODO add button
-function clearStorage() {
-  chrome.storage.sync.remove("options");
-}
