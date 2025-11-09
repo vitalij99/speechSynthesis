@@ -1,15 +1,17 @@
 // background.js
 
+const scriptExecutionState = { isActive: "", reader: false };
+
 async function getCurrentTab() {
   const queryOptions = { active: true, lastFocusedWindow: true };
-
   const [tab] = await chrome.tabs.query(queryOptions);
   return tab;
 }
+
 chrome.commands.onCommand.addListener(async (command) => {
   switch (command) {
     case "com-start":
-      startOrStopReadingMode();
+      await executeScriptOnce(true);
       break;
 
     case "com-add-p":
@@ -21,53 +23,65 @@ chrome.commands.onCommand.addListener(async (command) => {
       break;
   }
 });
+
 chrome.runtime.onMessage.addListener(async (message) => {
   if (message.action === "firstTimeScript") {
-    await startOrStopReadingMode();
+    await executeScriptOnce(true);
   } else if (message.action === "stopScript") {
+    scriptExecutionState.reader = false;
     const tab = await getCurrentTab();
-
     await setReadingList(tab);
   }
 });
 
 chrome.webNavigation.onCompleted.addListener(async (details) => {
   if (details.frameId === 0) {
-    const tab = await getCurrentTab();
-
-    chrome.scripting
-      .executeScript({
-        target: { tabId: tab.id },
-        files: ["/js/script.js"],
-      })
-      .then(() => {
-        setNewHistory(tab.title, tab.url);
-      });
+    await executeScriptOnce(false);
   }
 });
 
-async function startOrStopReadingMode() {
+async function executeScriptOnce(sendMessage = false) {
   const tab = await getCurrentTab();
+  const pageKey = `${tab.id}-${tab.url}`;
 
-  chrome.scripting
-    .executeScript({
+  if (scriptExecutionState.isActive === pageKey) {
+    chrome.tabs.sendMessage(tab.id, {
+      action: "startReadeFun",
+    });
+    scriptExecutionState.reader = true;
+    return false;
+  }
+
+  try {
+    await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       files: ["/js/script.js"],
-    })
-    .then(() => {
-      setNewHistory(tab.title, tab.url);
-    })
-    .then(async () => {
-      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: "startReadeFun",
-        });
-      });
-
-      await setReadingList(tab);
     });
+
+    scriptExecutionState.isActive = pageKey;
+    setNewHistory(tab.title, tab.url);
+
+    if (sendMessage) {
+      chrome.tabs.sendMessage(tab.id, {
+        action: "startReadeFun",
+      });
+      scriptExecutionState.reader = true;
+      await setReadingList(tab);
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error executing script:", error);
+    return false;
+  }
 }
 
+chrome.tabs.onRemoved.addListener((tabId) => {
+  console.log("Tab closed:", tabId, scriptExecutionState);
+  if (scriptExecutionState.isActive.startsWith(`${tabId}-`)) {
+    scriptExecutionState.isActive = "";
+  }
+});
 async function adjustParagraphCount(delta) {
   const tab = await getCurrentTab();
   chrome.tabs.sendMessage(tab.id, {
