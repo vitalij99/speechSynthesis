@@ -1,5 +1,5 @@
 //script.js
-
+console.log("Script loaded");
 // storage keys - reader, navigator, mouse, options, paragraf
 // ----------------------------------------
 let reader = null;
