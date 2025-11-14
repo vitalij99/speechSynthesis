@@ -1,6 +1,7 @@
 // background.js
 
 const scriptExecutionState = { isActive: "", reader: false };
+let bookReader = "";
 
 async function getCurrentTab() {
   const queryOptions = { active: true, lastFocusedWindow: true };
@@ -11,7 +12,7 @@ async function getCurrentTab() {
 chrome.commands.onCommand.addListener(async (command) => {
   switch (command) {
     case "com-start":
-      await executeScriptOnce(true);
+      await executeScriptOnce();
       break;
 
     case "com-add-p":
@@ -26,7 +27,7 @@ chrome.commands.onCommand.addListener(async (command) => {
 
 chrome.runtime.onMessage.addListener(async (message) => {
   if (message.action === "firstTimeScript") {
-    await executeScriptOnce(true);
+    await executeScriptOnce();
   } else if (message.action === "stopScript") {
     scriptExecutionState.reader = false;
     const tab = await getCurrentTab();
@@ -36,48 +37,59 @@ chrome.runtime.onMessage.addListener(async (message) => {
 
 chrome.webNavigation.onCompleted.addListener(async (details) => {
   if (details.frameId === 0) {
-    await executeScriptOnce(false);
+    await executeScriptWebNav();
   }
 });
 
-async function executeScriptOnce(sendMessage = false) {
+async function executeScriptWebNav() {
   const tab = await getCurrentTab();
   const pageKey = `${tab.id}-${tab.url}`;
+  const isAlreadyActive = scriptExecutionState.isActive === pageKey;
 
-  if (scriptExecutionState.isActive === pageKey) {
-    chrome.tabs.sendMessage(tab.id, {
-      action: "startReadeFun",
-    });
+  const action = "startReadeNextPage";
+
+  console.log("executeScriptWebNav bk:", tab.url);
+  console.log("isAlreadyActive pk:", isAlreadyActive);
+  console.log("executeScriptWebNav sa:", scriptExecutionState);
+
+  if (isAlreadyActive && scriptExecutionState.reader) {
+    chrome.tabs.sendMessage(tab.id, { action, value: bookReader });
+    setNewHistory(tab.title, tab.url);
     scriptExecutionState.reader = true;
     return false;
   }
+}
+async function executeScriptOnce() {
+  const tab = await getCurrentTab();
+  const pageKey = `${tab.id}-${tab.url}`;
 
-  try {
+  const action = "startReadeFun";
+
+  console.log("execut bk:", tab.url);
+  console.log("execut pk:", pageKey);
+
+  if (scriptExecutionState.isActive !== pageKey) {
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       files: ["/js/script.js"],
     });
-
-    scriptExecutionState.isActive = pageKey;
-    setNewHistory(tab.title, tab.url);
-
-    if (sendMessage) {
-      chrome.tabs.sendMessage(tab.id, {
-        action: "startReadeFun",
-      });
-      scriptExecutionState.reader = true;
-      await setReadingList(tab);
-    }
-
-    return true;
-  } catch (error) {
-    console.error("Error executing script:", error);
-    return false;
   }
+
+  chrome.tabs.sendMessage(tab.id, { action });
+  scriptExecutionState.reader = true;
+  scriptExecutionState.isActive = pageKey;
+
+  bookReader = getBookUrl(tab.url);
+  console.log("bookReader bk:", bookReader);
+
+  await setNewHistory(tab.title, tab.url);
+
+  await setReadingList(tab);
+
+  return true;
 }
 
 chrome.tabs.onRemoved.addListener((tabId) => {
-  console.log("Tab closed:", tabId, scriptExecutionState);
   if (scriptExecutionState.isActive.startsWith(`${tabId}-`)) {
     scriptExecutionState.isActive = "";
   }
@@ -91,16 +103,15 @@ async function adjustParagraphCount(delta) {
 }
 
 function getBookUrl(urlPage) {
-  const numbers = [];
+  const urlParts = urlPage.split("/");
 
-  for (let index = 1; index < urlPage.length; index++) {
-    const element = urlPage[urlPage.length - index];
-    if (!isNaN(element)) {
-      numbers.unshift(element);
-    } else {
-      return urlPage.slice(0, urlPage.length - index + 1);
-    }
+  const res = urlParts.slice(0, urlParts.length - 1).join("/");
+
+  if (res.length > 0) {
+    urlPage = res;
   }
+
+  console.log("getBookUrl bk:", urlPage);
 
   return urlPage;
 }
@@ -149,6 +160,7 @@ async function setStorageData(key, value) {
   });
 }
 async function setNewHistory(name, link) {
+  if (!link || !name) return;
   const history = (await getStorageData("history")) || [];
 
   const linkArray = link.split("/");

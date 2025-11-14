@@ -494,21 +494,21 @@ function getNextPage() {
   return urlPage;
 }
 
-const setStorageDate = () => {
+function setStorageDate() {
   const date = new Date();
   date.setMinutes(date.getMinutes() + options.timer);
   reader = date.toString();
   setSaveData({ reader });
-};
+}
 
-const setStorageBook = () => {
+function setStorageBook() {
   navigator.bookURL = document.URL;
   navigator.book =
     document.title.length > 150
       ? document.title.substring(0, 147) + "..."
       : document.title;
   setSaveData({ navigator });
-};
+}
 
 function checkText(str) {
   if (!str) return "";
@@ -516,44 +516,6 @@ function checkText(str) {
   if (str && regex.test(str))
     return str.replace(/(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu, "");
 }
-
-chrome.storage.onChanged.addListener((changes) => {
-  if (changes.reader) {
-    reader = changes.reader.newValue;
-  }
-  if (changes.paragraf) {
-    paragraf = changes.paragraf.newValue;
-  }
-  if (changes.navigator) {
-    Object.assign(navigator, changes.navigator.newValue);
-  }
-  if (changes.mouse) {
-    Object.assign(mouse, changes.mouse.newValue);
-  }
-  if (changes.options) {
-    Object.assign(options, changes.options.newValue);
-  }
-});
-
-chrome.runtime.onMessage.addListener(async (message) => {
-  if (message.action === "startReadeFun") {
-    const urlPage = document.URL;
-    if (urlPage !== navigator.thisPageSave) {
-      paragraf = 0;
-
-      setSaveData({ paragraf });
-    }
-
-    setStorageDate();
-    setStorageBook();
-    startReade();
-  } else if (message.action === "objustParagraphs") {
-    const delta = message.value;
-    if (delta === undefined) return;
-
-    handleParagraphChange(delta);
-  }
-});
 
 function resetReader({ synth, textContainer, paragraf, speak }) {
   console.log("⏹ Озвучка зупинилася або нема нових слів.");
@@ -573,33 +535,69 @@ function setSaveData(data) {
     Object.fromEntries(Object.entries(data).filter(([_, v]) => v !== undefined))
   );
 }
-
-(async function autoStartOpenMenu() {
-  const data = await getStorageData();
-
-  // TODO перевірити чи потрібно це
-  if (data.reader !== undefined) reader = data.reader;
-  if (data.paragraf !== undefined) paragraf = data.paragraf;
-  if (data.navigator) Object.assign(navigator, data.navigator);
-  if (data.mouse) Object.assign(mouse, data.mouse);
-  if (data.options) Object.assign(options, data.options);
-
-  const dateSave = new Date(reader);
-  const dateNow = new Date();
-
-  const urlPage = document.URL;
-
-  if (
-    (reader &&
-      options?.timerCheckbox &&
-      dateSave > dateNow &&
-      urlPage.includes(navigator.thisPageSave)) ||
-    urlPage.includes(navigator.nextPageSave)
-  ) {
-    if (urlPage.includes(navigator.nextPageSave)) {
+chrome.runtime.onMessage.addListener(async (message) => {
+  if (message.action === "startReadeFun") {
+    const urlPage = document.URL;
+    if (urlPage !== navigator.thisPageSave) {
       paragraf = 0;
+
+      setSaveData({ paragraf });
     }
 
+    setStorageDate();
+    setStorageBook();
     startReade();
+  } else if (message.action === "startReadeNextPage") {
+    const urlPage = document.URL;
+    const bookStart = message.value;
+
+    const data = await getStorageData();
+
+    // TODO перевірити чи потрібно це
+    if (data.reader !== undefined) reader = data.reader;
+    if (data.paragraf !== undefined) paragraf = data.paragraf;
+    if (data.navigator) Object.assign(navigator, data.navigator);
+    if (data.mouse) Object.assign(mouse, data.mouse);
+    if (data.options) Object.assign(options, data.options);
+
+    const dateSave = new Date(reader);
+    const dateNow = new Date();
+
+    const isThisBook = urlPage.includes(bookStart);
+
+    console.log("reader:", reader);
+    console.log("isThisBook:", isThisBook);
+    console.log("options.timerCheckbox:", options.timerCheckbox);
+    console.log("dateSave > dateNow:", dateSave > dateNow);
+
+    if (reader && isThisBook && options?.timerCheckbox && dateSave > dateNow) {
+      if (urlPage !== navigator.thisPageSave) {
+        paragraf = 0;
+      }
+
+      startReade();
+    }
+  } else if (message.action === "objustParagraphs") {
+    const delta = message.value;
+    if (delta === undefined) return;
+
+    handleParagraphChange(delta);
   }
-})();
+});
+chrome.storage.onChanged.addListener((changes) => {
+  if (changes.reader) {
+    reader = changes.reader.newValue;
+  }
+  if (changes.paragraf) {
+    paragraf = changes.paragraf.newValue;
+  }
+  if (changes.navigator) {
+    Object.assign(navigator, changes.navigator.newValue);
+  }
+  if (changes.mouse) {
+    Object.assign(mouse, changes.mouse.newValue);
+  }
+  if (changes.options) {
+    Object.assign(options, changes.options.newValue);
+  }
+});
