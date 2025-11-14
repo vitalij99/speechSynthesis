@@ -540,7 +540,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
 
   switch (action) {
     case "startReadeFun":
-      handleStartReadFun();
+      await handleStartReadFun();
       break;
 
     case "startReadeNextPage":
@@ -552,9 +552,20 @@ chrome.runtime.onMessage.addListener(async (message) => {
       break;
   }
 });
-function handleStartReadFun() {
-  const url = document.URL;
 
+async function initGetStorage() {
+  const data = await getStorageData();
+
+  if (data.reader !== undefined) reader = data.reader;
+  if (data.paragraf !== undefined) paragraf = data.paragraf;
+  if (data.navigator) Object.assign(navigator, data.navigator);
+  if (data.mouse) Object.assign(mouse, data.mouse);
+  if (data.options) Object.assign(options, data.options);
+}
+
+async function handleStartReadFun() {
+  const url = document.URL;
+  await initGetStorage();
   if (url !== navigator.thisPageSave) {
     paragraf = 0;
     setSaveData({ paragraf });
@@ -566,13 +577,7 @@ function handleStartReadFun() {
 }
 async function handleStartReadNextPage(bookStart) {
   const url = document.URL;
-  const data = await getStorageData();
-
-  if (data.reader !== undefined) reader = data.reader;
-  if (data.paragraf !== undefined) paragraf = data.paragraf;
-  if (data.navigator) Object.assign(navigator, data.navigator);
-  if (data.mouse) Object.assign(mouse, data.mouse);
-  if (data.options) Object.assign(options, data.options);
+  await initGetStorage();
 
   const dateSave = new Date(reader);
   const dateNow = new Date();
