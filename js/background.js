@@ -1,7 +1,6 @@
 // background.js
 
-const scriptExecutionState = { isActive: "", reader: false };
-let bookReader = "";
+const scriptExecutionState = { isActive: "", reader: false, book: "" };
 
 async function getCurrentTab() {
   const queryOptions = { active: true, lastFocusedWindow: true };
@@ -13,6 +12,7 @@ chrome.commands.onCommand.addListener(async (command) => {
   switch (command) {
     case "com-start":
       await executeScriptOnce(true);
+
       break;
 
     case "com-add-p":
@@ -40,7 +40,6 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
     scriptExecutionState.isActive.startsWith(`${details.tabId}-`) &&
     details.frameId === 0
   ) {
-    console.log("onCompleted bk:", details.url);
     await executeScriptOnce(false);
   }
 });
@@ -48,22 +47,32 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
 async function executeScriptOnce(sendMessage = false) {
   try {
     const tab = await getCurrentTab();
+    const book = getBookUrl(tab.url);
     const pageKey = `${tab.id}-${tab.url}`;
     const isAlreadyActive = scriptExecutionState.isActive === pageKey;
 
     // is auto or manual start
     const action = sendMessage ? "startReadeFun" : "startReadeNextPage";
 
-    // script is already active on this page
-    if (isAlreadyActive) {
-      chrome.tabs.sendMessage(tab.id, { action });
-      setNewHistory(tab.title, tab.url);
-      scriptExecutionState.reader = true;
+    if (!tab.url.startsWith(scriptExecutionState.book) && !sendMessage) {
+      scriptExecutionState.reader = false;
+      scriptExecutionState.isActive = "";
+      scriptExecutionState.book = "";
+      console.log("Different book, stop execution");
       return false;
     }
-    console.log("executeScriptOnce bk:", tab.url);
-    console.log("executeScriptOnce pk:", pageKey);
-    console.log("executeScriptOnce sa:", sendMessage);
+
+    // script is already active on this page
+    if (isAlreadyActive) {
+      try {
+        await chrome.tabs.sendMessage(tab.id, { action });
+        setNewHistory(tab.title, tab.url);
+        scriptExecutionState.reader = true;
+        return true;
+      } catch (error) {
+        console.log("upload page");
+      }
+    }
 
     // first time execute script
     await chrome.scripting.executeScript({
@@ -72,9 +81,9 @@ async function executeScriptOnce(sendMessage = false) {
     });
 
     scriptExecutionState.isActive = pageKey;
-    bookReader = getBookUrl(tab.url);
+    scriptExecutionState.book = book;
 
-    chrome.tabs.sendMessage(tab.id, { action, value: bookReader });
+    chrome.tabs.sendMessage(tab.id, { action, value: book });
 
     setNewHistory(tab.title, tab.url);
 
@@ -88,11 +97,6 @@ async function executeScriptOnce(sendMessage = false) {
   }
 }
 
-chrome.tabs.onRemoved.addListener((tabId) => {
-  if (scriptExecutionState.isActive.startsWith(`${tabId}-`)) {
-    scriptExecutionState.isActive = "";
-  }
-});
 async function adjustParagraphCount(delta) {
   const tab = await getCurrentTab();
   chrome.tabs.sendMessage(tab.id, {
@@ -179,3 +183,8 @@ async function setNewHistory(name, link) {
 
   await setStorageData("history", updatedHistory);
 }
+chrome.tabs.onRemoved.addListener((tabId) => {
+  if (scriptExecutionState.isActive.startsWith(`${tabId}-`)) {
+    scriptExecutionState.isActive = "";
+  }
+});

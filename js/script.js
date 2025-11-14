@@ -553,7 +553,6 @@ chrome.runtime.onMessage.addListener(async (message) => {
 
     const data = await getStorageData();
 
-    // TODO перевірити чи потрібно це
     if (data.reader !== undefined) reader = data.reader;
     if (data.paragraf !== undefined) paragraf = data.paragraf;
     if (data.navigator) Object.assign(navigator, data.navigator);
@@ -564,11 +563,6 @@ chrome.runtime.onMessage.addListener(async (message) => {
     const dateNow = new Date();
 
     const isThisBook = urlPage.includes(bookStart);
-
-    console.log("reader:", reader);
-    console.log("isThisBook:", isThisBook);
-    console.log("options.timerCheckbox:", options.timerCheckbox);
-    console.log("dateSave > dateNow:", dateSave > dateNow);
 
     if (reader && isThisBook && options?.timerCheckbox && dateSave > dateNow) {
       if (urlPage !== navigator.thisPageSave) {
