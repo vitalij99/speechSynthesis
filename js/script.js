@@ -578,7 +578,6 @@ async function handleStartReadNextPage(bookStart) {
   const dateNow = new Date();
   const sameBook = url.includes(bookStart);
 
-  // Умова для автозапуску читання
   if (reader && sameBook && options?.timerCheckbox && dateSave > dateNow) {
     if (url !== navigator.thisPageSave) {
       paragraf = 0;
