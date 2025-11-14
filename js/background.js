@@ -12,7 +12,7 @@ async function getCurrentTab() {
 chrome.commands.onCommand.addListener(async (command) => {
   switch (command) {
     case "com-start":
-      await executeScriptOnce();
+      await executeScriptOnce(true);
       break;
 
     case "com-add-p":
@@ -27,7 +27,7 @@ chrome.commands.onCommand.addListener(async (command) => {
 
 chrome.runtime.onMessage.addListener(async (message) => {
   if (message.action === "firstTimeScript") {
-    await executeScriptOnce();
+    await executeScriptOnce(true);
   } else if (message.action === "stopScript") {
     scriptExecutionState.reader = false;
     const tab = await getCurrentTab();
@@ -36,57 +36,55 @@ chrome.runtime.onMessage.addListener(async (message) => {
 });
 
 chrome.webNavigation.onCompleted.addListener(async (details) => {
-  if (details.frameId === 0) {
-    await executeScriptWebNav();
+  if (
+    scriptExecutionState.isActive.startsWith(`${details.tabId}-`) &&
+    details.frameId === 0
+  ) {
+    await executeScriptOnce(false);
   }
 });
 
-async function executeScriptWebNav() {
-  const tab = await getCurrentTab();
-  const pageKey = `${tab.id}-${tab.url}`;
-  const isAlreadyActive = scriptExecutionState.isActive === pageKey;
+async function executeScriptOnce(sendMessage = false) {
+  try {
+    const tab = await getCurrentTab();
+    const pageKey = `${tab.id}-${tab.url}`;
+    const isAlreadyActive = scriptExecutionState.isActive === pageKey;
 
-  const action = "startReadeNextPage";
+    // is auto or manual start
+    const action = sendMessage ? "startReadeFun" : "startReadeNextPage";
 
-  console.log("executeScriptWebNav bk:", tab.url);
-  console.log("isAlreadyActive pk:", isAlreadyActive);
-  console.log("executeScriptWebNav sa:", scriptExecutionState);
+    // script is already active on this page
+    if (isAlreadyActive) {
+      chrome.tabs.sendMessage(tab.id, { action });
+      setNewHistory(tab.title, tab.url);
+      scriptExecutionState.reader = true;
+      return false;
+    }
+    console.log("executeScriptOnce bk:", tab.url);
+    console.log("executeScriptOnce pk:", pageKey);
+    console.log("executeScriptOnce sa:", sendMessage);
 
-  if (isAlreadyActive && scriptExecutionState.reader) {
-    chrome.tabs.sendMessage(tab.id, { action, value: bookReader });
-    setNewHistory(tab.title, tab.url);
-    scriptExecutionState.reader = true;
-    return false;
-  }
-}
-async function executeScriptOnce() {
-  const tab = await getCurrentTab();
-  const pageKey = `${tab.id}-${tab.url}`;
-
-  const action = "startReadeFun";
-
-  console.log("execut bk:", tab.url);
-  console.log("execut pk:", pageKey);
-
-  if (scriptExecutionState.isActive !== pageKey) {
+    // first time execute script
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       files: ["/js/script.js"],
     });
+
+    scriptExecutionState.isActive = pageKey;
+    bookReader = getBookUrl(tab.url);
+
+    chrome.tabs.sendMessage(tab.id, { action, value: bookReader });
+
+    setNewHistory(tab.title, tab.url);
+
+    await setReadingList(tab);
+
+    scriptExecutionState.reader = true;
+    return true;
+  } catch (error) {
+    console.error("Error executing script:", error);
+    return false;
   }
-
-  chrome.tabs.sendMessage(tab.id, { action });
-  scriptExecutionState.reader = true;
-  scriptExecutionState.isActive = pageKey;
-
-  bookReader = getBookUrl(tab.url);
-  console.log("bookReader bk:", bookReader);
-
-  await setNewHistory(tab.title, tab.url);
-
-  await setReadingList(tab);
-
-  return true;
 }
 
 chrome.tabs.onRemoved.addListener((tabId) => {
