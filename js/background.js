@@ -12,7 +12,6 @@ chrome.commands.onCommand.addListener(async (command) => {
   switch (command) {
     case "com-start":
       await executeScriptOnce(true);
-
       break;
 
     case "com-add-p":
@@ -51,10 +50,13 @@ async function executeScriptOnce(sendMessage = false) {
     const pageKey = `${tab.id}-${tab.url}`;
     const isAlreadyActive = scriptExecutionState.isActive === pageKey;
 
-    // is auto or manual start
     const action = sendMessage ? "startReadeFun" : "startReadeNextPage";
 
-    if (!tab.url.startsWith(scriptExecutionState.book) && !sendMessage) {
+    if (
+      scriptExecutionState.book.split("/").length + 1 >
+        tab.url.split("/").length ||
+      (!tab.url.startsWith(scriptExecutionState.book) && !sendMessage)
+    ) {
       scriptExecutionState.reader = false;
       scriptExecutionState.isActive = "";
       scriptExecutionState.book = "";
@@ -62,7 +64,6 @@ async function executeScriptOnce(sendMessage = false) {
       return false;
     }
 
-    // script is already active on this page
     if (isAlreadyActive) {
       try {
         await chrome.tabs.sendMessage(tab.id, { action });
@@ -74,7 +75,6 @@ async function executeScriptOnce(sendMessage = false) {
       }
     }
 
-    // first time execute script
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       files: ["/js/script.js"],
@@ -106,21 +106,17 @@ async function adjustParagraphCount(delta) {
 }
 
 function getBookUrl(urlPage) {
-  const parts = urlPage.split("/").filter(Boolean);
+  const url = new URL(urlPage);
 
-  const domainIndex = parts.indexOf(parts.find((p) => p.includes(".")));
+  const segments = url.pathname.split("/").filter(Boolean);
 
-  if (domainIndex === -1) return urlPage;
-
-  const minLength = domainIndex + 2;
-
-  if (parts.length <= minLength) {
-    return urlPage;
+  if (segments.length > 1) {
+    segments.pop();
   }
 
-  parts.pop();
+  const newPath = "/" + segments.join("/");
 
-  return parts.join("/");
+  return url.origin + newPath;
 }
 
 async function getFindBook(urlPage) {

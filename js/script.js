@@ -536,48 +536,58 @@ function setSaveData(data) {
   );
 }
 chrome.runtime.onMessage.addListener(async (message) => {
-  if (message.action === "startReadeFun") {
-    const urlPage = document.URL;
-    if (urlPage !== navigator.thisPageSave) {
-      paragraf = 0;
+  const { action, value } = message;
 
-      setSaveData({ paragraf });
-    }
+  switch (action) {
+    case "startReadeFun":
+      handleStartReadFun();
+      break;
 
-    setStorageDate();
-    setStorageBook();
-    startReade();
-  } else if (message.action === "startReadeNextPage") {
-    const urlPage = document.URL;
-    const bookStart = message.value;
+    case "startReadeNextPage":
+      await handleStartReadNextPage(value);
+      break;
 
-    const data = await getStorageData();
-
-    if (data.reader !== undefined) reader = data.reader;
-    if (data.paragraf !== undefined) paragraf = data.paragraf;
-    if (data.navigator) Object.assign(navigator, data.navigator);
-    if (data.mouse) Object.assign(mouse, data.mouse);
-    if (data.options) Object.assign(options, data.options);
-
-    const dateSave = new Date(reader);
-    const dateNow = new Date();
-
-    const isThisBook = urlPage.includes(bookStart);
-
-    if (reader && isThisBook && options?.timerCheckbox && dateSave > dateNow) {
-      if (urlPage !== navigator.thisPageSave) {
-        paragraf = 0;
-      }
-
-      startReade();
-    }
-  } else if (message.action === "objustParagraphs") {
-    const delta = message.value;
-    if (delta === undefined) return;
-
-    handleParagraphChange(delta);
+    case "objustParagraphs":
+      if (value !== undefined) handleParagraphChange(value);
+      break;
   }
 });
+function handleStartReadFun() {
+  const url = document.URL;
+
+  if (url !== navigator.thisPageSave) {
+    paragraf = 0;
+    setSaveData({ paragraf });
+  }
+
+  setStorageDate();
+  setStorageBook();
+  startReade();
+}
+async function handleStartReadNextPage(bookStart) {
+  const url = document.URL;
+  const data = await getStorageData();
+
+  if (data.reader !== undefined) reader = data.reader;
+  if (data.paragraf !== undefined) paragraf = data.paragraf;
+  if (data.navigator) Object.assign(navigator, data.navigator);
+  if (data.mouse) Object.assign(mouse, data.mouse);
+  if (data.options) Object.assign(options, data.options);
+
+  const dateSave = new Date(reader);
+  const dateNow = new Date();
+  const sameBook = url.includes(bookStart);
+
+  // Умова для автозапуску читання
+  if (reader && sameBook && options?.timerCheckbox && dateSave > dateNow) {
+    if (url !== navigator.thisPageSave) {
+      paragraf = 0;
+    }
+
+    startReade();
+  }
+}
+
 chrome.storage.onChanged.addListener((changes) => {
   if (changes.reader) {
     reader = changes.reader.newValue;
