@@ -106,18 +106,23 @@ async function adjustParagraphCount(delta) {
 }
 
 function getBookUrl(urlPage) {
-  const urlParts = urlPage.split("/");
+  const parts = urlPage.split("/").filter(Boolean);
 
-  const res = urlParts.slice(0, urlParts.length - 1).join("/");
+  const domainIndex = parts.indexOf(parts.find((p) => p.includes(".")));
 
-  if (res.length > 0) {
-    urlPage = res;
+  if (domainIndex === -1) return urlPage;
+
+  const minLength = domainIndex + 2;
+
+  if (parts.length <= minLength) {
+    return urlPage;
   }
 
-  console.log("getBookUrl bk:", urlPage);
+  parts.pop();
 
-  return urlPage;
+  return parts.join("/");
 }
+
 async function getFindBook(urlPage) {
   const items = await chrome.readingList.query({});
 
