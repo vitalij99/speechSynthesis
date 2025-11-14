@@ -40,6 +40,7 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
     scriptExecutionState.isActive.startsWith(`${details.tabId}-`) &&
     details.frameId === 0
   ) {
+    console.log("onCompleted bk:", details.url);
     await executeScriptOnce(false);
   }
 });
