@@ -1,27 +1,24 @@
 // background.js
 
-const scriptExecutionState = { isActive: "", reader: false, book: "" };
+let scriptExecutionState = { isActive: null, reader: false, book: "start" };
 
-async function getCurrentTab() {
-  const queryOptions = { active: true, lastFocusedWindow: true };
-  const [tab] = await chrome.tabs.query(queryOptions);
-  return tab;
-}
+chrome.runtime.onStartup.addListener(loadState);
+chrome.runtime.onInstalled.addListener(loadState);
+loadState();
 
 chrome.commands.onCommand.addListener(async (command) => {
-  switch (command) {
-    case "com-start":
+  if (command === "com-start") {
+    console.log("Command received: ", command, scriptExecutionState);
+    if (scriptExecutionState.reader) {
+      chrome.storage.sync.set({ reader: null });
+      updateState({ reader: false });
+    } else {
       await executeScriptOnce(true);
-      break;
-
-    case "com-add-p":
-      console.log(scriptExecutionState);
-      adjustParagraphCount(true);
-      break;
-
-    case "com-rem-p":
-      adjustParagraphCount(false);
-      break;
+    }
+  } else if (command === "com-add-p") {
+    adjustParagraphCount(true);
+  } else if (command === "com-rem-p") {
+    adjustParagraphCount(false);
   }
 });
 
@@ -29,19 +26,31 @@ chrome.runtime.onMessage.addListener(async (message) => {
   if (message.action === "firstTimeScript") {
     await executeScriptOnce(true);
   } else if (message.action === "stopScript") {
-    scriptExecutionState.reader = false;
+    console.log(
+      scriptExecutionState,
+      `stopScript #${scriptExecutionState.book}`
+    );
+
+    updateState({ reader: false });
     const tab = await getCurrentTab();
     await setReadingList(tab);
   }
 });
 
 chrome.webNavigation.onCompleted.addListener(async (details) => {
+  if (details.frameId === 0)
+    console.log("webNavigation ", { details, state: scriptExecutionState });
   if (
     scriptExecutionState.isActive === details.tabId &&
     details.frameId === 0
   ) {
     console.log("webNavigation onCompleted");
     await executeScriptOnce(false);
+  }
+});
+chrome.tabs.onRemoved.addListener((tabId) => {
+  if (scriptExecutionState.isActive === tabId) {
+    updateState({ isActive: null });
   }
 });
 
@@ -58,9 +67,8 @@ async function executeScriptOnce(sendMessage = false) {
         tab.url.split("/").length ||
       (!tab.url.startsWith(scriptExecutionState.book) && !sendMessage)
     ) {
-      scriptExecutionState.reader = false;
-      scriptExecutionState.isActive = null;
-      scriptExecutionState.book = "";
+      updateState({ book: "", isActive: null, reader: false });
+
       console.log("Different book, stop execution");
       return false;
     }
@@ -68,18 +76,17 @@ async function executeScriptOnce(sendMessage = false) {
     try {
       await chrome.tabs.sendMessage(tab.id, { action });
       setNewHistory(tab.title, tab.url);
-      scriptExecutionState.reader = true;
+      updateState({ reader: true });
+
       console.log("upload page");
       return true;
-    } catch (error) {
-      await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ["/js/script.js"],
-      });
+    } catch (error) {}
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ["/js/script.js"],
+    });
 
-      scriptExecutionState.isActive = pageKey;
-      scriptExecutionState.book = book;
-    }
+    updateState({ book, isActive: pageKey, reader: true });
 
     chrome.tabs.sendMessage(tab.id, { action, value: book });
 
@@ -87,7 +94,6 @@ async function executeScriptOnce(sendMessage = false) {
 
     await setReadingList(tab);
 
-    scriptExecutionState.reader = true;
     return true;
   } catch (error) {
     console.error("Error executing script:", error);
@@ -182,9 +188,22 @@ async function setNewHistory(name, link) {
 
   await setStorageData("history", updatedHistory);
 }
-chrome.tabs.onRemoved.addListener((tabId) => {
-  console.log("Tab closed:", tabId, scriptExecutionState.isActive);
-  if (scriptExecutionState.isActive === tabId) {
-    scriptExecutionState.isActive = "";
-  }
-});
+async function loadState() {
+  const { scriptExecutionState: saved } = await chrome.storage.sync.get(
+    "scriptExecutionState"
+  );
+  if (saved) Object.assign(scriptExecutionState, saved);
+}
+
+function updateState(updates) {
+  Object.assign(scriptExecutionState, updates);
+  saveState();
+}
+function saveState() {
+  chrome.storage.sync.set({ scriptExecutionState });
+}
+async function getCurrentTab() {
+  const queryOptions = { active: true, lastFocusedWindow: true };
+  const [tab] = await chrome.tabs.query(queryOptions);
+  return tab;
+}

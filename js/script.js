@@ -1,5 +1,8 @@
 //script.js
 console.log("Script loaded");
+
+let saveDataTimeout = null;
+let lastData = null;
 // storage keys - reader, navigator, mouse, options, paragraf
 // ----------------------------------------
 let reader = null;
@@ -531,9 +534,22 @@ function resetReader({ synth, textContainer, paragraf, speak }) {
 }
 
 function setSaveData(data) {
-  chrome.storage.sync.set(
-    Object.fromEntries(Object.entries(data).filter(([_, v]) => v !== undefined))
-  );
+  lastData = {
+    ...lastData,
+    ...data,
+  };
+
+  if (saveDataTimeout) clearTimeout(saveDataTimeout);
+
+  saveDataTimeout = setTimeout(() => {
+    chrome.storage.sync.set(
+      Object.fromEntries(
+        Object.entries(lastData).filter(([_, v]) => v !== undefined)
+      )
+    );
+    lastData = null;
+    saveDataTimeout = null;
+  }, 300);
 }
 chrome.runtime.onMessage.addListener(async (message) => {
   const { action, value } = message;
