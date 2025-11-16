@@ -596,9 +596,6 @@ chrome.storage.onChanged.addListener((changes) => {
   if (changes.reader) {
     reader = changes.reader.newValue;
   }
-  if (changes.paragraf) {
-    paragraf = changes.paragraf.newValue;
-  }
   if (changes.navigator) {
     Object.assign(navigator, changes.navigator.newValue);
   }

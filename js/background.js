@@ -15,6 +15,7 @@ chrome.commands.onCommand.addListener(async (command) => {
       break;
 
     case "com-add-p":
+      console.log(scriptExecutionState);
       adjustParagraphCount(true);
       break;
 
@@ -36,9 +37,10 @@ chrome.runtime.onMessage.addListener(async (message) => {
 
 chrome.webNavigation.onCompleted.addListener(async (details) => {
   if (
-    scriptExecutionState.isActive.startsWith(`${details.tabId}-`) &&
+    scriptExecutionState.isActive === details.tabId &&
     details.frameId === 0
   ) {
+    console.log("webNavigation onCompleted");
     await executeScriptOnce(false);
   }
 });
@@ -47,8 +49,7 @@ async function executeScriptOnce(sendMessage = false) {
   try {
     const tab = await getCurrentTab();
     const book = getBookUrl(tab.url);
-    const pageKey = `${tab.id}-${tab.url}`;
-    const isAlreadyActive = scriptExecutionState.isActive === pageKey;
+    const pageKey = tab.id;
 
     const action = sendMessage ? "startReadeFun" : "startReadeNextPage";
 
@@ -58,30 +59,27 @@ async function executeScriptOnce(sendMessage = false) {
       (!tab.url.startsWith(scriptExecutionState.book) && !sendMessage)
     ) {
       scriptExecutionState.reader = false;
-      scriptExecutionState.isActive = "";
+      scriptExecutionState.isActive = null;
       scriptExecutionState.book = "";
       console.log("Different book, stop execution");
       return false;
     }
 
-    if (isAlreadyActive) {
-      try {
-        await chrome.tabs.sendMessage(tab.id, { action });
-        setNewHistory(tab.title, tab.url);
-        scriptExecutionState.reader = true;
-        return true;
-      } catch (error) {
-        console.log("upload page");
-      }
+    try {
+      await chrome.tabs.sendMessage(tab.id, { action });
+      setNewHistory(tab.title, tab.url);
+      scriptExecutionState.reader = true;
+      console.log("upload page");
+      return true;
+    } catch (error) {
+      await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ["/js/script.js"],
+      });
+
+      scriptExecutionState.isActive = pageKey;
+      scriptExecutionState.book = book;
     }
-
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ["/js/script.js"],
-    });
-
-    scriptExecutionState.isActive = pageKey;
-    scriptExecutionState.book = book;
 
     chrome.tabs.sendMessage(tab.id, { action, value: book });
 
@@ -185,7 +183,8 @@ async function setNewHistory(name, link) {
   await setStorageData("history", updatedHistory);
 }
 chrome.tabs.onRemoved.addListener((tabId) => {
-  if (scriptExecutionState.isActive.startsWith(`${tabId}-`)) {
+  console.log("Tab closed:", tabId, scriptExecutionState.isActive);
+  if (scriptExecutionState.isActive === tabId) {
     scriptExecutionState.isActive = "";
   }
 });
