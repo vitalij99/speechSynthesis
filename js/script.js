@@ -109,6 +109,11 @@ function configureButtons(textContainer, synth) {
 
   setNextPage();
 
+  const debouncedSpeak = debounce(() => {
+    if (synth.speaking) synth.cancel();
+    speak();
+  }, 300);
+
   function speak() {
     if (synth.speaking) {
       console.error("speechSynthesis.speaking");
@@ -190,14 +195,13 @@ function configureButtons(textContainer, synth) {
   buttonStart.onclick = () => handleStartClick(synth, buttonStart, speak);
   buttonStop.onclick = () =>
     handleStopClick(synth, buttonStart, textContainer, paragraf);
+
   inputParagraf.onchange = () => {
     clearParagraphStyle(textContainer, paragraf);
     paragraf = Number(inputParagraf.value);
     if (paragraf < 0) paragraf = 0;
-    if (synth.speaking) {
-      synth.cancel();
-      speak();
-    }
+
+    debouncedSpeak();
   };
 }
 
@@ -606,6 +610,13 @@ async function handleStartReadNextPage(bookStart) {
 
     startReade();
   }
+}
+function debounce(fn, delay = 300) {
+  let timer;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
 }
 
 chrome.storage.onChanged.addListener((changes) => {
