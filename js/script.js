@@ -297,6 +297,8 @@ function moveToNextPage() {
 
   window.dispatchEvent(rightArrowEvent);
   window.dispatchEvent(rightArrowEventUp);
+  document.dispatchEvent(rightArrowEvent);
+  document.dispatchEvent(rightArrowEventUp);
 
   setTimeout(() => {
     if (window.location.href === initialURL) {
