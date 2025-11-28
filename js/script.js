@@ -309,8 +309,13 @@ function moveToNextPage() {
   setTimeout(() => {
     if (window.location.href === initialURL) {
       window.location.href = navigator.nextPageSave;
+    } else {
+      // move to next page not uploaded in background.js
+      console.log("Navigated to next page via keyboard event.");
+
+      location.reload();
     }
-  }, 1000);
+  }, 2000);
 }
 
 function getStorageData() {
@@ -468,6 +473,7 @@ function createHTMLButton() {
 }
 
 function findElementWithMostDirectParagraphs() {
+  console.log("Finding element with most direct paragraphs...");
   const allElements = document.querySelectorAll("body *");
   let maxCount = 0;
   let bestElement = null;
@@ -476,7 +482,11 @@ function findElementWithMostDirectParagraphs() {
     let count = 0;
 
     for (let child of el.children) {
-      if (child.tagName === "P" || child.tagName === "SPAN") {
+      if (
+        child.tagName === "P" ||
+        child.tagName === "SPAN" ||
+        child.tagName === "DIV"
+      ) {
         count++;
       }
     }
