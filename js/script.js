@@ -125,53 +125,63 @@ function configureButtons(textContainer, synth) {
       options.timerCheckbox
     ) {
       moveToNextPage();
-    }
+    } else {
+      const textElement = textContainer.children[paragraf];
 
-    const textElement = textContainer.children[paragraf];
+      const text = checkChildrenVisibility(textElement);
 
-    const paragrafText = checkChildrenVisibility(textElement);
-
-    if (!paragrafText) {
-      paragraf++;
-      inputParagraf.value = paragraf;
-      speak();
-    } else if (paragrafText !== "") {
-      const utterThis = new SpeechSynthesisUtterance(paragrafText);
-      styleCurrentParagraph(textContainer, paragraf);
-      saveStyledParagraf = paragraf;
-
-      utterThis.onend = () => {
-        clearParagraphStyle(textContainer, saveStyledParagraf || paragraf);
+      if (text === null) {
         paragraf++;
         inputParagraf.value = paragraf;
+        speak();
+      }
 
-        if (reader) {
-          setSaveData({ paragraf });
+      const paragrafText = checkText(text);
 
-          speak();
-        }
-      };
+      if (!paragrafText || paragrafText?.length === 0) {
+        paragraf++;
+        inputParagraf.value = paragraf;
+        speak();
+      } else if (paragrafText !== "") {
+        const utterThis = new SpeechSynthesisUtterance(paragrafText);
+        styleCurrentParagraph(textContainer, paragraf);
+        saveStyledParagraf = paragraf;
 
-      utterThis.onerror = (event) => {
-        if (event.error === "interrupted") return;
-        console.error("SpeechSynthesisUtterance.onerror", event.error);
-        timerCounter.count++;
+        utterThis.onend = () => {
+          clearParagraphStyle(textContainer, saveStyledParagraf || paragraf);
 
-        timerCounter.paragraf = paragraf;
-        if (timerCounter.count >= 3 && timerCounter.paragraf === paragraf) {
-          clearParagraphStyle(textContainer, paragraf);
           paragraf++;
-          timerCounter.count = 0;
-        }
-        resetReader({ synth, textContainer, paragraf, speak });
-      };
+          inputParagraf.value = paragraf;
 
-      setVoice(utterThis, voices);
-      utterThis.pitch = options.utterThis.pitch;
-      utterThis.rate = options.utterThis.rate;
-      utterThis.volume = options.utterThis.volume;
+          if (reader) {
+            setSaveData({ paragraf });
 
-      synth.speak(utterThis);
+            speak();
+          }
+        };
+
+        utterThis.onerror = (event) => {
+          if (event.error === "interrupted") return;
+          console.error("SpeechSynthesisUtterance.onerror", event.error);
+          timerCounter.count++;
+
+          timerCounter.paragraf = paragraf;
+          if (timerCounter.count >= 3 && timerCounter.paragraf === paragraf) {
+            clearParagraphStyle(textContainer, paragraf);
+
+            paragraf++;
+            timerCounter.count = 0;
+          }
+          resetReader({ synth, textContainer, paragraf, speak });
+        };
+
+        setVoice(utterThis, voices);
+        utterThis.pitch = options.utterThis.pitch;
+        utterThis.rate = options.utterThis.rate;
+        utterThis.volume = options.utterThis.volume;
+
+        synth.speak(utterThis);
+      }
     }
   }
 
