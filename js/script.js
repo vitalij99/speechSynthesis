@@ -129,13 +129,13 @@ function configureButtons(textContainer, synth) {
 
     const textElement = textContainer.children[paragraf];
 
-    const textContent = Array.from(textElement?.childNodes)
-      .map((node) => node.textContent)
-      .join("");
+    const textContent = textElement ? textElement.textContent : "";
 
     const paragrafText = checkText(textContent);
 
-    if (textElement.clientHeight < 8 || !paragrafText) {
+    const rect = textElement.getBoundingClientRect();
+
+    if (rect.height <= 1 || !paragrafText) {
       paragraf++;
       inputParagraf.value = paragraf;
       speak();
