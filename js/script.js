@@ -129,13 +129,9 @@ function configureButtons(textContainer, synth) {
 
     const textElement = textContainer.children[paragraf];
 
-    const textContent = textElement ? textElement.textContent : "";
+    const paragrafText = checkChildrenVisibility(textElement);
 
-    const paragrafText = checkText(textContent);
-
-    const rect = textElement.getBoundingClientRect();
-
-    if (rect.height <= 1 || !paragrafText) {
+    if (!paragrafText) {
       paragraf++;
       inputParagraf.value = paragraf;
       speak();
@@ -573,6 +569,35 @@ function setSaveData(data) {
     saveDataTimeout = null;
   }, 300);
 }
+function checkChildrenVisibility(textElement) {
+  if (!textElement) return null;
+
+  const results = [];
+
+  const children = Array.from(textElement.childNodes);
+
+  children.forEach((node) => {
+    const text = node.textContent ? node.textContent.trim() : "";
+
+    if (!text) return;
+
+    if (node.getBoundingClientRect) {
+      const rect = node.getBoundingClientRect();
+      const isVisible = rect.height > 1 && rect.width > 0;
+
+      if (isVisible) {
+        results.push(text);
+      } else {
+        console.log("Hidden text node:", text);
+      }
+    } else {
+      console.log("not BoundingClientRect:", text);
+    }
+  });
+
+  return results.join() ?? null;
+}
+
 chrome.runtime.onMessage.addListener(async (message) => {
   const { action, value } = message;
 
