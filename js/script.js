@@ -429,6 +429,9 @@ function createHTMLButton() {
   let startX, startY, initialX, initialY, newX, newY;
 
   draggableElement.addEventListener("mousedown", (e) => {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON") {
+      return;
+    }
     isDragging = true;
     startX = e.clientX;
     startY = e.clientY;
