@@ -307,8 +307,15 @@ function moveToNextPage() {
 
   setTimeout(() => {
     if (window.location.href === initialURL) {
-      if (!navigator.nextPageSave || navigator?.nextPageSave?.length < 5)
+      if (
+        navigator.nextPageSave === initialURL ||
+        !navigator.nextPageSave ||
+        navigator?.nextPageSave?.length < 5
+      ) {
+        console.log("No next page URL found.");
         return;
+      }
+
       window.location.href = navigator.nextPageSave;
     } else {
       // move to next page not uploaded in background.js
