@@ -126,10 +126,12 @@ function configureButtons(textContainer, synth) {
 
       const text = checkChildrenVisibility(textElement);
 
-      if (text === null) {
+      if (text === null || text === undefined) {
         paragraf++;
         inputParagraf.value = paragraf;
+
         speak();
+        return;
       }
 
       const paragrafText = checkText(text);
