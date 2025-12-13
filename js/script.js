@@ -58,11 +58,7 @@ function setNextPage() {
   const nextPageButton = getHtmlElements(options.nextPageBtn);
 
   navigator.thisPageSave = document.URL;
-  if (!nextPageButton) {
-    setSaveData({ navigator });
 
-    return;
-  }
   navigator.nextPageSave = nextPageButton
     ? nextPageButton?.attributes?.href?.value
     : getNextPage();
@@ -188,15 +184,12 @@ function configureButtons(textContainer, synth) {
   const dateSave = new Date(reader);
   const dateNow = new Date();
 
-  setTimeout(
-    () => {
-      if (reader && dateSave > dateNow) {
-        setNextPage();
-        speak();
-      }
-    },
-    Number(options.timeout) ? Number(options.timeout) : 1000
-  );
+  setTimeout(() => {
+    if (reader && dateSave > dateNow) {
+      setNextPage();
+      speak();
+    }
+  }, 1000);
 
   buttonStart.onclick = () => handleStartClick(synth, buttonStart, speak);
   buttonStop.onclick = () =>
@@ -314,6 +307,8 @@ function moveToNextPage() {
 
   setTimeout(() => {
     if (window.location.href === initialURL) {
+      if (!navigator.nextPageSave || navigator?.nextPageSave?.length < 5)
+        return;
       window.location.href = navigator.nextPageSave;
     } else {
       // move to next page not uploaded in background.js
@@ -522,6 +517,8 @@ function getNextPage() {
       const number = parseInt(numbers.join("")) + 1;
 
       return newUrlPage + number;
+    } else {
+      return urlPage;
     }
   }
 
@@ -664,7 +661,12 @@ async function handleStartReadNextPage(bookStart) {
       paragraf = 0;
     }
 
-    startReade();
+    setTimeout(
+      () => {
+        startReade();
+      },
+      Number(options.timeout) ? Number(options.timeout) : 1000
+    );
   }
 }
 function debounce(fn, delay = 300) {
