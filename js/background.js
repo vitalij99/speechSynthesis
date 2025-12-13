@@ -1,5 +1,6 @@
 // background.js
 
+let nextPage = null;
 let scriptExecutionState = { isActive: null, reader: false, book: "start" };
 
 chrome.runtime.onStartup.addListener(loadState);
@@ -62,15 +63,17 @@ async function executeScriptOnce(sendMessage = false) {
 
     const action = sendMessage ? "startReadeFun" : "startReadeNextPage";
 
-    if (
-      scriptExecutionState.book.split("/").length + 1 >
-        tab.url.split("/").length ||
-      (!tab.url.startsWith(scriptExecutionState.book) && !sendMessage)
-    ) {
-      updateState({ book: "", isActive: null, reader: false });
+    if (!tab.url.includes(nextPage)) {
+      if (
+        scriptExecutionState.book.split("/").length + 1 >
+          tab.url.split("/").length ||
+        (!tab.url.startsWith(scriptExecutionState.book) && !sendMessage)
+      ) {
+        updateState({ book: "", isActive: null, reader: false });
 
-      console.log("Different book, stop execution");
-      return false;
+        console.log("Different book, stop execution");
+        return false;
+      }
     }
 
     try {
@@ -80,7 +83,10 @@ async function executeScriptOnce(sendMessage = false) {
 
       console.log("upload page");
       return true;
-    } catch (error) {}
+    } catch (error) {
+      // If sending message fails, we inject the script
+    }
+
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       files: ["/js/script.js"],
@@ -210,6 +216,10 @@ async function loadState() {
   const { scriptExecutionState: saved } = await chrome.storage.sync.get(
     "scriptExecutionState"
   );
+  nextPage = await chrome.storage.sync
+    .get("navigator")
+    .then((res) => res.navigator?.nextPageSave);
+
   if (saved) Object.assign(scriptExecutionState, saved);
 }
 
@@ -225,3 +235,10 @@ async function getCurrentTab() {
   const [tab] = await chrome.tabs.query(queryOptions);
   return tab;
 }
+chrome.storage.onChanged.addListener((changes) => {
+  if (changes.navigator) {
+    if (changes.navigator.newValue.nextPageSave !== nextPage) {
+      nextPage = changes.navigator.newValue.nextPageSave;
+    }
+  }
+});
