@@ -167,27 +167,45 @@ async function setStorageData(key, value) {
     });
   });
 }
+
 async function setNewHistory(name, link) {
   if (!link || !name) return;
+
+  const MAX_NAME_LENGTH = 150;
+  const HISTORY_LIMIT = 20;
+
   const history = (await getStorageData("history")) || [];
 
-  const linkArray = link.split("/");
-  const bookLink = linkArray.slice(0, linkArray.length - 1).join("/");
+  const linkSegments = link.split("/");
+  const bookLink = linkSegments.slice(0, linkSegments.length - 1).join("/");
 
-  const filteredHistory = history.filter((item) => item.bookLink !== bookLink);
+  const shortName =
+    name.length > MAX_NAME_LENGTH
+      ? `${name.substring(0, MAX_NAME_LENGTH - 3)}...`
+      : name;
 
-  const shortName = name.length > 150 ? name.substring(0, 147) + "..." : name;
+  const filteredHistory = history.filter((item) => {
+    if (!item) return false;
 
-  const newHistory = {
+    const isDuplicate = item.name === shortName || item.bookLink === bookLink;
+
+    return !isDuplicate;
+  });
+
+  const newHistoryItem = {
     name: shortName,
-    link,
-    bookLink,
+    link: link,
+    bookLink: bookLink,
   };
 
-  const updatedHistory = [newHistory, ...filteredHistory].slice(0, 20);
+  const updatedHistory = [newHistoryItem, ...filteredHistory].slice(
+    0,
+    HISTORY_LIMIT
+  );
 
   await setStorageData("history", updatedHistory);
 }
+
 async function loadState() {
   const { scriptExecutionState: saved } = await chrome.storage.sync.get(
     "scriptExecutionState"
