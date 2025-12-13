@@ -594,12 +594,24 @@ function checkChildrenVisibility(textElement) {
   const children = Array.from(textElement.childNodes);
 
   children.forEach((node) => {
-    const text = node.textContent ? node.textContent.trim() : "";
-
+    const text = node.textContent?.trim();
     if (!text) return;
 
-    if (node.getBoundingClientRect) {
-      const rect = node.getBoundingClientRect();
+    let rect = null;
+
+    try {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        rect = node.getBoundingClientRect();
+      }
+
+      if (node.nodeType === Node.TEXT_NODE) {
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        rect = range.getBoundingClientRect();
+      }
+
+      if (!rect) return;
+
       const isVisible = rect.height > 1 && rect.width > 0;
 
       if (isVisible) {
@@ -607,12 +619,12 @@ function checkChildrenVisibility(textElement) {
       } else {
         console.log("Hidden text node:", text);
       }
-    } else {
-      console.log("not BoundingClientRect:", text);
+    } catch (error) {
+      console.error("Error checking children visibility:", error);
     }
   });
 
-  return results.join() ?? null;
+  return results.length ? results.join(", ") : null;
 }
 
 chrome.runtime.onMessage.addListener(async (message) => {
