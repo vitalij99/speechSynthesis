@@ -130,6 +130,21 @@ function onMouseUp(draggableElement, state, moveHandler, upHandler) {
     state.onSave(state.newX, state.newY);
   }
 }
+
+async function initGetStorage() {
+  const data = await chrome.storage.sync.get("mouse");
+  if (data.mouse) Object.assign(mouse, data.mouse);
+}
+function setSaveData(data) {
+  Object.assign(mouse, data);
+
+  if (saveDataTimeout) clearTimeout(saveDataTimeout);
+
+  saveDataTimeout = setTimeout(() => {
+    chrome.storage.sync.set({ mouse });
+    saveDataTimeout = null;
+  }, 300);
+}
 export async function createHTMLButton() {
   if (document.getElementById("floatingDiv")) return;
   await initGetStorage();
@@ -162,18 +177,4 @@ export async function createHTMLButton() {
   draggableElement.addEventListener("mousedown", (e) =>
     onMouseDown(e, draggableElement, state)
   );
-}
-async function initGetStorage() {
-  const data = await chrome.storage.sync.get("mouse");
-  if (data.mouse) Object.assign(mouse, data.mouse);
-}
-function setSaveData(data) {
-  Object.assign(mouse, data);
-
-  if (saveDataTimeout) clearTimeout(saveDataTimeout);
-
-  saveDataTimeout = setTimeout(() => {
-    chrome.storage.sync.set({ mouse });
-    saveDataTimeout = null;
-  }, 300);
 }
