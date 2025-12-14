@@ -1,37 +1,16 @@
+import { createHTMLButton } from "../lib/createHtmlButton.js";
+import { debounce } from "../lib/debounce.js";
+import { getHtmlElements, setNextPage } from "../lib/pageNavigation.js";
+import { navigator, mouse, options } from "../lib/storageContent.js";
 //script.js
 console.log("Script loaded");
 
 let saveDataTimeout = null;
 let lastData = null;
-// storage keys - reader, navigator, mouse, options, paragraf
-// ----------------------------------------
+
 let reader = null;
 let paragraf = 0;
 
-const navigator = {
-  nextPageSave: null,
-  thisPageSave: null,
-  bookURL: null,
-  book: null,
-};
-
-const mouse = { x: 0, y: 0 };
-
-const options = {
-  contentDivElem: "#content  ",
-  nextPageBtn: ".nextchap",
-  timer: 20,
-  lastParagraf: 0,
-  timerCheckbox: true,
-  timeout: 2000,
-  utterThis: {
-    language: null,
-    pitch: 2,
-    rate: 2,
-    volume: 1,
-  },
-};
-// ----------------------------------------
 let paused = false;
 let saveStyledParagraf = null;
 let timerId = null;
@@ -50,39 +29,8 @@ async function startReade() {
     return;
   }
   const synth = window.speechSynthesis;
-  createHTMLButton();
+  createHTMLButton(mouse, setSaveData);
   configureButtons(textContainer, synth);
-}
-
-function setNextPage() {
-  const nextPageButton = getHtmlElements(options.nextPageBtn);
-
-  navigator.thisPageSave = document.URL;
-
-  navigator.nextPageSave = nextPageButton
-    ? nextPageButton?.attributes?.href?.value
-    : getNextPage();
-  setSaveData({ navigator });
-}
-
-function getHtmlElements(selector) {
-  try {
-    return (
-      selector
-        .split("\n")
-        .map((name) => {
-          if (!name.trim()) return null;
-          try {
-            return document.querySelector(name);
-          } catch {
-            return null;
-          }
-        })
-        .filter(Boolean)?.[0] || null
-    );
-  } catch {
-    return null;
-  }
 }
 
 function configureButtons(textContainer, synth) {
@@ -103,7 +51,7 @@ function configureButtons(textContainer, synth) {
     voices = synth.getVoices();
   };
 
-  setNextPage();
+  setNextPage({ options, setSaveData, navigator });
 
   const debouncedSpeak = debounce(() => {
     if (synth.speaking) synth.cancel();
@@ -188,7 +136,7 @@ function configureButtons(textContainer, synth) {
 
   setTimeout(() => {
     if (reader && dateSave > dateNow) {
-      setNextPage();
+      setNextPage({ options, setSaveData, navigator });
       speak();
     }
   }, 1000);
@@ -339,152 +287,6 @@ function getStorageData() {
   });
 }
 
-function createHTMLButton() {
-  if (document.getElementById("floatingDiv")) return;
-
-  const buttonStyle = `
-    .floating-div {
-      display: flex;
-      position: fixed;
-      top: ${mouse.y && mouse.y <= 100 ? mouse.y : 1}%;
-      left: ${mouse.x && mouse.x <= 100 ? mouse.x : 1}%;
-      width: max-content;
-      background-color: lightblue;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-      z-index: 999;
-    
-    }
-    .action-button {
-      margin-right: 10px;
-      padding: 8px 16px;
-      background-color: #4caf50;
-      border: none;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .input-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color
-      : #fff;
-      padding-right: 5px;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-    .input-container input {
-      border: none;
-      padding: 5px;
-      width: 55px;
-      font-size: 16px;
-      color: #000;
-    }
-    .paragraph {
-      margin: 0 0 0 -12px;
-      color: #000;
-    }
-    .paragraph::before {
-      content: "/";
-      margin-left: 5px;
-      margin-right: 5px;
-      font-size: 20px;
-      color: #777;
-    }
-
-    #draggable {
-      user-select: none;    
-    }
-    .no-select {
-      user-select: none; 
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      }
-  `;
-
-  const floatingDivHTML = `
-    <div id="floatingDiv" class="floating-div">
-      <div>
-        <button id="start" class="action-button">Play</button>
-        <button id="stop" class="action-button">Stop</button>
-      </div>
-      <div class="input-container">
-        <input type="number" id="inputParagrafs" class="input-number" value="0" min="0" max="7777">
-        <p id="paragrafs" class="paragraph">0</p>
-      </div>
-  
-    </div>
-  `;
-
-  const floatingDiv = document.createElement("div");
-  floatingDiv.innerHTML = floatingDivHTML;
-
-  const styleElement = document.createElement("style");
-  styleElement.textContent = buttonStyle;
-  document.body.appendChild(floatingDiv);
-  document.head.appendChild(styleElement);
-
-  const draggableElement = document.getElementById("floatingDiv");
-
-  let isDragging = false;
-  let startX, startY, initialX, initialY, newX, newY;
-
-  draggableElement.addEventListener("mousedown", (e) => {
-    if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON") {
-      return;
-    }
-    isDragging = true;
-    startX = e.clientX;
-    startY = e.clientY;
-    initialX = (draggableElement.offsetLeft / window.innerWidth) * 100;
-    initialY = (draggableElement.offsetTop / window.innerHeight) * 100;
-
-    document.body.classList.add("no-select");
-
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onMouseUp);
-  });
-
-  const onMouseMove = (e) => {
-    if (!isDragging) return;
-
-    const dx = ((e.clientX - startX) / window.innerWidth) * 100;
-    const dy = ((e.clientY - startY) / window.innerHeight) * 100;
-
-    newX = (initialX + dx).toFixed(2);
-    newY = (initialY + dy).toFixed(2);
-
-    const elementWidth =
-      (draggableElement.offsetWidth / window.innerWidth) * 100;
-    const elementHeight =
-      (draggableElement.offsetHeight / window.innerHeight) * 100;
-
-    if (newX < 0) newX = 0;
-    if (newY < 0) newY = 0;
-    if (newX + elementWidth > 100) newX = 100 - elementWidth;
-    if (newY + elementHeight > 100) newY = 100 - elementHeight;
-
-    draggableElement.style.left = `${newX}%`;
-    draggableElement.style.top = `${newY}%`;
-  };
-
-  const onMouseUp = () => {
-    isDragging = false;
-    document.removeEventListener("mousemove", onMouseMove);
-    document.removeEventListener("mouseup", onMouseUp);
-    document.body.classList.remove("no-select");
-
-    if (newX && newY) {
-      mouse.x = newX;
-      mouse.y = newY;
-      setSaveData({ mouse });
-    }
-  };
-}
-
 function findElementWithMostDirectParagraphs() {
   console.log("Finding element with most direct paragraphs...");
   const allElements = document.querySelectorAll("body *");
@@ -511,27 +313,6 @@ function findElementWithMostDirectParagraphs() {
   }
 
   return bestElement;
-}
-
-function getNextPage() {
-  const urlPage = document.URL;
-  const numbers = [];
-
-  for (let index = 1; index < urlPage.length; index++) {
-    const element = urlPage[urlPage.length - index];
-    if (!isNaN(element)) {
-      numbers.unshift(element);
-    } else if (index !== 1) {
-      const newUrlPage = urlPage.slice(0, urlPage.length - index + 1);
-      const number = parseInt(numbers.join("")) + 1;
-
-      return newUrlPage + number;
-    } else {
-      return urlPage;
-    }
-  }
-
-  return urlPage;
 }
 
 function setStorageDate() {
@@ -689,13 +470,6 @@ async function handleStartReadNextPage(bookStart) {
       Number(options.timeout) ? Number(options.timeout) : 1000
     );
   }
-}
-function debounce(fn, delay = 300) {
-  let timer;
-  return function (...args) {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn.apply(this, args), delay);
-  };
 }
 
 chrome.storage.onChanged.addListener((changes) => {
