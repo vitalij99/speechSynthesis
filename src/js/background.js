@@ -1,5 +1,7 @@
 // background.js
-
+chrome.runtime.onInstalled.addListener(() => {
+  console.log("Extension installed");
+});
 let nextPage = null;
 let scriptExecutionState = { isActive: null, reader: false, book: "start" };
 
