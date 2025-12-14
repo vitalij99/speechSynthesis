@@ -47,3 +47,40 @@ export function setNextPage({ options, setSaveData, navigator }) {
     : getNextPage();
   setSaveData({ navigator });
 }
+export function moveToNextPage({ navigator }) {
+  const initialURL = window.location.href;
+  const params = {
+    key: "ArrowRight",
+    code: "ArrowRight",
+    keyCode: 39,
+    which: 39,
+    bubbles: true,
+  };
+  const rightArrowEvent = new KeyboardEvent("keydown", params);
+  const rightArrowEventUp = new KeyboardEvent("keyup", params);
+
+  window.dispatchEvent(rightArrowEvent);
+  window.dispatchEvent(rightArrowEventUp);
+  document.dispatchEvent(rightArrowEvent);
+  document.dispatchEvent(rightArrowEventUp);
+
+  setTimeout(() => {
+    if (window.location.href === initialURL) {
+      if (
+        navigator.nextPageSave === initialURL ||
+        !navigator.nextPageSave ||
+        navigator?.nextPageSave?.length < 5
+      ) {
+        console.log("No next page URL found.");
+        return;
+      }
+
+      window.location.href = navigator.nextPageSave;
+    } else {
+      // move to next page not uploaded in background.js
+      console.log("Navigated to next page via keyboard event.");
+
+      location.reload();
+    }
+  }, 2000);
+}

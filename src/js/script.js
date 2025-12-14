@@ -1,6 +1,10 @@
 import { createHTMLButton } from "../lib/createHtmlButton.js";
 import { debounce } from "../lib/debounce.js";
-import { getHtmlElements, setNextPage } from "../lib/pageNavigation.js";
+import {
+  getHtmlElements,
+  moveToNextPage,
+  setNextPage,
+} from "../lib/pageNavigation.js";
 import { navigator, mouse, options } from "../lib/storageContent.js";
 //script.js
 console.log("Script loaded");
@@ -68,7 +72,7 @@ function configureButtons(textContainer, synth) {
       paragraf >= textContainer.children.length - (options.lastParagraf || 0) &&
       options.timerCheckbox
     ) {
-      moveToNextPage();
+      moveToNextPage({ navigator });
     } else {
       const textElement = textContainer.children[paragraf];
 
@@ -236,44 +240,6 @@ function setVoice(utterThis, voices) {
       break;
     }
   }
-}
-
-function moveToNextPage() {
-  const initialURL = window.location.href;
-  const params = {
-    key: "ArrowRight",
-    code: "ArrowRight",
-    keyCode: 39,
-    which: 39,
-    bubbles: true,
-  };
-  const rightArrowEvent = new KeyboardEvent("keydown", params);
-  const rightArrowEventUp = new KeyboardEvent("keyup", params);
-
-  window.dispatchEvent(rightArrowEvent);
-  window.dispatchEvent(rightArrowEventUp);
-  document.dispatchEvent(rightArrowEvent);
-  document.dispatchEvent(rightArrowEventUp);
-
-  setTimeout(() => {
-    if (window.location.href === initialURL) {
-      if (
-        navigator.nextPageSave === initialURL ||
-        !navigator.nextPageSave ||
-        navigator?.nextPageSave?.length < 5
-      ) {
-        console.log("No next page URL found.");
-        return;
-      }
-
-      window.location.href = navigator.nextPageSave;
-    } else {
-      // move to next page not uploaded in background.js
-      console.log("Navigated to next page via keyboard event.");
-
-      location.reload();
-    }
-  }, 2000);
 }
 
 function getStorageData() {
