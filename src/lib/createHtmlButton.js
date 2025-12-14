@@ -183,6 +183,12 @@ const handleParagraphChange = (isAdd) => {
   }
   inputParagraf.onchange();
 };
+
+export function addParagraph(paragraf) {
+  const inputParagraf = document.getElementById("inputParagrafs");
+  inputParagraf.value = paragraf;
+}
+
 chrome.runtime.onMessage.addListener(async (message) => {
   const { action, value } = message;
 
