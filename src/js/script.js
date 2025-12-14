@@ -5,7 +5,7 @@ import {
   moveToNextPage,
   setNextPage,
 } from "../lib/pageNavigation.js";
-import { navigator, mouse, options } from "../lib/storageContent.js";
+import { navigator, options } from "../lib/storageContent.js";
 //script.js
 console.log("Script loaded");
 
@@ -33,7 +33,7 @@ async function startReade() {
     return;
   }
   const synth = window.speechSynthesis;
-  createHTMLButton(mouse, setSaveData);
+  await createHTMLButton();
   configureButtons(textContainer, synth);
 }
 
@@ -245,7 +245,7 @@ function setVoice(utterThis, voices) {
 function getStorageData() {
   return new Promise((resolve) => {
     chrome.storage.sync.get(
-      ["reader", "navigator", "mouse", "options", "paragraf"],
+      ["reader", "navigator", "options", "paragraf"],
       (result) => {
         resolve(result);
       }
@@ -400,7 +400,7 @@ async function initGetStorage() {
   if (data.reader !== undefined) reader = data.reader;
   if (data.paragraf !== undefined) paragraf = data.paragraf;
   if (data.navigator) Object.assign(navigator, data.navigator);
-  if (data.mouse) Object.assign(mouse, data.mouse);
+
   if (data.options) Object.assign(options, data.options);
 }
 
@@ -445,9 +445,7 @@ chrome.storage.onChanged.addListener((changes) => {
   if (changes.navigator) {
     Object.assign(navigator, changes.navigator.newValue);
   }
-  if (changes.mouse) {
-    Object.assign(mouse, changes.mouse.newValue);
-  }
+
   if (changes.options) {
     Object.assign(options, changes.options.newValue);
   }

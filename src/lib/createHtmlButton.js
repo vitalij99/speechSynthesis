@@ -1,4 +1,7 @@
-const buttonStyle = (mouse) => `
+const mouse = { x: 0, y: 0 };
+let saveDataTimeout = null;
+
+const buttonStyle = () => `
     .floating-div {
       display: flex;
       position: fixed;
@@ -73,7 +76,7 @@ const floatingDivHTML = `
   
     </div>
   `;
-// draggable.js - експорт колбеків для перевикористання
+
 function onMouseDown(e, draggableElement, state) {
   if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON") {
     return;
@@ -127,14 +130,15 @@ function onMouseUp(draggableElement, state, moveHandler, upHandler) {
     state.onSave(state.newX, state.newY);
   }
 }
-export function createHTMLButton(mouse, setSaveData) {
+export async function createHTMLButton() {
   if (document.getElementById("floatingDiv")) return;
+  await initGetStorage();
 
   const floatingDiv = document.createElement("div");
   floatingDiv.innerHTML = floatingDivHTML;
 
   const styleElement = document.createElement("style");
-  styleElement.textContent = buttonStyle(mouse);
+  styleElement.textContent = buttonStyle();
   document.body.appendChild(floatingDiv);
   document.head.appendChild(styleElement);
 
@@ -158,4 +162,18 @@ export function createHTMLButton(mouse, setSaveData) {
   draggableElement.addEventListener("mousedown", (e) =>
     onMouseDown(e, draggableElement, state)
   );
+}
+async function initGetStorage() {
+  const data = await chrome.storage.sync.get("mouse");
+  if (data.mouse) Object.assign(mouse, data.mouse);
+}
+function setSaveData(data) {
+  Object.assign(mouse, data);
+
+  if (saveDataTimeout) clearTimeout(saveDataTimeout);
+
+  saveDataTimeout = setTimeout(() => {
+    chrome.storage.sync.set({ mouse });
+    saveDataTimeout = null;
+  }, 300);
 }

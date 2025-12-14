@@ -5,8 +5,6 @@ export const navigator = {
   book: null,
 };
 
-export const mouse = { x: 0, y: 0 };
-
 export const options = {
   contentDivElem: "#content  ",
   nextPageBtn: ".nextchap",
