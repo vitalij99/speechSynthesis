@@ -1,5 +1,3 @@
-import { getStorage, setStorage } from "../lib/libBackground.js";
-
 // background.js
 chrome.runtime.onInstalled.addListener(() => {
   console.log("Extension installed");
@@ -15,7 +13,7 @@ chrome.commands.onCommand.addListener(async (command) => {
   if (command === "com-start") {
     console.log("Command received: ", command, scriptExecutionState);
     if (scriptExecutionState.reader) {
-      await setStorage({ reader: false });
+      await chrome.storage.sync.set({ reader: false });
 
       updateState({ reader: false });
     } else {
@@ -166,14 +164,14 @@ async function setReadingList(tab) {
 }
 async function getStorageData(key) {
   return new Promise((resolve) => {
-    getStorage([key], (result) => {
+    chrome.storage.sync.get([key], (result) => {
       resolve(result.history);
     });
   });
 }
 async function setStorageData(key, value) {
   return new Promise((resolve) => {
-    setStorage({ [key]: value }, () => {
+    chrome.storage.sync.set({ [key]: value }, () => {
       resolve();
     });
   });
@@ -233,7 +231,7 @@ function updateState(updates) {
   saveState();
 }
 function saveState() {
-  setStorage({ scriptExecutionState });
+  chrome.storage.sync.set({ scriptExecutionState });
 }
 async function getCurrentTab() {
   const queryOptions = { active: true, lastFocusedWindow: true };
