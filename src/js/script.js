@@ -89,7 +89,6 @@ function configureButtons(textContainer, synth) {
   };
 
   function speak() {
-    console.log("Speaking paragraf:", paragraf);
     if (synth.speaking) {
       console.error("speechSynthesis.speaking");
       return;
