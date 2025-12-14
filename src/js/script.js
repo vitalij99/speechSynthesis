@@ -172,7 +172,7 @@ function configureButtons(textContainer, synth) {
 }
 function handleStartClick(synth, buttonStart, speak) {
   if (!synth.speaking) {
-    setStorageDate({ options, setSaveData });
+    setStorageDate({ options, setSaveData, reader });
 
     setStorageBook({ navigator, setSaveData });
     speak();
@@ -291,20 +291,6 @@ function checkChildrenVisibility(textElement) {
   return results.length ? results.join(", ") : null;
 }
 
-chrome.runtime.onMessage.addListener(async (message) => {
-  const { action, value } = message;
-
-  switch (action) {
-    case "startReadeFun":
-      await handleStartReadFun();
-      break;
-
-    case "startReadeNextPage":
-      await handleStartReadNextPage(value);
-      break;
-  }
-});
-
 async function initGetStorage() {
   const data = await getStorageData();
 
@@ -323,7 +309,7 @@ async function handleStartReadFun() {
     setSaveData({ paragraf });
   }
 
-  setStorageDate({ options, setSaveData });
+  reader = setStorageDate({ options, setSaveData, reader });
   setStorageBook({ navigator, setSaveData });
   startReade();
 }
@@ -359,5 +345,18 @@ chrome.storage.onChanged.addListener((changes) => {
 
   if (changes.options) {
     Object.assign(options, changes.options.newValue);
+  }
+});
+chrome.runtime.onMessage.addListener(async (message) => {
+  const { action, value } = message;
+
+  switch (action) {
+    case "startReadeFun":
+      await handleStartReadFun();
+      break;
+
+    case "startReadeNextPage":
+      await handleStartReadNextPage(value);
+      break;
   }
 });

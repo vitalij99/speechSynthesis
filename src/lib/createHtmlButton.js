@@ -1,7 +1,6 @@
 import { setSaveData } from "./storageContent";
 
 const mouse = { x: 0, y: 0 };
-let saveDataTimeout = null;
 
 const buttonStyle = () => `
     .floating-div {
@@ -192,11 +191,12 @@ chrome.runtime.onMessage.addListener(async (message) => {
   }
 });
 
-export function setStorageDate({ options, setSaveData }) {
+export function setStorageDate({ options, setSaveData, reader }) {
   const date = new Date();
   date.setMinutes(date.getMinutes() + options.timer);
   reader = date.toString();
   setSaveData({ reader });
+  return reader;
 }
 export function setStorageBook({ navigator, setSaveData }) {
   navigator.bookURL = document.URL;
@@ -205,4 +205,5 @@ export function setStorageBook({ navigator, setSaveData }) {
       ? document.title.substring(0, 147) + "..."
       : document.title;
   setSaveData({ navigator });
+  return navigator;
 }
