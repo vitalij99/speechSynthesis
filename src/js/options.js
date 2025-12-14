@@ -1,3 +1,5 @@
+import { getStorage, setStorage } from "../lib/storage";
+
 const optionsForm = document.getElementById("optionsForm");
 const btnBook = document.getElementById("book");
 
@@ -31,7 +33,7 @@ loadDataFromStorage();
 
 // Initialize the form with the user's option settings
 async function loadDataFromStorage() {
-  const data = await chrome.storage.sync.get(["navigator", "options"]);
+  const data = await getStorage(["navigator", "options"]);
 
   if (data.navigator) {
     Object.assign(navigator, data.navigator);
@@ -58,6 +60,6 @@ optionsForm.addEventListener("change", () => {
   options.lastParagraf = optionsForm.lastParagraf.value;
   options.timeout = optionsForm.timeout.value;
 
-  chrome.storage.sync.set({ options });
+  setStorage({ options });
   console.log({ options });
 });

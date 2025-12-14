@@ -1,3 +1,5 @@
+import { getStorage, setStorage } from "../lib/storage";
+
 // menu.js
 const synth = window.speechSynthesis;
 const voiceSelect = document.querySelector("select");
@@ -86,7 +88,7 @@ if (speechSynthesis.onvoiceschanged !== undefined) {
 
 async function loadDataFromStorage() {
   try {
-    const stored = await chrome.storage.sync.get(["options", "reader"]);
+    const stored = await getStorage(["options", "reader"]);
 
     reader = stored.reader;
 
@@ -116,7 +118,7 @@ menuForm.addEventListener("change", () => {
   getTimeFormat(options.timer, menuForm);
 
   console.log(options);
-  chrome.storage.sync.set({ options });
+  setStorage({ options });
 });
 
 menuForm.addEventListener("input", () => {

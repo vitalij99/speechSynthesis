@@ -1,3 +1,5 @@
+import { getStorage, setStorage } from "../lib/storage";
+
 // popup.js
 const btnStartReader = document.getElementById("startReader");
 const historyMenu = document.getElementById("historyMenu");
@@ -34,7 +36,7 @@ function updateNavigatorLink(navigator) {
 
 async function loadHistory() {
   try {
-    const { history = [] } = await chrome.storage.sync.get("history");
+    const { history = [] } = await getStorage("history");
 
     if (!history.length) {
       historyMenu.innerHTML =
@@ -73,7 +75,7 @@ async function handleReaderToggle() {
     if (isActive) {
       await chrome.runtime.sendMessage({ action: "stopScript" });
       reader = null;
-      await chrome.storage.sync.set({ reader });
+      await setStorage({ reader });
     } else {
       await chrome.runtime.sendMessage({ action: "firstTimeScript" });
       window.close();
@@ -108,7 +110,7 @@ async function init() {
   isInitialized = true;
 
   try {
-    const { reader: storedReader, navigator } = await chrome.storage.sync.get([
+    const { reader: storedReader, navigator } = await getStorage([
       "reader",
       "navigator",
     ]);
