@@ -1,4 +1,7 @@
-import { clearParagraphStyle } from "../lib/clearParagraphStyle.js";
+import {
+  clearParagraphStyle,
+  styleCurrentParagraph,
+} from "../lib/clearParagraphStyle.js";
 import {
   createHTMLButton,
   setStorageBook,
@@ -202,23 +205,6 @@ function handleStopClick(synth, buttonStart, textContainer, paragraf) {
   setSaveData({ reader, navigator });
 
   chrome.runtime.sendMessage("stopScript");
-}
-
-function styleCurrentParagraph(container, index) {
-  try {
-    const paragraph = container.children[index];
-
-    // Скляний ефект + авто контраст
-    paragraph.style.backdropFilter = "blur(10px)";
-    paragraph.style.background = "rgba(255, 255, 255, 0.15)";
-    paragraph.style.filter = "invert(1)";
-    paragraph.style.borderRadius = "6px";
-    paragraph.style.outline = "2px solid rgba(0,0,0,0.9)";
-
-    paragraph.scrollIntoView({ behavior: "smooth", block: "center" });
-  } catch (error) {
-    console.error("Error styling paragraph:", error);
-  }
 }
 
 function setVoice(utterThis, voices) {
