@@ -1,3 +1,5 @@
+import { setSaveData } from "./storageContent";
+
 const mouse = { x: 0, y: 0 };
 let saveDataTimeout = null;
 
@@ -135,16 +137,7 @@ async function initGetStorage() {
   const data = await chrome.storage.sync.get("mouse");
   if (data.mouse) Object.assign(mouse, data.mouse);
 }
-function setSaveData(data) {
-  Object.assign(mouse, data);
 
-  if (saveDataTimeout) clearTimeout(saveDataTimeout);
-
-  saveDataTimeout = setTimeout(() => {
-    chrome.storage.sync.set({ mouse });
-    saveDataTimeout = null;
-  }, 300);
-}
 export async function createHTMLButton() {
   if (document.getElementById("floatingDiv")) return;
   await initGetStorage();
@@ -193,7 +186,23 @@ const handleParagraphChange = (isAdd) => {
 };
 chrome.runtime.onMessage.addListener(async (message) => {
   const { action, value } = message;
+
   if (action === "objustParagraphs") {
     if (value !== undefined) handleParagraphChange(value);
   }
 });
+
+export function setStorageDate({ options, setSaveData }) {
+  const date = new Date();
+  date.setMinutes(date.getMinutes() + options.timer);
+  reader = date.toString();
+  setSaveData({ reader });
+}
+export function setStorageBook({ navigator, setSaveData }) {
+  navigator.bookURL = document.URL;
+  navigator.book =
+    document.title.length > 150
+      ? document.title.substring(0, 147) + "..."
+      : document.title;
+  setSaveData({ navigator });
+}

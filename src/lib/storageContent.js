@@ -20,3 +20,24 @@ export const options = {
   },
 };
 // ----------------------------------------
+let lastData = null;
+let saveDataTimeout = null;
+
+export function setSaveData(data) {
+  lastData = {
+    ...lastData,
+    ...data,
+  };
+
+  if (saveDataTimeout) clearTimeout(saveDataTimeout);
+
+  saveDataTimeout = setTimeout(() => {
+    chrome.storage.sync.set(
+      Object.fromEntries(
+        Object.entries(lastData).filter(([_, v]) => v !== undefined)
+      )
+    );
+    lastData = null;
+    saveDataTimeout = null;
+  }, 300);
+}

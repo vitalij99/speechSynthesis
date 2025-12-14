@@ -1,16 +1,20 @@
-import { createHTMLButton } from "../lib/createHtmlButton.js";
+import { clearParagraphStyle } from "../lib/clearParagraphStyle.js";
+import {
+  createHTMLButton,
+  setStorageBook,
+  setStorageDate,
+} from "../lib/createHtmlButton.js";
 import { debounce } from "../lib/debounce.js";
+import { findElementWithMostDirectParagraphs } from "../lib/findElementWithMostDirectParagraphs.js";
 import {
   getHtmlElements,
   moveToNextPage,
   setNextPage,
 } from "../lib/pageNavigation.js";
-import { navigator, options } from "../lib/storageContent.js";
+import { resetReader } from "../lib/resetReader.js";
+import { navigator, options, setSaveData } from "../lib/storageContent.js";
 //script.js
 console.log("Script loaded");
-
-let saveDataTimeout = null;
-let lastData = null;
 
 let reader = null;
 let paragraf = 0;
@@ -32,12 +36,13 @@ async function startReade() {
     console.dir(textContainer);
     return;
   }
+  const synth = window.speechSynthesis;
 
   await createHTMLButton();
-  configureButtons(textContainer);
+  configureButtons(textContainer, synth);
 }
 
-function configureButtons(textContainer) {
+function configureButtons(textContainer, synth) {
   const buttonStart = document.getElementById("start");
   const buttonStop = document.getElementById("stop");
   const inputParagraf = document.getElementById("inputParagrafs");
@@ -48,8 +53,6 @@ function configureButtons(textContainer) {
   punktParagrafs.textContent = textContainer.children.length;
   inputParagraf.max = textContainer.children.length;
   inputParagraf.value = paragraf;
-  const synth = window.speechSynthesis;
-
   let voices = synth.getVoices();
 
   synth.onvoiceschanged = () => {
@@ -86,6 +89,7 @@ function configureButtons(textContainer) {
   };
 
   function speak() {
+    console.log("Speaking paragraf:", paragraf);
     if (synth.speaking) {
       console.error("speechSynthesis.speaking");
       return;
@@ -135,6 +139,7 @@ function configureButtons(textContainer) {
 
         utterThis.onerror = (event) => {
           if (event.error === "interrupted") return;
+          if (event.error === "not-allowed") return;
           console.error("SpeechSynthesisUtterance.onerror", event.error);
           timerCounter.count++;
 
@@ -145,7 +150,14 @@ function configureButtons(textContainer) {
             paragraf++;
             timerCounter.count = 0;
           }
-          resetReader({ synth, textContainer, paragraf, speak });
+          resetReader({
+            synth,
+            textContainer,
+            paragraf,
+            speak,
+            options,
+            reader,
+          });
         };
 
         setVoice(utterThis, voices);
@@ -158,12 +170,11 @@ function configureButtons(textContainer) {
     }
   }
 }
-
 function handleStartClick(synth, buttonStart, speak) {
   if (!synth.speaking) {
-    setStorageDate();
+    setStorageDate({ options, setSaveData });
 
-    setStorageBook();
+    setStorageBook({ navigator, setSaveData });
     speak();
   } else if (paused) {
     paused = false;
@@ -211,14 +222,6 @@ function styleCurrentParagraph(container, index) {
   }
 }
 
-function clearParagraphStyle(container, index) {
-  try {
-    container.children[index].style = "";
-  } catch {
-    return;
-  }
-}
-
 function setVoice(utterThis, voices) {
   if (!options.utterThis.language) return;
   for (const voice of voices) {
@@ -240,50 +243,6 @@ function getStorageData() {
   });
 }
 
-function findElementWithMostDirectParagraphs() {
-  console.log("Finding element with most direct paragraphs...");
-  const allElements = document.querySelectorAll("body *");
-  let maxCount = 0;
-  let bestElement = null;
-
-  for (let el of allElements) {
-    let count = 0;
-
-    for (let child of el.children) {
-      if (
-        child.tagName === "P" ||
-        child.tagName === "SPAN" ||
-        child.tagName === "DIV"
-      ) {
-        count++;
-      }
-    }
-
-    if (count > maxCount) {
-      maxCount = count;
-      bestElement = el;
-    }
-  }
-
-  return bestElement;
-}
-
-function setStorageDate() {
-  const date = new Date();
-  date.setMinutes(date.getMinutes() + options.timer);
-  reader = date.toString();
-  setSaveData({ reader });
-}
-
-function setStorageBook() {
-  navigator.bookURL = document.URL;
-  navigator.book =
-    document.title.length > 150
-      ? document.title.substring(0, 147) + "..."
-      : document.title;
-  setSaveData({ navigator });
-}
-
 function checkText(str) {
   if (!str) return "";
   const regex = /[\p{L}\p{N}]/u;
@@ -291,37 +250,6 @@ function checkText(str) {
     return str.replace(/(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu, "");
 }
 
-function resetReader({ synth, textContainer, paragraf, speak }) {
-  console.log("⏹ Озвучка зупинилася або нема нових слів.");
-
-  if (!options.timerCheckbox || !reader) return;
-
-  clearParagraphStyle(textContainer, paragraf);
-  synth.cancel();
-
-  if (!synth.speaking) {
-    speak();
-  }
-}
-
-function setSaveData(data) {
-  lastData = {
-    ...lastData,
-    ...data,
-  };
-
-  if (saveDataTimeout) clearTimeout(saveDataTimeout);
-
-  saveDataTimeout = setTimeout(() => {
-    chrome.storage.sync.set(
-      Object.fromEntries(
-        Object.entries(lastData).filter(([_, v]) => v !== undefined)
-      )
-    );
-    lastData = null;
-    saveDataTimeout = null;
-  }, 300);
-}
 function checkChildrenVisibility(textElement) {
   if (!textElement) return null;
 
@@ -395,8 +323,8 @@ async function handleStartReadFun() {
     setSaveData({ paragraf });
   }
 
-  setStorageDate();
-  setStorageBook();
+  setStorageDate({ options, setSaveData });
+  setStorageBook({ navigator, setSaveData });
   startReade();
 }
 async function handleStartReadNextPage(bookStart) {
