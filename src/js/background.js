@@ -1,3 +1,5 @@
+import { getStorage, setStorage } from "../lib/libBackground.js";
+
 // background.js
 chrome.runtime.onInstalled.addListener(() => {
   console.log("Extension installed");
@@ -13,7 +15,8 @@ chrome.commands.onCommand.addListener(async (command) => {
   if (command === "com-start") {
     console.log("Command received: ", command, scriptExecutionState);
     if (scriptExecutionState.reader) {
-      chrome.storage.sync.set({ reader: null });
+      await setStorage({ reader: false });
+
       updateState({ reader: false });
     } else {
       await executeScriptOnce(true);
@@ -163,14 +166,14 @@ async function setReadingList(tab) {
 }
 async function getStorageData(key) {
   return new Promise((resolve) => {
-    chrome.storage.sync.get([key], (result) => {
+    getStorage([key], (result) => {
       resolve(result.history);
     });
   });
 }
 async function setStorageData(key, value) {
   return new Promise((resolve) => {
-    chrome.storage.sync.set({ [key]: value }, () => {
+    setStorage({ [key]: value }, () => {
       resolve();
     });
   });
@@ -215,12 +218,12 @@ async function setNewHistory(name, link) {
 }
 
 async function loadState() {
-  const { scriptExecutionState: saved } = await chrome.storage.sync.get(
+  const { scriptExecutionState: saved } = await getStorage(
     "scriptExecutionState"
   );
-  nextPage = await chrome.storage.sync
-    .get("navigator")
-    .then((res) => res.navigator?.nextPageSave);
+  nextPage = await getStorage("navigator").then(
+    (res) => res.navigator?.nextPageSave
+  );
 
   if (saved) Object.assign(scriptExecutionState, saved);
 }
@@ -230,7 +233,7 @@ function updateState(updates) {
   saveState();
 }
 function saveState() {
-  chrome.storage.sync.set({ scriptExecutionState });
+  setStorage({ scriptExecutionState });
 }
 async function getCurrentTab() {
   const queryOptions = { active: true, lastFocusedWindow: true };

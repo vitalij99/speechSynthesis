@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["DOM", "ES2020"],
+
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+
+    "allowJs": true, // 🔑 дозволяє JS
+    "checkJs": false, // 🔕 не лізе з помилками в JS
+    "strict": true,
+
+    "noEmit": true, // Vite збирає код
+    "types": ["chrome"]
+  },
+  "include": ["src"]
+}
