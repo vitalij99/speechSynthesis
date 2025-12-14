@@ -32,12 +32,12 @@ async function startReade() {
     console.dir(textContainer);
     return;
   }
-  const synth = window.speechSynthesis;
+
   await createHTMLButton();
-  configureButtons(textContainer, synth);
+  configureButtons(textContainer);
 }
 
-function configureButtons(textContainer, synth) {
+function configureButtons(textContainer) {
   const buttonStart = document.getElementById("start");
   const buttonStop = document.getElementById("stop");
   const inputParagraf = document.getElementById("inputParagrafs");
@@ -48,6 +48,7 @@ function configureButtons(textContainer, synth) {
   punktParagrafs.textContent = textContainer.children.length;
   inputParagraf.max = textContainer.children.length;
   inputParagraf.value = paragraf;
+  const synth = window.speechSynthesis;
 
   let voices = synth.getVoices();
 
@@ -61,6 +62,28 @@ function configureButtons(textContainer, synth) {
     if (synth.speaking) synth.cancel();
     speak();
   }, 300);
+
+  const dateSave = new Date(reader);
+  const dateNow = new Date();
+
+  setTimeout(() => {
+    if (reader && dateSave > dateNow) {
+      setNextPage({ options, setSaveData, navigator });
+      speak();
+    }
+  }, 1000);
+
+  buttonStart.onclick = () => handleStartClick(synth, buttonStart, speak);
+  buttonStop.onclick = () =>
+    handleStopClick(synth, buttonStart, textContainer, paragraf);
+
+  inputParagraf.onchange = () => {
+    clearParagraphStyle(textContainer, paragraf);
+    paragraf = Number(inputParagraf.value);
+    if (paragraf < 0) paragraf = 0;
+
+    debouncedSpeak();
+  };
 
   function speak() {
     if (synth.speaking) {
@@ -134,42 +157,6 @@ function configureButtons(textContainer, synth) {
       }
     }
   }
-
-  const dateSave = new Date(reader);
-  const dateNow = new Date();
-
-  setTimeout(() => {
-    if (reader && dateSave > dateNow) {
-      setNextPage({ options, setSaveData, navigator });
-      speak();
-    }
-  }, 1000);
-
-  buttonStart.onclick = () => handleStartClick(synth, buttonStart, speak);
-  buttonStop.onclick = () =>
-    handleStopClick(synth, buttonStart, textContainer, paragraf);
-
-  inputParagraf.onchange = () => {
-    clearParagraphStyle(textContainer, paragraf);
-    paragraf = Number(inputParagraf.value);
-    if (paragraf < 0) paragraf = 0;
-
-    debouncedSpeak();
-  };
-}
-
-function handleParagraphChange(isAdd) {
-  const inputParagraf = document.getElementById("inputParagrafs");
-
-  if (isAdd) {
-    inputParagraf.value = Math.min(
-      Number(inputParagraf.value) + 1,
-      Number(inputParagraf.max)
-    );
-  } else {
-    inputParagraf.value = Math.max(Number(inputParagraf.value) - 1, 0);
-  }
-  inputParagraf.onchange();
 }
 
 function handleStartClick(synth, buttonStart, speak) {
@@ -386,10 +373,6 @@ chrome.runtime.onMessage.addListener(async (message) => {
 
     case "startReadeNextPage":
       await handleStartReadNextPage(value);
-      break;
-
-    case "objustParagraphs":
-      if (value !== undefined) handleParagraphChange(value);
       break;
   }
 });

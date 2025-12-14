@@ -178,3 +178,22 @@ export async function createHTMLButton() {
     onMouseDown(e, draggableElement, state)
   );
 }
+const handleParagraphChange = (isAdd) => {
+  const inputParagraf = document.getElementById("inputParagrafs");
+
+  if (isAdd) {
+    inputParagraf.value = Math.min(
+      Number(inputParagraf.value) + 1,
+      Number(inputParagraf.max)
+    );
+  } else {
+    inputParagraf.value = Math.max(Number(inputParagraf.value) - 1, 0);
+  }
+  inputParagraf.onchange();
+};
+chrome.runtime.onMessage.addListener(async (message) => {
+  const { action, value } = message;
+  if (action === "objustParagraphs") {
+    if (value !== undefined) handleParagraphChange(value);
+  }
+});
