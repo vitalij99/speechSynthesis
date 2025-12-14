@@ -1,6 +1,7 @@
 const optionsForm = document.getElementById("optionsForm");
 const btnBook = document.getElementById("book");
 
+console.log("options.js loaded");
 // storage keys -  navigator,  options,
 //  ----------------------------------------
 

@@ -9,6 +9,8 @@ export default defineConfig({
         background: "src/js/background.js",
         script: "src/js/script.js",
         menu: "src/js/menu.js",
+        options: "src/js/options.js",
+        popup: "src/js/popup.js",
       },
       output: {
         entryFileNames: "js/[name].js",
