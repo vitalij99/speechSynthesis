@@ -216,12 +216,12 @@ async function setNewHistory(name, link) {
 }
 
 async function loadState() {
-  const { scriptExecutionState: saved } = await getStorage(
+  const { scriptExecutionState: saved } = await chrome.storage.get(
     "scriptExecutionState"
   );
-  nextPage = await getStorage("navigator").then(
-    (res) => res.navigator?.nextPageSave
-  );
+  nextPage = await chrome.storage
+    .get("navigator")
+    .then((res) => res.navigator?.nextPageSave);
 
   if (saved) Object.assign(scriptExecutionState, saved);
 }
