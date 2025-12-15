@@ -18,7 +18,12 @@ import {
 } from "../lib/pageNavigation.js";
 import { resetReader } from "../lib/resetReader.js";
 import { setVoice } from "../lib/setVoice.js";
-import { navigator, options, setSaveData } from "../lib/storageContent.js";
+import {
+  getStorageData,
+  navigator,
+  options,
+  setSaveData,
+} from "../lib/storageContent.js";
 import { checkChildrenVisibility, checkText } from "../lib/textCheck.js";
 //script.js
 console.log("Script loaded");
@@ -210,17 +215,6 @@ function speak() {
       synth.speak(utterThis);
     }
   }
-}
-
-function getStorageData() {
-  return new Promise((resolve) => {
-    chrome.storage.sync.get(
-      ["reader", "navigator", "options", "paragraf"],
-      (result) => {
-        resolve(result);
-      }
-    );
-  });
 }
 
 async function initGetStorage() {

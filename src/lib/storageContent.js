@@ -41,3 +41,14 @@ export function setSaveData(data) {
     saveDataTimeout = null;
   }, 300);
 }
+
+export function getStorageData() {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get(
+      ["reader", "navigator", "options", "paragraf"],
+      (result) => {
+        resolve(result);
+      }
+    );
+  });
+}
