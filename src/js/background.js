@@ -216,7 +216,7 @@ async function setNewHistory(name, link) {
 }
 
 async function loadState() {
-  const { scriptExecutionState: saved } = await chrome.storage.get(
+  const { scriptExecutionState: saved } = await chrome.storage.sync.get(
     "scriptExecutionState"
   );
   nextPage = await chrome.storage
