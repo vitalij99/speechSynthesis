@@ -17,6 +17,7 @@ import {
   setNextPage,
 } from "../lib/pageNavigation.js";
 import { resetReader } from "../lib/resetReader.js";
+import { setVoice } from "../lib/setVoice.js";
 import { navigator, options, setSaveData } from "../lib/storageContent.js";
 import { checkChildrenVisibility, checkText } from "../lib/textCheck.js";
 //script.js
@@ -201,22 +202,12 @@ function speak() {
         });
       };
 
-      setVoice(utterThis, voices);
+      utterThis.voice = setVoice(utterThis, voices, options.utterThis.language);
       utterThis.pitch = options.utterThis.pitch;
       utterThis.rate = options.utterThis.rate;
       utterThis.volume = options.utterThis.volume;
 
       synth.speak(utterThis);
-    }
-  }
-}
-
-function setVoice(utterThis, voices) {
-  if (!options.utterThis.language) return;
-  for (const voice of voices) {
-    if (voice.name === options.utterThis.language) {
-      utterThis.voice = voice;
-      break;
     }
   }
 }
