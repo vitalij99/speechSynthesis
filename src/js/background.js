@@ -219,7 +219,7 @@ async function loadState() {
   const { scriptExecutionState: saved } = await chrome.storage.sync.get(
     "scriptExecutionState"
   );
-  nextPage = await chrome.storage
+  nextPage = await chrome.storage.sync
     .get("navigator")
     .then((res) => res.navigator?.nextPageSave);
 
