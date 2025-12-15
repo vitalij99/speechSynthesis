@@ -5,6 +5,7 @@ export function resetReader({
   speak,
   options,
   reader,
+  clearParagraphStyle,
 }) {
   console.log("⏹ Озвучка зупинилася або нема нових слів.");
 

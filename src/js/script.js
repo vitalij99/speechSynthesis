@@ -197,6 +197,7 @@ function speak() {
           speak,
           options,
           reader,
+          clearParagraphStyle,
         });
       };
 
