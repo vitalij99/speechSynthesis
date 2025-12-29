@@ -41,6 +41,7 @@ let textContainer = null;
 let synth = null;
 let voices = null;
 let utterThis = null;
+let stopFirstClick = false;
 
 async function startReade() {
   textContainer = getHtmlElements(options.contentDivElem);
@@ -109,10 +110,18 @@ function handleStopClick(buttonStart) {
   paused = false;
 
   setSaveData({ reader, navigator });
-
   chrome.runtime.sendMessage("stopScript");
+
+  if (stopFirstClick) {
+    stopFirstClick = false;
+
+    handleStartReadFun();
+  } else {
+    stopFirstClick = true;
+  }
 }
 function handleStartClick(buttonStart) {
+  stopFirstClick = false;
   if (!synth.speaking) {
     setStorageDate({ options, setSaveData, reader });
 
