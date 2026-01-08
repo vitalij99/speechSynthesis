@@ -40,6 +40,12 @@
         "default": "Alt+Z"
       },
       "description": "-1 paragraph"
+    },
+    "com-go-next-page": {
+      "suggested_key": {
+        "default": "Alt+C"
+      },
+      "description": "Go to next page"
     }
   },
   "background": {

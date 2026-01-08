@@ -293,5 +293,9 @@ chrome.runtime.onMessage.addListener(async (message) => {
     case "startReadeNextPage":
       await handleStartReadNextPage(value);
       break;
+
+    case "goToNextPage":
+      moveToNextPage({ navigator });
+      break;
   }
 });

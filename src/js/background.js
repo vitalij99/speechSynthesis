@@ -23,6 +23,11 @@ chrome.commands.onCommand.addListener(async (command) => {
     adjustParagraphCount(true);
   } else if (command === "com-rem-p") {
     adjustParagraphCount(false);
+  } else if (command === "com-go-next-page") {
+    const tab = await getCurrentTab();
+    chrome.tabs.sendMessage(tab.id, {
+      action: "goToNextPage",
+    });
   }
 });
 
