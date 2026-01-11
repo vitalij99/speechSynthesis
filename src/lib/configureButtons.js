@@ -8,10 +8,17 @@ export function configureButtons({
   handleStartClick,
   handleStopClick,
 }) {
-  const buttonStart = document.getElementById("start");
-  const buttonStop = document.getElementById("stop");
-  const inputParagraf = document.getElementById("inputParagrafs");
-  const punktParagrafs = document.getElementById("paragrafs");
+  const shadowHost = document.getElementById("chrome-ext-shadow-root");
+  const shadowRoot = shadowHost?.shadowRoot;
+  if (!shadowRoot) {
+    console.error("Shadow DOM not found. Call createHTMLButton() first.");
+    return;
+  }
+
+  const buttonStart = shadowRoot.getElementById("start");
+  const buttonStop = shadowRoot.getElementById("stop");
+  const inputParagraf = shadowRoot.getElementById("inputParagrafs");
+  const punktParagrafs = shadowRoot.getElementById("paragrafs");
 
   buttonStart.textContent = !paused ? "Pause" : "Play";
 

@@ -1,8 +1,10 @@
 import { setSaveData } from "./storageContent";
 
 const mouse = { x: 0, y: 0 };
+let inputParagraf = null;
 
 const buttonStyle = () => `
+
     .floating-div {
       display: flex;
       position: fixed;
@@ -13,8 +15,8 @@ const buttonStyle = () => `
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-      z-index: 999;
-    
+      z-index: 999999;
+      cursor: move;
     }
     .action-button {
       margin-right: 10px;
@@ -24,13 +26,16 @@ const buttonStyle = () => `
       color: white;
       border-radius: 5px;
       cursor: pointer;
+      font-size: 14px;
+    }
+    .action-button:hover {
+      background-color: #45a049;
     }
     .input-container {
       display: flex;
       align-items: center;
       justify-content: center;
-      background-color
-      : #fff;
+      background-color: #fff;
       padding-right: 5px;
       border-radius: 5px;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -41,10 +46,12 @@ const buttonStyle = () => `
       width: 55px;
       font-size: 16px;
       color: #000;
+      outline: none;
     }
     .paragraph {
       margin: 0 0 0 -12px;
       color: #000;
+      font-size: 16px;
     }
     .paragraph::before {
       content: "/";
@@ -53,17 +60,14 @@ const buttonStyle = () => `
       font-size: 20px;
       color: #777;
     }
-
-    #draggable {
-      user-select: none;    
-    }
     .no-select {
       user-select: none; 
       -webkit-user-select: none;
       -moz-user-select: none;
       -ms-user-select: none;
-      }
+    }
   `;
+
 const floatingDivHTML = `
     <div id="floatingDiv" class="floating-div">
       <div>
@@ -74,7 +78,6 @@ const floatingDivHTML = `
         <input type="number" id="inputParagrafs" class="input-number" value="0" min="0" max="7777">
         <p id="paragrafs" class="paragraph">0</p>
       </div>
-  
     </div>
   `;
 
@@ -88,8 +91,6 @@ function onMouseDown(e, draggableElement, state) {
   state.startY = e.clientY;
   state.initialX = (draggableElement.offsetLeft / window.innerWidth) * 100;
   state.initialY = (draggableElement.offsetTop / window.innerHeight) * 100;
-
-  document.body.classList.add("no-select");
 
   const moveHandler = (e) => onMouseMove(e, draggableElement, state);
   const upHandler = () =>
@@ -125,7 +126,6 @@ function onMouseUp(draggableElement, state, moveHandler, upHandler) {
   state.isDragging = false;
   document.removeEventListener("mousemove", moveHandler);
   document.removeEventListener("mouseup", upHandler);
-  document.body.classList.remove("no-select");
 
   if (state.newX && state.newY && state.onSave) {
     state.onSave(state.newX, state.newY);
@@ -137,19 +137,40 @@ async function initGetStorage() {
   if (data.mouse) Object.assign(mouse, data.mouse);
 }
 
+const handleParagraphChange = (isAdd) => {
+  if (isAdd) {
+    inputParagraf.value = Math.min(
+      Number(inputParagraf.value) + 1,
+      Number(inputParagraf.max)
+    );
+  } else {
+    inputParagraf.value = Math.max(Number(inputParagraf.value) - 1, 0);
+  }
+  inputParagraf.onchange();
+};
+
 export async function createHTMLButton() {
-  if (document.getElementById("floatingDiv")) return;
+  if (document.getElementById("chrome-ext-shadow-root")) return;
+
   await initGetStorage();
 
-  const floatingDiv = document.createElement("div");
-  floatingDiv.innerHTML = floatingDivHTML;
+  const shadowHost = document.createElement("div");
+  shadowHost.id = "chrome-ext-shadow-root";
+  shadowHost.style.cssText = "position: fixed; z-index: 999999;";
+
+  const shadowRoot = shadowHost.attachShadow({ mode: "open" });
 
   const styleElement = document.createElement("style");
   styleElement.textContent = buttonStyle();
-  document.body.appendChild(floatingDiv);
-  document.head.appendChild(styleElement);
+  shadowRoot.appendChild(styleElement);
 
-  const draggableElement = document.getElementById("floatingDiv");
+  const container = document.createElement("div");
+  container.innerHTML = floatingDivHTML;
+  shadowRoot.appendChild(container);
+
+  document.body.appendChild(shadowHost);
+
+  const draggableElement = shadowRoot.getElementById("floatingDiv");
 
   const state = {
     isDragging: false,
@@ -169,33 +190,12 @@ export async function createHTMLButton() {
   draggableElement.addEventListener("mousedown", (e) =>
     onMouseDown(e, draggableElement, state)
   );
+
+  inputParagraf = shadowRoot.getElementById("inputParagrafs");
 }
-const handleParagraphChange = (isAdd) => {
-  const inputParagraf = document.getElementById("inputParagrafs");
-
-  if (isAdd) {
-    inputParagraf.value = Math.min(
-      Number(inputParagraf.value) + 1,
-      Number(inputParagraf.max)
-    );
-  } else {
-    inputParagraf.value = Math.max(Number(inputParagraf.value) - 1, 0);
-  }
-  inputParagraf.onchange();
-};
-
 export function addParagraph(paragraf) {
-  const inputParagraf = document.getElementById("inputParagrafs");
   inputParagraf.value = paragraf;
 }
-
-chrome.runtime.onMessage.addListener(async (message) => {
-  const { action, value } = message;
-
-  if (action === "objustParagraphs") {
-    if (value !== undefined) handleParagraphChange(value);
-  }
-});
 
 export function setStorageDate({ options, setSaveData, reader }) {
   const date = new Date();
@@ -213,3 +213,11 @@ export function setStorageBook({ navigator, setSaveData }) {
   setSaveData({ navigator });
   return navigator;
 }
+
+chrome.runtime.onMessage.addListener(async (message) => {
+  const { action, value } = message;
+
+  if (action === "objustParagraphs") {
+    if (value !== undefined) handleParagraphChange(value);
+  }
+});
