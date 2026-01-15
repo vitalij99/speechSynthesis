@@ -1,9 +1,14 @@
 import { getStorage, setStorage } from "../lib/storage";
+import { debounce } from "../utils/debounce";
 
 // popup.js
 const btnStartReader = document.getElementById("startReader");
+
 const historyMenu = document.getElementById("historyMenu");
 const toggleBtn = document.getElementById("toggleHistory");
+
+const rulesText = document.getElementById("rulesText");
+const toggleRulesBtn = document.getElementById("toggleRulesText");
 
 let reader = null;
 let isInitialized = false;
@@ -104,16 +109,42 @@ chrome.storage.onChanged.addListener((changes, area) => {
     loadHistory();
   }
 });
+async function toggleHistory() {
+  const isHidden = historyMenu.classList.contains("hidden");
+
+  if (isHidden) {
+    await loadHistory();
+    historyMenu.classList.remove("hidden");
+    toggleBtn.setAttribute("aria-expanded", "true");
+  } else {
+    historyMenu.classList.add("hidden");
+    toggleBtn.setAttribute("aria-expanded", "false");
+  }
+}
+
+function toggleRules(storedRulesText) {
+  const isHidden = rulesText.classList.contains("hidden");
+
+  if (isHidden) {
+    rulesText.value = storedRulesText || "";
+    rulesText.classList.remove("hidden");
+    toggleRulesBtn.setAttribute("aria-expanded", "true");
+  } else {
+    rulesText.classList.add("hidden");
+    toggleRulesBtn.setAttribute("aria-expanded", "false");
+  }
+}
 
 async function init() {
   if (isInitialized) return;
   isInitialized = true;
 
   try {
-    const { reader: storedReader, navigator } = await getStorage([
-      "reader",
-      "navigator",
-    ]);
+    const {
+      reader: storedReader,
+      navigator,
+      rulesText: storedRulesText,
+    } = await getStorage(["reader", "navigator", "rulesText"]);
 
     reader = storedReader;
     updateReaderButton(reader);
@@ -121,18 +152,16 @@ async function init() {
 
     btnStartReader.addEventListener("click", handleReaderToggle);
 
-    toggleBtn.addEventListener("click", async () => {
-      const isHidden = historyMenu.classList.contains("hidden");
-
-      if (isHidden) {
-        await loadHistory();
-        historyMenu.classList.remove("hidden");
-        toggleBtn.setAttribute("aria-expanded", "true");
-      } else {
-        historyMenu.classList.add("hidden");
-        toggleBtn.setAttribute("aria-expanded", "false");
-      }
-    });
+    toggleBtn.addEventListener("click", toggleHistory);
+    toggleRulesBtn.addEventListener("click", () =>
+      toggleRules(storedRulesText)
+    );
+    rulesText.addEventListener(
+      "input",
+      debounce(() => {
+        chrome.storage.sync.set({ rulesText: rulesText.value });
+      }, 300)
+    );
   } catch (error) {
     console.error("Failed to initialize popup:", error);
   }

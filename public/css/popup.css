@@ -25,9 +25,24 @@ body {
   justify-content: center;
 }
 
-#toggleHistory {
+.toggleHistory {
   position: absolute;
   right: 0;
+}
+.toggleRulesText {
+  position: absolute;
+  left: 0;
+}
+.rules-text {
+  width: 80%;
+  min-height: 150px;
+  padding: 5px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-family: monospace;
+  resize: vertical;
 }
 
 .btn {

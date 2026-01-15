@@ -17,13 +17,21 @@
         >Last start reade</a
       >
       <div class="btn-popup-wrapp">
+        <button id="toggleRulesText" class="btn toggleRulesText">
+          Rules Text
+        </button>
         <div class="center">
           <button id="startReader" class="btn">Play</button>
         </div>
-        <button id="toggleHistory" class="btn">📚 History</button>
+        <button id="toggleHistory" class="btn toggleHistory">📚 History</button>
       </div>
     </div>
     <div id="historyMenu" class="history-menu hidden"></div>
+    <textarea
+      id="rulesText"
+      class="rules-text hidden"
+      placeholder="text - new Text"
+    ></textarea>
     <script type="module" type="module" src="../js/popup.js"></script>
   </body>
 </html>
