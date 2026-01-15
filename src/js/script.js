@@ -1,4 +1,8 @@
 import {
+  autoScrollToParagraph,
+  startAutoScrollEvents,
+} from "../lib/autoScroll.js";
+import {
   clearParagraphStyle,
   styleCurrentParagraph,
 } from "../lib/clearParagraphStyle.js";
@@ -66,6 +70,7 @@ async function startReade() {
   };
 
   setNextPage({ options, setSaveData, navigator });
+  startAutoScrollEvents();
   configureButtons({
     textContainer,
     synth,
@@ -175,6 +180,8 @@ function speak() {
     } else if (paragrafText !== "") {
       utterThis = new SpeechSynthesisUtterance(paragrafText);
       styleCurrentParagraph(textContainer, paragraf);
+      autoScrollToParagraph(textContainer, paragraf);
+
       saveStyledParagraf = paragraf;
 
       utterThis.onend = () => {
