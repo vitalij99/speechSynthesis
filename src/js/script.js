@@ -20,6 +20,7 @@ import {
   moveToNextPage,
   setNextPage,
 } from "../lib/pageNavigation.js";
+import { initStorageRulesText, replaceText } from "../lib/replaceText.js";
 import { resetReader } from "../lib/resetReader.js";
 import { setVoice } from "../lib/setVoice.js";
 import {
@@ -178,7 +179,9 @@ function speak() {
       addParagraph(paragraf);
       speak();
     } else if (paragrafText !== "") {
-      utterThis = new SpeechSynthesisUtterance(paragrafText);
+      const repText = replaceText(paragrafText);
+
+      utterThis = new SpeechSynthesisUtterance(repText);
       styleCurrentParagraph(textContainer, paragraf);
       autoScrollToParagraph(textContainer, paragraf);
 
@@ -241,6 +244,7 @@ async function initGetStorage() {
   if (data.navigator) Object.assign(navigator, data.navigator);
 
   if (data.options) Object.assign(options, data.options);
+  await initStorageRulesText();
 }
 
 async function handleStartReadFun() {
