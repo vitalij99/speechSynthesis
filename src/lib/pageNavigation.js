@@ -1,3 +1,5 @@
+import { setSaveData } from "./storageContent";
+
 export function getHtmlElements(selector, document = window.document) {
   try {
     return (
@@ -48,6 +50,8 @@ export function setNextPage({ options, setSaveData, navigator }) {
   setSaveData({ navigator });
 }
 export function moveToNextPage({ navigator }) {
+  setSaveData({ paragraf: 0 });
+
   const initialURL = window.location.href;
   const params = {
     key: "ArrowRight",

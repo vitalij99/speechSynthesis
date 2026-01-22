@@ -270,13 +270,14 @@ async function handleStartReadNextPage(bookStart) {
   if (reader && sameBook && options?.timerCheckbox && dateSave > dateNow) {
     if (url !== navigator.thisPageSave) {
       paragraf = 0;
+      setSaveData({ paragraf });
     }
 
     setTimeout(
       () => {
         startReade();
       },
-      Number(options.timeout) ? Number(options.timeout) : 1000
+      Number(options.timeout) ? Number(options.timeout) : 1000,
     );
   }
 }
