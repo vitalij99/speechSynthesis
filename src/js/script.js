@@ -4,6 +4,7 @@ import {
 } from "../lib/autoScroll.js";
 import {
   clearParagraphStyle,
+  initStyles,
   styleCurrentParagraph,
 } from "../lib/paragraphStyle.js";
 import { configureButtons } from "../lib/configureButtons.js";
@@ -245,6 +246,7 @@ async function initGetStorage() {
 
   if (data.options) Object.assign(options, data.options);
   await initStorageRulesText();
+  await initStyles();
 }
 
 async function handleStartReadFun() {
