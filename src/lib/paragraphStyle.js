@@ -15,35 +15,54 @@ export async function initStyles() {
     }
   });
 }
-
-const styles = [
+const allStyles = {
+  backdropFilter: "blur(10px)",
+  borderRadius: "6px",
+  outlineOffset: "3px",
+};
+export const styles = [
   {
-    background: "rgba(255, 0, 0, 0.15)",
-    outline: "2px solid red",
-    filter: "invert(0)",
-  },
-  {
-    background: "rgba(0, 255, 0, 0.15)",
-    outline: "2px solid green",
-    filter: "invert(1)",
-  },
-  {
+    ...allStyles,
     background: "rgba(0, 0, 255, 0.15)",
     outline: "2px solid blue",
-    filter: "invert(0)",
   },
   {
-    background: "rgba(255, 255, 0, 0.15)",
-    outline: "2px solid orange",
+    ...allStyles,
+    background: "rgba(0, 0, 255, 0.15)",
+    outline: "2px solid yellow",
     filter: "invert(1)",
   },
   {
-    background: "rgba(255, 0, 255, 0.15)",
-    outline: "2px solid purple",
-    filter: "invert(0)",
+    ...allStyles,
+    background: "rgba(255, 255, 0, 0.15)",
+    outline: "2px solid orange",
   },
   {
+    ...allStyles,
+    background: "rgba(255, 255, 0, 0.15)",
+    outline: "2px solid rgb(0, 95, 255)",
+    filter: "invert(1)",
+  },
+  {
+    ...allStyles,
+    background: "rgba(255, 255, 255, 0.15)",
     outline: "2px solid cyan",
+  },
+  {
+    ...allStyles,
+    background: "rgba(255, 255, 255, 0.15)",
+    outline: "2px solid red",
+    filter: "invert(1)",
+  },
+  {
+    ...allStyles,
+    background: "rgba(255, 255, 255, 0.15)",
+  },
+  {
+    ...allStyles,
+    background: "rgba(255, 255, 255, 0.15)",
+
+    filter: "invert(1)",
   },
 ];
 
@@ -59,13 +78,7 @@ export function styleCurrentParagraph(container, index) {
   }
 }
 function getStyles() {
-  const allStyles = {
-    backdropFilter: "blur(10px)",
-    background: "rgba(255, 255, 255, 0.15)",
-    borderRadius: "6px",
-  };
-
-  return { ...allStyles, ...styles[stylesIndex % styles.length] };
+  return { ...styles[stylesIndex % styles.length] };
 }
 chrome.storage.onChanged.addListener((changes) => {
   if (changes.stylesIndex) {

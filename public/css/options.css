@@ -32,3 +32,20 @@ textarea {
   font-size: 14px;
   resize: vertical;
 }
+#styleParagraphs {
+  margin-top: 5px;
+  padding: 5px;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+
+  & > p {
+    margin-top: 20px;
+  }
+
+  & > p:hover {
+    margin-left: 10px;
+  }
+}
+.selected {
+  margin-left: 20px;
+}

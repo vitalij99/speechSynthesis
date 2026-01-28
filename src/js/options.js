@@ -1,11 +1,13 @@
+import { styles } from "../lib/paragraphStyle";
 import { getStorage, setStorage } from "../lib/storage";
 
 const optionsForm = document.getElementById("optionsForm");
 const btnBook = document.getElementById("book");
+const stylesP = document.getElementById("styleParagraphs");
 
 // storage keys -  navigator,  options,
 //  ----------------------------------------
-
+const STORAGE_KEY = "stylesIndex";
 const navigator = {
   nextPageSave: null,
   thisPageSave: null,
@@ -27,13 +29,14 @@ const options = {
     volume: 1,
   },
 };
+let stylesIndex = 0;
 // ----------------------------------------
 
 loadDataFromStorage();
 
 // Initialize the form with the user's option settings
 async function loadDataFromStorage() {
-  const data = await getStorage(["navigator", "options"]);
+  const data = await getStorage(["navigator", "options", STORAGE_KEY]);
 
   if (data.navigator) {
     Object.assign(navigator, data.navigator);
@@ -43,7 +46,13 @@ async function loadDataFromStorage() {
     Object.assign(options, data.options);
   }
 
-  console.log({ navigator, options });
+  if (data.stylesIndex !== undefined) {
+    stylesIndex = data.stylesIndex;
+  }
+
+  initStylesParagraph();
+
+  console.log({ navigator, options, stylesIndex });
 
   optionsForm.contentDivElem.value = options.contentDivElem;
   optionsForm.nextPage.value = options.nextPageBtn;
@@ -63,3 +72,35 @@ optionsForm.addEventListener("change", () => {
   setStorage({ options });
   console.log({ options });
 });
+
+function updateStylesParagraph() {}
+
+function initStylesParagraph() {
+  for (let i = 0; i < styles.length; i++) {
+    const p = document.createElement("p");
+    p.textContent = `Style ${i + 1}: text hello world`;
+
+    Object.assign(p.style, styles[i]);
+
+    p.style.cursor = "pointer";
+
+    if (i === stylesIndex) {
+      p.classList.add("selected");
+    }
+
+    p.addEventListener("click", () => {
+      selectStyle(i);
+    });
+
+    stylesP.appendChild(p);
+  }
+}
+
+function selectStyle(index) {
+  [...stylesP.children].forEach((el) => el.classList.remove("selected"));
+
+  stylesP.children[index].classList.add("selected");
+
+  setStorage({ [STORAGE_KEY]: index });
+  stylesIndex = index;
+}
