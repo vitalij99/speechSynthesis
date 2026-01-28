@@ -5,7 +5,7 @@ import {
 import {
   clearParagraphStyle,
   styleCurrentParagraph,
-} from "../lib/clearParagraphStyle.js";
+} from "../lib/paragraphStyle.js";
 import { configureButtons } from "../lib/configureButtons.js";
 import {
   addParagraph,
