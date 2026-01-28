@@ -13,7 +13,7 @@ import {
   setStorageBook,
   setStorageDate,
 } from "../lib/createHtmlButton.js";
-import { debounce } from "../lib/debounce.js";
+import { debounce } from "../utils/debounce.js";
 import { findElementWithMostDirectParagraphs } from "../lib/findElementWithMostDirectParagraphs.js";
 import {
   getHtmlElements,
