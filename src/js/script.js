@@ -113,7 +113,9 @@ function handleStopClick(buttonStart) {
   clearParagraphStyle(textContainer, paragraf);
 
   synth.cancel();
-  buttonStart.textContent = "Play";
+  if (buttonStart) {
+    buttonStart.textContent = "Play";
+  }
   paused = false;
 
   setSaveData({ reader, navigator });
@@ -261,15 +263,14 @@ async function handleStartReadFun() {
   setStorageBook({ navigator, setSaveData });
   startReade();
 }
-async function handleStartReadNextPage(bookStart) {
+async function handleStartReadNextPage() {
   const url = document.URL;
   await initGetStorage();
 
   const dateSave = new Date(reader);
   const dateNow = new Date();
-  const sameBook = url.includes(bookStart);
 
-  if (reader && sameBook && options?.timerCheckbox && dateSave > dateNow) {
+  if (reader && options?.timerCheckbox && dateSave > dateNow) {
     if (url !== navigator.thisPageSave) {
       paragraf = 0;
       setSaveData({ paragraf });
@@ -297,7 +298,7 @@ chrome.storage.onChanged.addListener((changes) => {
   }
 });
 chrome.runtime.onMessage.addListener(async (message) => {
-  const { action, value } = message;
+  const { action } = message;
 
   switch (action) {
     case "startReadeFun":
@@ -305,11 +306,23 @@ chrome.runtime.onMessage.addListener(async (message) => {
       break;
 
     case "startReadeNextPage":
-      await handleStartReadNextPage(value);
+      await handleStartReadNextPage();
       break;
 
     case "goToNextPage":
       moveToNextPage({ navigator });
       break;
+    case "isReaderActive":
+      togleReaderOff();
+      break;
   }
 });
+function togleReaderOff() {
+  if (synth?.speaking) {
+    handleStopClick();
+    stopFirstClick = false;
+  } else {
+    stopFirstClick = false;
+    handleStartReadFun();
+  }
+}

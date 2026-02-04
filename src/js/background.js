@@ -17,19 +17,13 @@ loadState();
 chrome.commands.onCommand.addListener(async (command) => {
   if (command === "com-start") {
     console.log("Command received: ", command, scriptExecutionState);
-    if (scriptExecutionState.reader) {
-      console.log("Stopping reader");
-      await chrome.storage.sync.set({ reader: false });
 
-      updateState({ reader: false });
-    } else {
-      await executeScriptOnce({
-        sendMessage: true,
-        scriptExecutionState,
-        updateState,
-        nextPage,
-      });
-    }
+    await executeScriptOnce({
+      sendMessage: true,
+      scriptExecutionState,
+      updateState,
+      nextPage,
+    });
   } else if (command === "com-add-p") {
     adjustParagraphCount(true);
   } else if (command === "com-rem-p") {

@@ -14,6 +14,7 @@ export async function executeScriptOnce({
 
     const action = sendMessage ? "startReadeFun" : "startReadeNextPage";
 
+    // Check if we are on a different book
     if (!tab.url.includes(nextPage)) {
       if (
         scriptExecutionState.book.split("/").length + 1 >
@@ -27,8 +28,10 @@ export async function executeScriptOnce({
       }
     }
 
+    // If the script is already active on this page, just send a message
+    // in popup or command case
     try {
-      await chrome.tabs.sendMessage(tab.id, { action });
+      await chrome.tabs.sendMessage(tab.id, { action: "isReaderActive" });
       setNewHistory(tab.title, tab.url);
       updateState({ reader: true });
 
@@ -45,7 +48,7 @@ export async function executeScriptOnce({
 
     updateState({ book, isActive: pageKey, reader: true });
 
-    chrome.tabs.sendMessage(tab.id, { action, value: book });
+    chrome.tabs.sendMessage(tab.id, { action });
 
     setNewHistory(tab.title, tab.url);
 
