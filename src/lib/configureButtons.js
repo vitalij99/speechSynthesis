@@ -30,4 +30,16 @@ export function configureButtons({
   buttonStop.onclick = () => handleStopClick(buttonStart);
 
   inputParagraf.onchange = () => handleParagraphChange(inputParagraf);
+  inputParagraf.oninput = (e) => {
+    if (synth.speaking) synth.cancel();
+
+    const paragraf = Number(e.target.value);
+
+    if (textContainer.children[paragraf]) {
+      textContainer.children[paragraf]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  };
 }

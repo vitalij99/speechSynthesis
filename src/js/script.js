@@ -99,7 +99,7 @@ function handleParagraphChange(inputParagraf) {
   clearParagraphStyle(textContainer, paragraf);
   paragraf = Number(inputParagraf.value);
   if (paragraf < 0) paragraf = 0;
-  if (synth.speaking) synth.cancel();
+
   debouncedSpeak();
 }
 
