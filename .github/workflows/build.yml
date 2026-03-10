@@ -35,8 +35,9 @@ jobs:
           cd build
           zip -r ../reader-v${{ steps.package-version.outputs.version }}.zip .
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: reader-extension
-          path: reader-v${{ steps.package-version.outputs.version }}.zip
+          tag_name: v${{ steps.package-version.outputs.version }}
+          name: Chrome Extension v${{ steps.package-version.outputs.version }}
+          files: reader-v${{ steps.package-version.outputs.version }}.zip

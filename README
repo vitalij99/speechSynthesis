@@ -1,0 +1,16 @@
+# Reader Chrome Extension
+
+Chrome Extension for audio book reading
+
+## Download
+
+[⬇ Download latest version](https://github.com/vitalij99/speechSynthesis/releases/latest)
+
+## Install
+
+1. Download the zip
+2. Extract it
+3. Open `chrome://extensions`
+4. Enable Developer mode
+5. Click **Load unpacked**
+6. Select the folder
