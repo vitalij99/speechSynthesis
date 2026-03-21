@@ -115,8 +115,9 @@ function onMouseMove(e, draggableElement, state) {
 
   if (state.newX < 0) state.newX = 0;
   if (state.newY < 0) state.newY = 0;
-  if (state.newX + elementWidth > 100) state.newX = 100 - elementWidth;
-  if (state.newY + elementHeight > 100) state.newY = 100 - elementHeight;
+  if (Number(state.newX) + elementWidth > 100) state.newX = 100 - elementWidth;
+  if (Number(state.newY) + elementHeight > 100)
+    state.newY = 100 - elementHeight;
 
   draggableElement.style.left = `${state.newX}%`;
   draggableElement.style.top = `${state.newY}%`;
