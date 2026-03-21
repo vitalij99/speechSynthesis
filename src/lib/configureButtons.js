@@ -35,12 +35,12 @@ export function configureButtons({
   inputParagraf.oninput = (e) => {
     if (synth.speaking) synth.cancel();
 
-    // if handleParagraphChange action === "objustParagraphs"
-    if (typeof e === "number") {
-      autoScrollToParagraph(textContainer, Number(e), false);
-      return;
-    } else {
-      autoScrollToParagraph(textContainer, Number(e.target.value), false);
-    }
+    autoScrollToParagraph(textContainer, getValue(e), false);
   };
+}
+// if handleParagraphChange action === "objustParagraphs"
+function getValue(e) {
+  if (typeof e === "number") return e;
+
+  return Number(e.target.value);
 }
