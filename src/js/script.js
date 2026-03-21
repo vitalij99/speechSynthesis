@@ -96,6 +96,8 @@ async function startReade() {
 }
 
 function handleParagraphChange(inputParagraf) {
+  if (synth?.speaking) synth.cancel();
+
   clearParagraphStyle(textContainer, paragraf);
   paragraf = Number(inputParagraf.value);
   if (paragraf < 0) paragraf = 0;
@@ -153,7 +155,7 @@ const debouncedSpeak = debounce(() => {
 
 function speak() {
   if (synth.speaking) {
-    console.error("speechSynthesis.speaking");
+    console.error("synth.speaking");
     return;
   }
 

@@ -1,3 +1,5 @@
+import { autoScrollToParagraph } from "./autoScroll";
+
 export function configureButtons({
   textContainer,
   synth,
@@ -33,13 +35,12 @@ export function configureButtons({
   inputParagraf.oninput = (e) => {
     if (synth.speaking) synth.cancel();
 
-    const paragraf = Number(e.target.value);
-
-    if (textContainer.children[paragraf]) {
-      textContainer.children[paragraf]?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
+    // if handleParagraphChange action === "objustParagraphs"
+    if (typeof e === "number") {
+      autoScrollToParagraph(textContainer, Number(e), false);
+      return;
+    } else {
+      autoScrollToParagraph(textContainer, Number(e.target.value), false);
     }
   };
 }

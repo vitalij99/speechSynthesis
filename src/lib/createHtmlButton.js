@@ -138,15 +138,15 @@ async function initGetStorage() {
 }
 
 const handleParagraphChange = (isAdd) => {
-  if (isAdd) {
-    inputParagraf.value = Math.min(
-      Number(inputParagraf.value) + 1,
-      Number(inputParagraf.max)
-    );
-  } else {
-    inputParagraf.value = Math.max(Number(inputParagraf.value) - 1, 0);
-  }
-  inputParagraf.onchange();
+  const value = isAdd
+    ? Number(inputParagraf.value) + 1
+    : Number(inputParagraf.value) - 1;
+  if (value < 0) inputParagraf.value = 0;
+
+  inputParagraf.value = value;
+
+  inputParagraf.oninput(value);
+  inputParagraf.onchange(value);
 };
 
 export async function createHTMLButton() {
@@ -188,7 +188,7 @@ export async function createHTMLButton() {
   };
 
   draggableElement.addEventListener("mousedown", (e) =>
-    onMouseDown(e, draggableElement, state)
+    onMouseDown(e, draggableElement, state),
   );
 
   inputParagraf = shadowRoot.getElementById("inputParagrafs");

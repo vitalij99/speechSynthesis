@@ -1,9 +1,13 @@
 let isAutoScroll = false;
 let userScrollTimeout = null;
 
-export function autoScrollToParagraph(container, index) {
+export function autoScrollToParagraph(
+  container,
+  index,
+  isAutoScrollEnabled = isAutoScroll,
+) {
   try {
-    if (isAutoScroll) return;
+    if (isAutoScrollEnabled) return;
 
     const paragraph = container.children[index];
     if (!paragraph) return;
@@ -41,7 +45,7 @@ export function startAutoScrollEvents() {
           userScrollTimeout = null;
         }, 2000);
       },
-      { passive: true }
+      { passive: true },
     );
   });
 }
