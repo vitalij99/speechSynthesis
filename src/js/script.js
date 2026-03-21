@@ -137,6 +137,7 @@ function handleStartClick(buttonStart) {
     setStorageDate({ options, setSaveData, reader });
 
     setStorageBook({ navigator, setSaveData });
+    buttonStart.textContent = "Pause";
     speak();
   } else if (paused) {
     paused = false;
