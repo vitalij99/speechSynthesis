@@ -21,7 +21,13 @@ export function autoScrollToParagraph(
   }
 }
 
-const userScrollEvents = ["wheel", "touchstart", "touchmove", "scroll"];
+const userScrollEvents = [
+  "wheel",
+  "touchstart",
+  "touchmove",
+  "keydown",
+  "mousedown",
+];
 
 export function startAutoScrollEvents() {
   userScrollEvents.forEach((event) => {
