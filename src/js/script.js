@@ -7,12 +7,11 @@ import {
   initStyles,
   styleCurrentParagraph,
 } from "../lib/paragraphStyle.js";
-import { configureButtons } from "../lib/configureButtons.js";
+import { configureButtons, configureReload } from "../lib/configureButtons.js";
 import {
   addParagraph,
   createHTMLButton,
   setStorageBook,
-  setStorageDate,
 } from "../lib/createHtmlButton.js";
 import { debounce } from "../utils/debounce.js";
 import { findElementWithMostDirectParagraphs } from "../lib/findElementWithMostDirectParagraphs.js";
@@ -31,6 +30,7 @@ import {
   setSaveData,
 } from "../lib/storageContent.js";
 import { checkChildrenVisibility, checkText } from "../lib/textCheck.js";
+import { setStorageDate } from "../lib/setStorageDate.js";
 //script.js
 console.log("Script loaded");
 
@@ -262,9 +262,7 @@ async function handleStartReadFun() {
     setSaveData({ paragraf });
   }
 
-  reader = setStorageDate({ options, setSaveData, reader });
-  setStorageBook({ navigator, setSaveData });
-  startReade();
+  setStorageBookDataStart();
 }
 async function handleStartReadNextPage() {
   const url = document.URL;
@@ -285,7 +283,19 @@ async function handleStartReadNextPage() {
       },
       Number(options.timeout) ? Number(options.timeout) : 1000,
     );
+  } else if (reader && options?.timerCheckbox) {
+    await createHTMLButton(true);
+    paragraf = 0;
+    setSaveData({ paragraf });
+    configureReload(setStorageBookDataStart);
   }
+}
+
+function setStorageBookDataStart() {
+  reader = setStorageDate({ options, setSaveData, reader });
+  setStorageBook({ navigator, setSaveData });
+
+  startReade();
 }
 
 chrome.storage.onChanged.addListener((changes) => {

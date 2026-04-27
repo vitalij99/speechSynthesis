@@ -38,6 +38,22 @@ export function configureButtons({
     autoScrollToParagraph(textContainer, getValue(e), false);
   };
 }
+
+export function configureReload(setStorageBookDataStart) {
+  const shadowHost = document.getElementById("chrome-ext-shadow-root");
+  const shadowRoot = shadowHost?.shadowRoot;
+  if (!shadowRoot) {
+    console.error("Shadow DOM not found. Call createHTMLButton() first.");
+    return;
+  }
+  const buttonReload = shadowRoot.getElementById("reload");
+
+  buttonReload.onclick = () => {
+    console.log("reload");
+    shadowHost.remove();
+    setStorageBookDataStart();
+  };
+}
 // if handleParagraphChange action === "objustParagraphs"
 function getValue(e) {
   if (typeof e === "number") return e;
