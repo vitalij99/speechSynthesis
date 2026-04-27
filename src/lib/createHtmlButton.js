@@ -81,6 +81,12 @@ const floatingDivHTML = `
     </div>
   `;
 
+const floatingDivHTMLnextButton = `
+    <div id="floatingDiv" class="floating-div no-select">
+      <button id="reload" class="action-button">Reload</button>
+    </div>
+  `;
+
 function onMouseDown(e, draggableElement, state) {
   if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON") {
     return;
@@ -150,7 +156,7 @@ const handleParagraphChange = (isAdd) => {
   inputParagraf.onchange(value);
 };
 
-export async function createHTMLButton() {
+export async function createHTMLButton(isReload = false) {
   if (document.getElementById("chrome-ext-shadow-root")) return;
 
   await initGetStorage();
@@ -166,7 +172,7 @@ export async function createHTMLButton() {
   shadowRoot.appendChild(styleElement);
 
   const container = document.createElement("div");
-  container.innerHTML = floatingDivHTML;
+  container.innerHTML = isReload ? floatingDivHTMLnextButton : floatingDivHTML;
   shadowRoot.appendChild(container);
 
   document.body.appendChild(shadowHost);
@@ -198,13 +204,6 @@ export function addParagraph(paragraf) {
   inputParagraf.value = paragraf;
 }
 
-export function setStorageDate({ options, setSaveData, reader }) {
-  const date = new Date();
-  date.setMinutes(date.getMinutes() + options.timer);
-  reader = date.toString();
-  setSaveData({ reader });
-  return reader;
-}
 export function setStorageBook({ navigator, setSaveData }) {
   navigator.bookURL = document.URL;
   navigator.book =
