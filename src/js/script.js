@@ -284,7 +284,7 @@ async function handleStartReadNextPage() {
       Number(options.timeout) ? Number(options.timeout) : 1000,
     );
   } else if (reader && options?.timerCheckbox) {
-    await createHTMLButton(true);
+    await createHTMLButton(true, { reader, options });
     paragraf = 0;
     setSaveData({ paragraf });
     configureReload(setStorageBookDataStart);

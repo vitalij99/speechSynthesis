@@ -66,6 +66,16 @@ const buttonStyle = () => `
       -moz-user-select: none;
       -ms-user-select: none;
     }
+      .text-muted {
+        margin: 0;
+        color: #000;
+        font-size: larger;
+      }
+        .input-text-container {
+        border: 1px solid #fff;
+        padding: 5px 10px;
+        border-radius: 5px;
+        }
   `;
 
 const floatingDivHTML = `
@@ -81,11 +91,27 @@ const floatingDivHTML = `
     </div>
   `;
 
-const floatingDivHTMLnextButton = `
+const floatingDivHTMLnextButton = ({ reader, options }) => {
+  const dateSave = new Date(reader);
+  const date = new Date();
+  date.setMinutes(date.getMinutes() + options.timer);
+
+  const dateSaveFormatted = (date) =>
+    date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  return `
     <div id="floatingDiv" class="floating-div no-select">
-      <button id="reload" class="action-button">Reload</button>
+      <button id="reload" class="action-button">Next auto-timer</button>
+      <div class="input-text-container">
+      <p class="text-muted">Save ${dateSaveFormatted(dateSave)} </p>
+      <p class="text-muted">Next ${dateSaveFormatted(date)} </p>      
+      </div>
     </div>
   `;
+};
 
 function onMouseDown(e, draggableElement, state) {
   if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON") {
@@ -156,7 +182,10 @@ const handleParagraphChange = (isAdd) => {
   inputParagraf.onchange(value);
 };
 
-export async function createHTMLButton(isReload = false) {
+export async function createHTMLButton(
+  isReload = false,
+  { reader, options } = {},
+) {
   if (document.getElementById("chrome-ext-shadow-root")) return;
 
   await initGetStorage();
@@ -172,7 +201,9 @@ export async function createHTMLButton(isReload = false) {
   shadowRoot.appendChild(styleElement);
 
   const container = document.createElement("div");
-  container.innerHTML = isReload ? floatingDivHTMLnextButton : floatingDivHTML;
+  container.innerHTML = isReload
+    ? floatingDivHTMLnextButton({ reader, options })
+    : floatingDivHTML;
   shadowRoot.appendChild(container);
 
   document.body.appendChild(shadowHost);
