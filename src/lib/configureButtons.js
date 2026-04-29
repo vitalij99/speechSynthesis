@@ -47,11 +47,16 @@ export function configureReload(setStorageBookDataStart) {
     return;
   }
   const buttonReload = shadowRoot.getElementById("reload");
+  const buttonClose = shadowRoot.getElementById("closeBtn");
 
   buttonReload.onclick = () => {
-    console.log("reload");
     shadowHost.remove();
     setStorageBookDataStart();
+  };
+
+  buttonClose.onclick = () => {
+    chrome.runtime.sendMessage({ action: "stopScript" });
+    shadowHost.remove();
   };
 }
 // if handleParagraphChange action === "objustParagraphs"

@@ -121,7 +121,7 @@ function handleStopClick(buttonStart) {
   paused = false;
 
   setSaveData({ reader, navigator });
-  chrome.runtime.sendMessage("stopScript");
+  chrome.runtime.sendMessage({ action: "stopScript" });
 
   if (stopFirstClick) {
     stopFirstClick = false;

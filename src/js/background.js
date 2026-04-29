@@ -37,6 +37,7 @@ chrome.commands.onCommand.addListener(async (command) => {
 });
 
 chrome.runtime.onMessage.addListener(async (message) => {
+  console.log("Message received in background: ", message);
   if (message.action === "firstTimeScript") {
     await executeScriptOnce({
       sendMessage: true,
@@ -50,7 +51,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
       `stopScript #${scriptExecutionState.book}`,
     );
 
-    updateState({ reader: false });
+    updateState({ reader: false, book: "", isActive: null });
     const tab = await getCurrentTab();
     await setReadingList(tab);
   }

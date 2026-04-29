@@ -76,6 +76,16 @@ const buttonStyle = () => `
         padding: 5px 10px;
         border-radius: 5px;
         }
+      .button-close {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: transparent;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+        color: #000;
+      }
   `;
 
 const floatingDivHTML = `
@@ -105,6 +115,7 @@ const floatingDivHTMLnextButton = ({ reader, options }) => {
   return `
     <div id="floatingDiv" class="floating-div no-select">
       <button id="reload" class="action-button">Next auto-timer</button>
+      <button id="closeBtn" class="button-close">X</button>
       <div class="input-text-container">
       <p class="text-muted">Save ${dateSaveFormatted(dateSave)} </p>
       <p class="text-muted">Next ${dateSaveFormatted(date)} </p>      
