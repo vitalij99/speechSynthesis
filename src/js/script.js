@@ -63,7 +63,7 @@ async function startReade() {
   }
   synth = window.speechSynthesis;
 
-  await createHTMLButton();
+  await createHTMLButton({ isReload: false, handleButtonClose });
 
   voices = synth.getVoices();
 
@@ -284,7 +284,7 @@ async function handleStartReadNextPage() {
       Number(options.timeout) ? Number(options.timeout) : 1000,
     );
   } else if (reader && options?.timerCheckbox) {
-    await createHTMLButton(true, { reader, options });
+    await createHTMLButton({ isReload: true, handleButtonClose });
     paragraf = 0;
     setSaveData({ paragraf });
     configureReload(setStorageBookDataStart);
@@ -338,4 +338,10 @@ function togleReaderOff() {
     stopFirstClick = false;
     handleStartReadFun();
   }
+}
+function handleButtonClose(shadowHost) {
+  synth?.cancel();
+  chrome.runtime.sendMessage({ action: "stopScript" });
+  clearParagraphStyle(textContainer, paragraf);
+  shadowHost.remove();
 }

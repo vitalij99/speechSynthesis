@@ -90,6 +90,7 @@ const buttonStyle = () => `
 
 const floatingDivHTML = `
     <div id="floatingDiv" class="floating-div">
+      <button id="closeBtn" class="button-close">X</button>
       <div>
         <button id="start" class="action-button">Play</button>
         <button id="stop" class="action-button">Stop</button>
@@ -179,6 +180,11 @@ function onMouseUp(draggableElement, state, moveHandler, upHandler) {
 async function initGetStorage() {
   const data = await chrome.storage.sync.get("mouse");
   if (data.mouse) Object.assign(mouse, data.mouse);
+
+  const readerData = await chrome.storage.sync.get("reader");
+  const optionsData = await chrome.storage.sync.get("options");
+
+  return { reader: readerData.reader, options: optionsData.options };
 }
 
 const handleParagraphChange = (isAdd) => {
@@ -193,13 +199,16 @@ const handleParagraphChange = (isAdd) => {
   inputParagraf.onchange(value);
 };
 
-export async function createHTMLButton(
+export async function createHTMLButton({
   isReload = false,
-  { reader, options } = {},
-) {
-  if (document.getElementById("chrome-ext-shadow-root")) return;
+  handleButtonClose,
+}) {
+  const containerWas = document.getElementById("chrome-ext-shadow-root");
+  if (containerWas) {
+    containerWas.remove();
+  }
 
-  await initGetStorage();
+  const { reader, options } = await initGetStorage();
 
   const shadowHost = document.createElement("div");
   shadowHost.id = "chrome-ext-shadow-root";
@@ -212,9 +221,11 @@ export async function createHTMLButton(
   shadowRoot.appendChild(styleElement);
 
   const container = document.createElement("div");
+
   container.innerHTML = isReload
     ? floatingDivHTMLnextButton({ reader, options })
     : floatingDivHTML;
+
   shadowRoot.appendChild(container);
 
   document.body.appendChild(shadowHost);
@@ -241,6 +252,10 @@ export async function createHTMLButton(
   );
 
   inputParagraf = shadowRoot.getElementById("inputParagrafs");
+
+  const buttonClose = shadowRoot.getElementById("closeBtn");
+
+  buttonClose.onclick = () => handleButtonClose(shadowHost);
 }
 export function addParagraph(paragraf) {
   inputParagraf.value = paragraf;
