@@ -21,7 +21,7 @@ export async function executeScriptOnce({
           tab.url.split("/").length ||
         (!tab.url.startsWith(scriptExecutionState.book) && !sendMessage)
       ) {
-        updateState({ book: "", isActive: null, reader: false });
+        updateState({ book: "", isActive: null });
 
         console.log("Different book, stop execution");
         return false;
@@ -29,13 +29,13 @@ export async function executeScriptOnce({
     }
 
     // If the script is already active on this page, just send a message
-    // in popup or command case
+    // in popup or command case upload page or if was stoped, start again
     try {
       await chrome.tabs.sendMessage(tab.id, { action: "isReaderActive" });
       setNewHistory(tab.title, tab.url);
-      updateState({ reader: true });
+      updateState({ book, isActive: pageKey });
 
-      console.log("upload page");
+      console.log("upload page or if was stoped, start again");
       return true;
     } catch (error) {
       // If sending message fails, we inject the script
@@ -46,7 +46,7 @@ export async function executeScriptOnce({
       files: ["/js/script.js"],
     });
 
-    updateState({ book, isActive: pageKey, reader: true });
+    updateState({ book, isActive: pageKey });
 
     chrome.tabs.sendMessage(tab.id, { action });
 

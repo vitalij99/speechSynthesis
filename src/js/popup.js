@@ -58,7 +58,7 @@ async function loadHistory() {
            class="history-item">
           ${escapeHtml(item.name)}
         </a>
-      `
+      `,
       )
       .join("");
   } catch (error) {
@@ -154,13 +154,13 @@ async function init() {
 
     toggleBtn.addEventListener("click", toggleHistory);
     toggleRulesBtn.addEventListener("click", () =>
-      toggleRules(storedRulesText)
+      toggleRules(storedRulesText),
     );
     rulesText.addEventListener(
       "input",
       debounce(() => {
         chrome.storage.sync.set({ rulesText: rulesText.value });
-      }, 300)
+      }, 300),
     );
   } catch (error) {
     console.error("Failed to initialize popup:", error);

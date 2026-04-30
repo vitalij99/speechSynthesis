@@ -8,7 +8,7 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log("Extension installed");
 });
 let nextPage = null;
-let scriptExecutionState = { isActive: null, reader: false, book: "start" };
+let scriptExecutionState = { isActive: null, book: "start" };
 
 chrome.runtime.onStartup.addListener(loadState);
 chrome.runtime.onInstalled.addListener(loadState);
@@ -37,7 +37,6 @@ chrome.commands.onCommand.addListener(async (command) => {
 });
 
 chrome.runtime.onMessage.addListener(async (message) => {
-  console.log("Message received in background: ", message);
   if (message.action === "firstTimeScript") {
     await executeScriptOnce({
       sendMessage: true,
@@ -51,7 +50,11 @@ chrome.runtime.onMessage.addListener(async (message) => {
       `stopScript #${scriptExecutionState.book}`,
     );
 
-    updateState({ reader: false, book: "", isActive: null });
+    const tab = await getCurrentTab();
+    await setReadingList(tab);
+  } else if (message.action === "closeReader") {
+    updateState({ book: "", isActive: null });
+    setStorage({ reader: null });
     const tab = await getCurrentTab();
     await setReadingList(tab);
   }

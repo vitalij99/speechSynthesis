@@ -341,7 +341,7 @@ function togleReaderOff() {
 }
 function handleButtonClose(shadowHost) {
   synth?.cancel();
-  chrome.runtime.sendMessage({ action: "stopScript" });
+  chrome.runtime.sendMessage({ action: "closeReader" });
   clearParagraphStyle(textContainer, paragraf);
   shadowHost.remove();
 }
