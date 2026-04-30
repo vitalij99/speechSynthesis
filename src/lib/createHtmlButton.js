@@ -204,31 +204,16 @@ export async function createHTMLButton({
   handleButtonClose,
 }) {
   const containerWas = document.getElementById("chrome-ext-shadow-root");
-  if (containerWas) {
-    containerWas.remove();
-  }
+  if (containerWas) containerWas.remove();
 
   const { reader, options } = await initGetStorage();
 
-  const shadowHost = document.createElement("div");
-  shadowHost.id = "chrome-ext-shadow-root";
-  shadowHost.style.cssText = "position: fixed; z-index: 999999;";
-
-  const shadowRoot = shadowHost.attachShadow({ mode: "open" });
-
-  const styleElement = document.createElement("style");
-  styleElement.textContent = buttonStyle();
-  shadowRoot.appendChild(styleElement);
-
-  const container = document.createElement("div");
-
-  container.innerHTML = isReload
-    ? floatingDivHTMLnextButton({ reader, options })
-    : floatingDivHTML;
-
-  shadowRoot.appendChild(container);
-
-  document.body.appendChild(shadowHost);
+  const shadowRoot = createShadowRoot({
+    reader,
+    options,
+    handleButtonClose,
+    isReload,
+  });
 
   const draggableElement = shadowRoot.getElementById("floatingDiv");
 
@@ -250,12 +235,6 @@ export async function createHTMLButton({
   draggableElement.addEventListener("mousedown", (e) =>
     onMouseDown(e, draggableElement, state),
   );
-
-  inputParagraf = shadowRoot.getElementById("inputParagrafs");
-
-  const buttonClose = shadowRoot.getElementById("closeBtn");
-
-  buttonClose.onclick = () => handleButtonClose(shadowHost);
 }
 export function addParagraph(paragraf) {
   inputParagraf.value = paragraf;
@@ -269,6 +248,34 @@ export function setStorageBook({ navigator, setSaveData }) {
       : document.title;
   setSaveData({ navigator });
   return navigator;
+}
+
+function createShadowRoot({ reader, options, handleButtonClose, isReload }) {
+  const shadowHost = document.createElement("div");
+  shadowHost.id = "chrome-ext-shadow-root";
+  shadowHost.style.cssText = "position: fixed; z-index: 999999;";
+
+  const shadowRoot = shadowHost.attachShadow({ mode: "open" });
+
+  const styleElement = document.createElement("style");
+  styleElement.textContent = buttonStyle();
+  shadowRoot.appendChild(styleElement);
+
+  const container = document.createElement("div");
+
+  container.innerHTML = isReload
+    ? floatingDivHTMLnextButton({ reader, options })
+    : floatingDivHTML;
+
+  shadowRoot.appendChild(container);
+  document.body.appendChild(shadowHost);
+
+  inputParagraf = shadowRoot.getElementById("inputParagrafs");
+  const buttonClose = shadowRoot.getElementById("closeBtn");
+
+  buttonClose.onclick = () => handleButtonClose(shadowHost);
+
+  return shadowRoot;
 }
 
 chrome.runtime.onMessage.addListener(async (message) => {
