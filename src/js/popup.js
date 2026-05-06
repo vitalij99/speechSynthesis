@@ -149,6 +149,7 @@ async function init() {
     reader = storedReader;
     updateReaderButton(reader);
     updateNavigatorLink(navigator);
+    handleAutoStartLink();
 
     btnStartReader.addEventListener("click", handleReaderToggle);
 
@@ -165,6 +166,22 @@ async function init() {
   } catch (error) {
     console.error("Failed to initialize popup:", error);
   }
+}
+
+function handleAutoStartLink() {
+  const autoStartLink = document.getElementById("book");
+
+  if (!autoStartLink) return;
+
+  autoStartLink.addEventListener("click", async (e) => {
+    try {
+      chrome.runtime.sendMessage({
+        action: "autoStartLink",
+      });
+    } catch (error) {
+      console.error("Failed to start reader from link:", error);
+    }
+  });
 }
 
 if (document.readyState === "loading") {

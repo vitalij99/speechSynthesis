@@ -64,19 +64,19 @@ async function getFindBook(urlPage) {
   }
 }
 
-export async function setReadingList(tab) {
-  const readingListUrl = await getFindBook(tab.url);
+export async function setReadingList({ title, url }) {
+  const readingListUrl = await getFindBook(url);
 
   if (readingListUrl) {
     chrome.readingList.updateEntry({
-      title: tab.title,
+      title: title,
       url: readingListUrl,
       hasBeenRead: false,
     });
   } else {
     chrome.readingList.addEntry({
-      title: tab.title,
-      url: tab.url,
+      title: title,
+      url: url,
       hasBeenRead: false,
     });
   }

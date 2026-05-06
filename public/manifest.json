@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Reader",
   "description": "Reader",
-  "version": "2.0.4",
+  "version": "2.0.5",
 
   "action": {
     "default_icon": "./img/icon_16.png",
@@ -54,5 +54,6 @@
   "options_ui": {
     "page": "./html/options.html",
     "open_in_tab": true
-  }
+  },
+  "host_permissions": ["<all_urls>"]
 }

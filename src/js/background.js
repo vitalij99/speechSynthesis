@@ -9,6 +9,7 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 let nextPage = null;
 let scriptExecutionState = { isActive: null, book: "start" };
+let load = false;
 
 chrome.runtime.onStartup.addListener(loadState);
 chrome.runtime.onInstalled.addListener(loadState);
@@ -37,13 +38,21 @@ chrome.commands.onCommand.addListener(async (command) => {
 });
 
 chrome.runtime.onMessage.addListener(async (message) => {
-  if (message.action === "firstTimeScript") {
+  if (
+    message.action === "firstTimeScript" ||
+    message.action === "autoStartLink"
+  ) {
+    load = true;
     await executeScriptOnce({
       sendMessage: true,
       scriptExecutionState,
       updateState,
       nextPage,
     });
+
+    setTimeout(() => {
+      load = false;
+    }, 1000);
   } else if (message.action === "stopScript") {
     console.log(
       scriptExecutionState,
@@ -62,8 +71,9 @@ chrome.runtime.onMessage.addListener(async (message) => {
 
 chrome.webNavigation.onCompleted.addListener(async (details) => {
   // if (details.frameId === 0)
-  //   console.log("webNavigation ", { details, state: scriptExecutionState });
+  //   console.log("webNavigation ", { details }, );
   if (
+    !load &&
     scriptExecutionState.isActive === details.tabId &&
     details.frameId === 0
   ) {

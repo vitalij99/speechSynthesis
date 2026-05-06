@@ -9,17 +9,18 @@ export async function executeScriptOnce({
 }) {
   try {
     const tab = await getCurrentTab();
-    const book = getBookUrl(tab.url);
+    const url = tab?.url || tab.pendingUrl;
+    const book = getBookUrl(url);
     const pageKey = tab.id;
 
     const action = sendMessage ? "startReadeFun" : "startReadeNextPage";
 
     // Check if we are on a different book
-    if (!tab.url.includes(nextPage)) {
+    if (!sendMessage && !url.includes(nextPage)) {
       if (
         scriptExecutionState.book.split("/").length + 1 >
-          tab.url.split("/").length ||
-        (!tab.url.startsWith(scriptExecutionState.book) && !sendMessage)
+          url.split("/").length ||
+        (!url.startsWith(scriptExecutionState.book) && !sendMessage)
       ) {
         updateState({ book: "", isActive: null });
 
@@ -32,7 +33,7 @@ export async function executeScriptOnce({
     // in popup or command case upload page or if was stoped, start again
     try {
       await chrome.tabs.sendMessage(tab.id, { action: "isReaderActive" });
-      setNewHistory(tab.title, tab.url);
+      setNewHistory(tab.title, url);
       updateState({ book, isActive: pageKey });
 
       console.log("upload page or if was stoped, start again");
@@ -50,9 +51,9 @@ export async function executeScriptOnce({
 
     chrome.tabs.sendMessage(tab.id, { action });
 
-    setNewHistory(tab.title, tab.url);
+    setNewHistory(tab.title, url);
 
-    await setReadingList(tab);
+    await setReadingList({ title: tab.title, url });
 
     return true;
   } catch (error) {
