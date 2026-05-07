@@ -9,37 +9,38 @@ export async function executeScriptOnce({
 }) {
   try {
     const tab = await getCurrentTab();
-    const url = tab?.url || tab.pendingUrl;
+    const url = tab?.url ?? tab?.pendingUrl;
+
+    if (!url) {
+      console.warn("executeScriptOnce: no URL available");
+      return false;
+    }
+
     const book = getBookUrl(url);
     const pageKey = tab.id;
 
-    const action = sendMessage ? "startReadeFun" : "startReadeNextPage";
-
-    // Check if we are on a different book
-    if (!sendMessage && !url.includes(nextPage)) {
-      if (
-        scriptExecutionState.book.split("/").length + 1 >
-          url.split("/").length ||
-        (!url.startsWith(scriptExecutionState.book) && !sendMessage)
-      ) {
-        updateState({ book: "", isActive: null });
-
-        console.log("Different book, stop execution");
-        return false;
-      }
+    // Stop if navigated to a different book
+    if (
+      !sendMessage &&
+      shouldStopExecution(url, nextPage, scriptExecutionState)
+    ) {
+      updateState({ book: "", isActive: null });
+      console.log("Different book, stopping execution");
+      return false;
     }
+
+    const action = sendMessage ? "startReadeFun" : "startReadeNextPage";
 
     // If the script is already active on this page, just send a message
     // in popup or command case upload page or if was stoped, start again
-    try {
-      await chrome.tabs.sendMessage(tab.id, { action: "isReaderActive" });
+    const isAlreadyInjected = await isReaderActive(tab.id);
+
+    if (isAlreadyInjected) {
       setNewHistory(tab.title, url);
       updateState({ book, isActive: pageKey });
-
+      await setReadingList({ title: tab.title, url });
       console.log("upload page or if was stoped, start again");
       return true;
-    } catch (error) {
-      // If sending message fails, we inject the script
     }
 
     await chrome.scripting.executeScript({
@@ -48,16 +49,35 @@ export async function executeScriptOnce({
     });
 
     updateState({ book, isActive: pageKey });
-
-    chrome.tabs.sendMessage(tab.id, { action });
-
     setNewHistory(tab.title, url);
 
+    await chrome.tabs.sendMessage(tab.id, { action });
     await setReadingList({ title: tab.title, url });
 
     return true;
   } catch (error) {
-    console.error("Error executing script:", error);
+    console.error("executeScriptOnce failed:", error);
+    return false;
+  }
+}
+
+// --- helpers ---
+
+function shouldStopExecution(url, nextPage, scriptExecutionState) {
+  if (url.includes(nextPage)) return false;
+
+  const isDeeperPath =
+    scriptExecutionState.book.split("/").length + 1 > url.split("/").length;
+  const isDifferentBook = !url.startsWith(scriptExecutionState.book);
+
+  return isDeeperPath || isDifferentBook;
+}
+
+async function isReaderActive(tabId) {
+  try {
+    await chrome.tabs.sendMessage(tabId, { action: "isReaderActive" });
+    return true;
+  } catch {
     return false;
   }
 }
