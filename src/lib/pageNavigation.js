@@ -39,17 +39,20 @@ function getNextPage(document = window.document) {
 
   return urlPage;
 }
-export function setNextPage({ options, setSaveData, navigator }) {
-  const nextPageButton = getHtmlElements(options.nextPageBtn);
+export function setNextPage({ nextPageBtn }) {
+  const nextPageButton = getHtmlElements(nextPageBtn);
 
-  navigator.thisPageSave = document.URL;
-
-  navigator.nextPageSave = nextPageButton
+  return nextPageButton
     ? nextPageButton?.attributes?.href?.value
     : getNextPage();
+}
+
+export function saveThisPage({ navigator }) {
+  navigator.thisPageSave = document.URL;
   setSaveData({ navigator });
 }
-export function moveToNextPage({ navigator }) {
+
+export function moveToNextPage({ nextPageBtn }) {
   setSaveData({ paragraf: 0 });
 
   const initialURL = window.location.href;
@@ -69,17 +72,20 @@ export function moveToNextPage({ navigator }) {
   document.dispatchEvent(rightArrowEventUp);
 
   setTimeout(() => {
+    const nextPageURL = setNextPage({ nextPageBtn });
     if (window.location.href === initialURL) {
       if (
-        navigator.nextPageSave === initialURL ||
-        !navigator.nextPageSave ||
-        navigator?.nextPageSave?.length < 5
+        nextPageURL === initialURL ||
+        !nextPageURL ||
+        nextPageURL?.length < 5
       ) {
         console.log("No next page URL found.");
         return;
       }
 
-      window.location.href = navigator.nextPageSave;
+      chrome.runtime.sendMessage({ action: "goToNextPage" });
+
+      window.location.href = nextPageURL;
     } else {
       // move to next page not uploaded in background.js
       console.log("Navigated to next page via keyboard event.");

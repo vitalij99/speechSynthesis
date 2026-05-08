@@ -18,6 +18,7 @@ import { findElementWithMostDirectParagraphs } from "../lib/findElementWithMostD
 import {
   getHtmlElements,
   moveToNextPage,
+  saveThisPage,
   setNextPage,
 } from "../lib/pageNavigation.js";
 import { initStorageRulesText, replaceText } from "../lib/replaceText.js";
@@ -70,8 +71,8 @@ async function startReade() {
   synth.onvoiceschanged = () => {
     voices = synth.getVoices();
   };
+  saveThisPage({ navigator });
 
-  setNextPage({ options, setSaveData, navigator });
   startAutoScrollEvents();
   configureButtons({
     textContainer,
@@ -164,7 +165,7 @@ function speak() {
     paragraf >= textContainer.children.length - (options.lastParagraf || 0) &&
     options.timerCheckbox
   ) {
-    moveToNextPage({ navigator });
+    moveToNextPage({ nextPageBtn: options.nextPageBtn });
   } else {
     const textElement = textContainer.children[paragraf];
 
@@ -323,7 +324,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
       break;
 
     case "goToNextPage":
-      moveToNextPage({ navigator });
+      moveToNextPage({ nextPageBtn: options.nextPageBtn });
       break;
     case "isReaderActive":
       togleReaderOff();

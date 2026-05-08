@@ -5,7 +5,7 @@ export async function executeScriptOnce({
   sendMessage = false,
   scriptExecutionState,
   updateState,
-  nextPage,
+  nextPage = false,
 }) {
   try {
     const tab = await getCurrentTab();
@@ -19,14 +19,13 @@ export async function executeScriptOnce({
     const book = getBookUrl(url);
     const pageKey = tab.id;
 
-    // Stop if navigated to a different book
-    if (
-      !sendMessage &&
-      shouldStopExecution(url, nextPage, scriptExecutionState)
-    ) {
-      updateState({ book: "", isActive: null });
-      console.log("Different book, stopping execution");
-      return false;
+    if (!nextPage) {
+      // Stop if navigated to a different book
+      if (!sendMessage && shouldStopExecution(url, scriptExecutionState)) {
+        updateState({ book: "", isActive: null });
+        console.log("Different book, stopping execution");
+        return false;
+      }
     }
 
     const action = sendMessage ? "startReadeFun" : "startReadeNextPage";
@@ -63,9 +62,7 @@ export async function executeScriptOnce({
 
 // --- helpers ---
 
-function shouldStopExecution(url, nextPage, scriptExecutionState) {
-  if (url.includes(nextPage)) return false;
-
+function shouldStopExecution(url, scriptExecutionState) {
   const isDeeperPath =
     scriptExecutionState.book.split("/").length + 1 > url.split("/").length;
   const isDifferentBook = !url.startsWith(scriptExecutionState.book);

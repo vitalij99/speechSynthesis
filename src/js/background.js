@@ -7,9 +7,10 @@ import { executeScriptOnce } from "../lib/executeScriptOnce";
 chrome.runtime.onInstalled.addListener(() => {
   console.log("Extension installed");
 });
-let nextPage = null;
+
 let scriptExecutionState = { isActive: null, book: "start" };
 let load = false;
+let nextPage = false;
 
 chrome.runtime.onStartup.addListener(loadState);
 chrome.runtime.onInstalled.addListener(loadState);
@@ -23,7 +24,6 @@ chrome.commands.onCommand.addListener(async (command) => {
       sendMessage: true,
       scriptExecutionState,
       updateState,
-      nextPage,
     });
   } else if (command === "com-add-p") {
     adjustParagraphCount(true);
@@ -38,6 +38,7 @@ chrome.commands.onCommand.addListener(async (command) => {
 });
 
 chrome.runtime.onMessage.addListener(async (message) => {
+  // console.log("Message received in background.js: ", message);
   if (
     message.action === "firstTimeScript" ||
     message.action === "autoStartLink"
@@ -66,6 +67,8 @@ chrome.runtime.onMessage.addListener(async (message) => {
     setStorage({ reader: null });
     const tab = await getCurrentTab();
     await setReadingList(tab);
+  } else if (message.action === "goToNextPage") {
+    nextPage = true;
   }
 });
 
@@ -84,6 +87,7 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
       updateState,
       nextPage,
     });
+    nextPage = false;
   }
 });
 chrome.tabs.onRemoved.addListener((tabId) => {
@@ -104,9 +108,6 @@ async function loadState() {
   const { scriptExecutionState: saved } = await chrome.storage.sync.get(
     "scriptExecutionState",
   );
-  nextPage = await chrome.storage.sync
-    .get("navigator")
-    .then((res) => res.navigator?.nextPageSave);
 
   if (saved) Object.assign(scriptExecutionState, saved);
 }
@@ -115,11 +116,3 @@ function updateState(updates) {
   Object.assign(scriptExecutionState, updates);
   setStorage({ scriptExecutionState: scriptExecutionState });
 }
-
-chrome.storage.onChanged.addListener((changes) => {
-  if (changes.navigator) {
-    if (changes.navigator.newValue.nextPageSave !== nextPage) {
-      nextPage = changes.navigator.newValue.nextPageSave;
-    }
-  }
-});

@@ -1,5 +1,4 @@
 export const navigator = {
-  nextPageSave: null,
   thisPageSave: null,
   bookURL: null,
   book: null,
@@ -34,8 +33,8 @@ export function setSaveData(data) {
   saveDataTimeout = setTimeout(() => {
     chrome.storage.sync.set(
       Object.fromEntries(
-        Object.entries(lastData).filter(([_, v]) => v !== undefined)
-      )
+        Object.entries(lastData).filter(([_, v]) => v !== undefined),
+      ),
     );
     lastData = null;
     saveDataTimeout = null;
@@ -48,7 +47,7 @@ export function getStorageData() {
       ["reader", "navigator", "options", "paragraf"],
       (result) => {
         resolve(result);
-      }
+      },
     );
   });
 }
