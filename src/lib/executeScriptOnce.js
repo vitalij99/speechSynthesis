@@ -12,18 +12,18 @@ export async function executeScriptOnce({
     const url = tab?.url ?? tab?.pendingUrl;
 
     if (!url) {
-      console.warn("executeScriptOnce: no URL available");
+      console.warn("executeScriptOnce: no URL available", { tab });
       return false;
     }
 
     const book = getBookUrl(url);
     const pageKey = tab.id;
 
-    if (!nextPage) {
+    if (!nextPage && pageKey === scriptExecutionState.isActive) {
       // Stop if navigated to a different book
       if (!sendMessage && shouldStopExecution(url, scriptExecutionState)) {
         updateState({ book: "", isActive: null });
-        console.log("Different book, stopping execution");
+        console.log("Different book, stopping execution", { tab });
         return false;
       }
     }
