@@ -165,7 +165,16 @@ function speak() {
     paragraf >= textContainer.children.length - (options.lastParagraf || 0) &&
     options.timerCheckbox
   ) {
-    moveToNextPage({ nextPageBtn: options.nextPageBtn });
+    if (navigator.thisPageSave && navigator.thisPageSave !== document.URL) {
+      console.log("Already on a different page, not navigating to next page.");
+      paragraf = 0;
+      handleStartReadFun();
+      return;
+    } else {
+      moveToNextPage({
+        nextPageBtn: options.nextPageBtn,
+      });
+    }
   } else {
     const textElement = textContainer.children[paragraf];
 
