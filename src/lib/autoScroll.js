@@ -1,21 +1,32 @@
-let isAutoScroll = false;
+let isStopAutoScroll = false;
 let userScrollTimeout = null;
 
-export function autoScrollToParagraph(
-  container,
-  index,
-  isAutoScrollEnabled = isAutoScroll,
-) {
+let isScrollEventListener = false;
+let autoScrollTimeout = null;
+
+export function autoScrollToParagraph({
+  textContainer,
+  isAutoScrollDisabled = isStopAutoScroll,
+  isHandleParagraphChange = false,
+}) {
   try {
-    if (isAutoScrollEnabled) return;
+    if (!textContainer || isAutoScrollDisabled) return;
 
-    const paragraph = container.children[index];
-    if (!paragraph) return;
-
-    paragraph.scrollIntoView({
+    textContainer.scrollIntoView({
       behavior: "smooth",
       block: "center",
     });
+
+    if (isHandleParagraphChange) return;
+
+    isScrollEventListener = true;
+
+    if (autoScrollTimeout !== null) {
+      clearTimeout(autoScrollTimeout);
+    }
+    autoScrollTimeout = window.setTimeout(() => {
+      isScrollEventListener = false;
+    }, 300);
   } catch (error) {
     console.error("Error auto-scrolling to paragraph:", error);
   }
@@ -27,6 +38,7 @@ const userScrollEvents = [
   "touchmove",
   "keydown",
   "mousedown",
+  "scroll",
 ];
 
 export function startAutoScrollEvents() {
@@ -34,14 +46,15 @@ export function startAutoScrollEvents() {
     window.addEventListener(
       event,
       () => {
-        isAutoScroll = true;
+        if (isScrollEventListener) return;
+        isStopAutoScroll = true;
 
         if (userScrollTimeout !== null) {
           clearTimeout(userScrollTimeout);
         }
 
         userScrollTimeout = window.setTimeout(() => {
-          isAutoScroll = false;
+          isStopAutoScroll = false;
           userScrollTimeout = null;
         }, 2000);
       },

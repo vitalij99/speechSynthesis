@@ -199,7 +199,10 @@ function speak() {
 
       utterThis = new SpeechSynthesisUtterance(repText);
       styleCurrentParagraph(textContainer, paragraf);
-      autoScrollToParagraph(textContainer, paragraf);
+      autoScrollToParagraph({
+        textContainer: textElement,
+        isHandleParagraphChange: false,
+      });
 
       saveStyledParagraf = paragraf;
 
