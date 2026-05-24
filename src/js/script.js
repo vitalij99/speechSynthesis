@@ -134,10 +134,10 @@ function handleStopClick(buttonStart) {
 }
 function handleStartClick(buttonStart) {
   stopFirstClick = false;
+  setStorageBook({ navigator, setSaveData });
   if (!synth.speaking) {
     setStorageDate({ options, setSaveData, reader });
 
-    setStorageBook({ navigator, setSaveData });
     buttonStart.textContent = "Pause";
     speak();
   } else if (paused) {
