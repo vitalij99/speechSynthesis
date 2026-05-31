@@ -166,7 +166,14 @@ function speak() {
     options.timerCheckbox
   ) {
     if (navigator.thisPageSave && navigator.thisPageSave !== document.URL) {
-      console.log("Already on a different page, not navigating to next page.");
+      const info = {
+        currentPage: document.URL,
+        savedPage: navigator.thisPageSave,
+      };
+      console.log(
+        "Already on a different page, not navigating to next page.",
+        info,
+      );
       paragraf = 0;
       handleStartReadFun();
       return;
