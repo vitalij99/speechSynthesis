@@ -165,15 +165,12 @@ function speak() {
     paragraf >= textContainer.children.length - (options.lastParagraf || 0) &&
     options.timerCheckbox
   ) {
-    if (navigator.thisPageSave && navigator.thisPageSave !== document.URL) {
-      const info = {
-        currentPage: document.URL,
-        savedPage: navigator.thisPageSave,
-      };
-      console.log(
-        "Already on a different page, not navigating to next page.",
-        info,
-      );
+    if (
+      navigator.thisPageSave &&
+      !document.URL.startsWith(navigator.thisPageSave)
+    ) {
+      // if the current url did not reload to the same page, do not navigate to next page and reset paragraf to 0
+
       paragraf = 0;
       handleStartReadFun();
       return;
