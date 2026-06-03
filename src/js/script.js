@@ -171,6 +171,10 @@ function speak() {
     ) {
       // if the current url did not reload to the same page, do not navigate to next page and reset paragraf to 0
 
+      console.log("Already on a different page, not navigating to next page.", {
+        currentPage: document.URL,
+        savedPage: navigator.thisPageSave,
+      });
       paragraf = 0;
       handleStartReadFun();
       return;
