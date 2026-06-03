@@ -6,12 +6,7 @@ body {
   min-height: 300px;
   padding: 10px;
 }
-.book-popup {
-  display: block;
-  font-size: larger;
-  padding: 10px 5px;
-  text-align: center;
-}
+
 .btn-popup-wrapp {
   position: relative;
   display: flex;
@@ -88,4 +83,25 @@ body {
 
 .hidden {
   display: none;
+}
+.book-container {
+  margin: 15px 0;
+}
+.book-popup {
+  display: block;
+  text-align: center;
+  font-size: larger;
+  position: relative;
+
+  &:hover::before {
+    content: "Last start reade when not sleeping";
+    position: absolute;
+    top: -25px;
+    left: 0;
+    background: #333;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
 }
