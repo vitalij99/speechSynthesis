@@ -94,7 +94,7 @@ body {
   position: relative;
 
   &:hover::before {
-    content: "Last start reade when not sleeping";
+    content: "";
     position: absolute;
     top: -25px;
     left: 0;
@@ -103,5 +103,15 @@ body {
     padding: 4px 8px;
     border-radius: 4px;
     white-space: nowrap;
+  }
+}
+.last-read {
+  &:hover::before {
+    content: "Last start reade when not sleeping";
+  }
+}
+.sleep {
+  &:hover::before {
+    content: "Resume reading from sleep";
   }
 }
