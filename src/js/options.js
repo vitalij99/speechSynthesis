@@ -5,15 +5,9 @@ const optionsForm = document.getElementById("optionsForm");
 const btnBook = document.getElementById("book");
 const stylesP = document.getElementById("styleParagraphs");
 
-// storage keys -  navigator,  options,
+// storage keys -    options,
 //  ----------------------------------------
 const STORAGE_KEY = "stylesIndex";
-const navigator = {
-  nextPageSave: null,
-  thisPageSave: null,
-  bookURL: null,
-  book: null,
-};
 
 const options = {
   contentDivElem: "#content  ",
@@ -36,11 +30,7 @@ loadDataFromStorage();
 
 // Initialize the form with the user's option settings
 async function loadDataFromStorage() {
-  const data = await getStorage(["navigator", "options", STORAGE_KEY]);
-
-  if (data.navigator) {
-    Object.assign(navigator, data.navigator);
-  }
+  const data = await getStorage(["options", STORAGE_KEY]);
 
   if (data.options) {
     Object.assign(options, data.options);
@@ -52,15 +42,12 @@ async function loadDataFromStorage() {
 
   initStylesParagraph();
 
-  console.log({ navigator, options, stylesIndex });
+  console.log({ options, stylesIndex });
 
   optionsForm.contentDivElem.value = options.contentDivElem;
   optionsForm.nextPage.value = options.nextPageBtn;
   optionsForm.lastParagraf.value = options.lastParagraf;
   optionsForm.timeout.value = options.timeout;
-
-  btnBook.textContent = navigator.book || "books";
-  btnBook.href = navigator.bookURL;
 }
 
 optionsForm.addEventListener("change", () => {
