@@ -2,6 +2,7 @@ export const navigator = {
   thisPageSave: null,
   bookURL: null,
   book: null,
+  wasSleep: { url: null, name: null },
 };
 
 export const options = {

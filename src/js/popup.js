@@ -27,15 +27,21 @@ function updateReaderButton(reader) {
 }
 
 function updateNavigatorLink(navigator) {
-  const btnBook = document.querySelector(".book-popup");
-  if (!btnBook) return;
+  const btnBook = document.querySelector("#book");
+  const btnWasSleep = document.querySelector("#wasSleep");
+  if (!btnBook || !btnWasSleep) return;
 
   btnBook.textContent = navigator?.book || "Last started reader";
   btnBook.href = navigator?.bookURL || "#";
 
-  if (!navigator?.bookURL) {
-    btnBook.setAttribute("aria-disabled", "true");
-    btnBook.style.pointerEvents = "none";
+  if (!navigator?.wasSleep?.url || !navigator?.wasSleep?.name) {
+    const wasSleepContainer = document.querySelector(".was-sleep-container");
+    if (wasSleepContainer) {
+      wasSleepContainer.style.display = "none";
+    }
+  } else {
+    btnWasSleep.textContent = navigator.wasSleep.name || "Resume reading";
+    btnWasSleep.href = navigator.wasSleep.url || "#";
   }
 }
 
@@ -169,11 +175,14 @@ async function init() {
 }
 
 function handleAutoStartLink() {
-  const autoStartLink = document.getElementById("book");
+  const autoStartLink = document.querySelector(".book-container");
 
   if (!autoStartLink) return;
 
   autoStartLink.addEventListener("click", async (e) => {
+    if (e.target.tagName.toLowerCase() !== "a") {
+      return;
+    }
     try {
       chrome.runtime.sendMessage({
         action: "autoStartLink",

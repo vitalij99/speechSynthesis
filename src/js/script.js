@@ -108,11 +108,8 @@ function handleParagraphChange(inputParagraf) {
 
 function handleStopClick(buttonStart) {
   reader = null;
-  navigator.bookURL = document.URL;
-  navigator.book =
-    document.title.length > 150
-      ? document.title.substring(0, 147) + "..."
-      : document.title;
+  setSaveData({ reader });
+  setStorageBook({ navigator, setSaveData });
   clearParagraphStyle(textContainer, paragraf);
 
   synth.cancel();
@@ -121,7 +118,6 @@ function handleStopClick(buttonStart) {
   }
   paused = false;
 
-  setSaveData({ reader, navigator });
   chrome.runtime.sendMessage({ action: "stopScript" });
 
   if (stopFirstClick) {
@@ -307,7 +303,10 @@ async function handleStartReadNextPage() {
   } else if (reader && options?.timerCheckbox) {
     await createHTMLButton({ isReload: true, handleButtonClose });
     paragraf = 0;
-    setSaveData({ paragraf });
+
+    navigator.wasSleep = { url: navigator.bookURL, name: navigator.book };
+    setSaveData({ paragraf, navigator });
+
     configureReload(setStorageBookDataStart);
   }
 }
