@@ -291,7 +291,10 @@ async function handleStartReadNextPage() {
   if (reader && options?.timerCheckbox && dateSave > dateNow) {
     if (url !== navigator.thisPageSave) {
       paragraf = 0;
-      setSaveData({ paragraf });
+
+      navigator.wasSleep = null;
+
+      setSaveData({ paragraf, navigator });
     }
 
     setTimeout(
