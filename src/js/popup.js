@@ -34,7 +34,10 @@ function updateNavigatorLink(navigator) {
   btnBook.textContent = navigator?.book || "Last started reader";
   btnBook.href = navigator?.bookURL || "#";
 
-  if (!navigator?.wasSleep?.url || !navigator?.wasSleep?.name) {
+  if (
+    !navigator?.wasSleep?.url ||
+    navigator?.wasSleep?.url === navigator?.bookURL
+  ) {
     const wasSleepContainer = document.querySelector(".was-sleep-container");
     if (wasSleepContainer) {
       wasSleepContainer.style.display = "none";
