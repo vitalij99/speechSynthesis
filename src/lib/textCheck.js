@@ -36,7 +36,7 @@ export function checkChildrenVisibility(textElement) {
       if (isVisible) {
         results.push(text);
       } else {
-        console.log("Hidden text node:", text);
+        console.log("Hidden text node:", { text });
       }
     } catch (error) {
       console.error("Error checking children visibility:", error);
