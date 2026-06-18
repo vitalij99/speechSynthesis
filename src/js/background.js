@@ -38,37 +38,21 @@ chrome.commands.onCommand.addListener(async (command) => {
 });
 
 chrome.runtime.onMessage.addListener(async (message) => {
-  // console.log("Message received in background.js: ", message);
-  if (
-    message.action === "firstTimeScript" ||
-    message.action === "autoStartLink"
-  ) {
-    load = true;
-    await executeScriptOnce({
-      sendMessage: true,
-      scriptExecutionState,
-      updateState,
-      nextPage,
-    });
+  const { action } = message;
+  if (action === "firstTimeScript" || action === "autoStartLink") {
+    return handleStartScript(action);
+  }
 
-    setTimeout(() => {
-      load = false;
-    }, 1000);
-  } else if (message.action === "stopScript") {
-    console.log(
-      scriptExecutionState,
-      `stopScript #${scriptExecutionState.book}`,
-    );
+  if (action === "stopScript") {
+    return handleStopScript();
+  }
 
-    const tab = await getCurrentTab();
-    await setReadingList(tab);
-  } else if (message.action === "closeReader") {
-    updateState({ book: "", isActive: null });
-    setStorage({ reader: null });
-    const tab = await getCurrentTab();
-    await setReadingList(tab);
-  } else if (message.action === "goToNextPage") {
-    nextPage = true;
+  if (action === "closeReader") {
+    return handleCloseReader();
+  }
+
+  if (action === "goToNextPage") {
+    return handleNextPage();
   }
 });
 
@@ -115,4 +99,39 @@ async function loadState() {
 function updateState(updates) {
   Object.assign(scriptExecutionState, updates);
   setStorage({ scriptExecutionState: scriptExecutionState });
+}
+
+async function handleStartScript(action) {
+  load = true;
+
+  const delay = action === "autoStartLink" ? 1000 : 1;
+
+  setTimeout(async () => {
+    await executeScriptOnce({
+      sendMessage: true,
+      scriptExecutionState,
+      updateState,
+      nextPage,
+    });
+  }, delay);
+
+  setTimeout(() => {
+    load = false;
+  }, 2000);
+}
+async function handleStopScript() {
+  console.log(scriptExecutionState, `stopScript #${scriptExecutionState.book}`);
+
+  const tab = await getCurrentTab();
+  await setReadingList(tab);
+}
+async function handleCloseReader() {
+  updateState({ book: "", isActive: null });
+  setStorage({ reader: null });
+
+  const tab = await getCurrentTab();
+  await setReadingList(tab);
+}
+function handleNextPage() {
+  nextPage = true;
 }

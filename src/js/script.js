@@ -321,6 +321,22 @@ function setStorageBookDataStart() {
   startReade();
 }
 
+function togleReaderOff() {
+  if (synth?.speaking) {
+    handleStopClick();
+    stopFirstClick = false;
+  } else {
+    stopFirstClick = false;
+    handleStartReadFun();
+  }
+}
+function handleButtonClose(shadowHost) {
+  synth?.cancel();
+  chrome.runtime.sendMessage({ action: "closeReader" });
+  clearParagraphStyle(textContainer, paragraf);
+  shadowHost.remove();
+}
+
 chrome.storage.onChanged.addListener((changes) => {
   if (changes.reader) {
     reader = changes.reader.newValue;
@@ -353,18 +369,3 @@ chrome.runtime.onMessage.addListener(async (message) => {
       break;
   }
 });
-function togleReaderOff() {
-  if (synth?.speaking) {
-    handleStopClick();
-    stopFirstClick = false;
-  } else {
-    stopFirstClick = false;
-    handleStartReadFun();
-  }
-}
-function handleButtonClose(shadowHost) {
-  synth?.cancel();
-  chrome.runtime.sendMessage({ action: "closeReader" });
-  clearParagraphStyle(textContainer, paragraf);
-  shadowHost.remove();
-}
