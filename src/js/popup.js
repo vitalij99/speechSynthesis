@@ -102,22 +102,6 @@ async function handleReaderToggle() {
   }
 }
 
-chrome.storage.onChanged.addListener((changes, area) => {
-  if (area !== "sync") return;
-
-  if (changes.reader) {
-    reader = changes.reader.newValue;
-    updateReaderButton(reader);
-  }
-
-  if (changes.navigator) {
-    updateNavigatorLink(changes.navigator.newValue);
-  }
-
-  if (changes.history && !historyMenu.classList.contains("hidden")) {
-    loadHistory();
-  }
-});
 async function toggleHistory() {
   const isHidden = historyMenu.classList.contains("hidden");
 
@@ -201,3 +185,19 @@ if (document.readyState === "loading") {
 } else {
   init();
 }
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== "sync") return;
+
+  if (changes.reader) {
+    reader = changes.reader.newValue;
+    updateReaderButton(reader);
+  }
+
+  if (changes.navigator) {
+    updateNavigatorLink(changes.navigator.newValue);
+  }
+
+  if (changes.history && !historyMenu.classList.contains("hidden")) {
+    loadHistory();
+  }
+});
