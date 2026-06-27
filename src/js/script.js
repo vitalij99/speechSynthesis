@@ -272,6 +272,7 @@ async function initGetStorage() {
 }
 
 async function handleStartReadFun() {
+  console.log("handleStartReadFun called");
   const url = document.URL;
   await initGetStorage();
   if (url !== navigator.thisPageSave) {
@@ -282,6 +283,7 @@ async function handleStartReadFun() {
   setStorageBookDataStart();
 }
 async function handleStartReadNextPage() {
+  console.log("handleStartReadNextPage called");
   const url = document.URL;
   await initGetStorage();
 
@@ -322,6 +324,8 @@ function setStorageBookDataStart() {
 }
 
 function togleReaderOff() {
+  console.log("togleReaderOff called", synth);
+  if (!synth) return;
   if (synth?.speaking) {
     handleStopClick();
     stopFirstClick = false;
