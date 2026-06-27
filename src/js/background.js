@@ -56,7 +56,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
   }
 });
 
-chrome.webNavigation.onCompleted.addListener(async (details) => {
+chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
   // if (details.frameId === 0)
   //   console.log("webNavigation ", { details }, );
   if (
@@ -64,7 +64,10 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
     scriptExecutionState.isActive === details.tabId &&
     details.frameId === 0
   ) {
-    console.log("webNavigation onCompleted");
+    console.log("webNavigation onDOMContentLoaded", {
+      details,
+      scriptExecutionState,
+    });
     await executeScriptOnce({
       sendMessage: false,
       scriptExecutionState,
@@ -104,7 +107,7 @@ function updateState(updates) {
 async function handleStartScript(action) {
   load = true;
 
-  const delay = action === "autoStartLink" ? 1000 : 1;
+  const delay = action === "autoStartLink" ? 5000 : 1;
 
   setTimeout(async () => {
     await executeScriptOnce({
