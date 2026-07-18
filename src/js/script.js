@@ -51,49 +51,54 @@ let utterThis = null;
 let stopFirstClick = false;
 
 async function startReade() {
-  textContainer = getHtmlElements(options.contentDivElem);
+  try {
+    textContainer = getHtmlElements(options.contentDivElem);
 
-  if (!textContainer || textContainer.length <= 1) {
-    textContainer = findElementWithMostDirectParagraphs();
-  }
-
-  if (!textContainer || textContainer.children.length <= 5) {
-    console.error("No readable content found.");
-    console.dir(textContainer);
-    return;
-  }
-  synth = window.speechSynthesis;
-
-  await createHTMLButton({ isReload: false, handleButtonClose });
-
-  voices = synth.getVoices();
-
-  synth.onvoiceschanged = () => {
-    voices = synth.getVoices();
-  };
-  saveThisPage({ navigator });
-
-  startAutoScrollEvents();
-  configureButtons({
-    textContainer,
-    synth,
-    paused,
-    paragraf,
-    speak,
-    handleParagraphChange,
-    handleStartClick,
-    handleStopClick,
-  });
-
-  const dateSave = new Date(reader);
-  const dateNow = new Date();
-
-  setTimeout(() => {
-    if (reader && dateSave > dateNow) {
-      setNextPage({ options, setSaveData, navigator });
-      speak();
+    if (!textContainer || textContainer.length <= 1) {
+      textContainer = findElementWithMostDirectParagraphs();
     }
-  }, 1000);
+
+    if (!textContainer || textContainer.children.length <= 5) {
+      console.error("No readable content found.");
+      console.dir(textContainer);
+      return;
+    }
+    synth = window.speechSynthesis;
+
+    await createHTMLButton({ isReload: false, handleButtonClose });
+
+    voices = synth.getVoices();
+
+    synth.onvoiceschanged = () => {
+      voices = synth.getVoices();
+    };
+    saveThisPage({ navigator });
+
+    startAutoScrollEvents();
+    configureButtons({
+      textContainer,
+      synth,
+      paused,
+      paragraf,
+      speak,
+      handleParagraphChange,
+      handleStartClick,
+      handleStopClick,
+    });
+
+    const dateSave = new Date(reader);
+    const dateNow = new Date();
+
+    setTimeout(() => {
+      if (reader && dateSave > dateNow) {
+        setNextPage({ options, setSaveData, navigator });
+        speak();
+      }
+    }, 1000);
+  } catch (error) {
+    console.error(error.message);
+    console.log(error);
+  }
 }
 
 function handleParagraphChange(inputParagraf) {
@@ -305,6 +310,8 @@ async function handleStartReadNextPage() {
       },
       Number(options.timeout) ? Number(options.timeout) : 1000,
     );
+
+    // is reload start create btn
   } else if (reader && options?.timerCheckbox) {
     await createHTMLButton({ isReload: true, handleButtonClose });
     paragraf = 0;
@@ -325,7 +332,7 @@ function setStorageBookDataStart() {
 
 function togleReaderOff() {
   console.log("togleReaderOff called", synth);
-  if (!synth) return;
+
   if (synth?.speaking) {
     handleStopClick();
     stopFirstClick = false;
