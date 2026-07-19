@@ -39,6 +39,7 @@ chrome.commands.onCommand.addListener(async (command) => {
 
 chrome.runtime.onMessage.addListener(async (message) => {
   const { action } = message;
+  console.log("message", action);
   if (action === "firstTimeScript" || action === "autoStartLink") {
     return handleStartScript(action);
   }
@@ -57,8 +58,13 @@ chrome.runtime.onMessage.addListener(async (message) => {
 });
 
 chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
-  // if (details.frameId === 0)
-  //   console.log("webNavigation ", { details }, );
+  if (details.frameId === 0)
+    console.log("webNavigation ", {
+      details,
+      scriptExecutionState,
+      load,
+      nextPage,
+    });
   if (
     !load &&
     scriptExecutionState.isActive === details.tabId &&
@@ -75,6 +81,13 @@ chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
       nextPage,
     });
     nextPage = false;
+
+    console.log("webNavigation end", {
+      details,
+      scriptExecutionState,
+      load,
+      nextPage,
+    });
   }
 });
 chrome.tabs.onRemoved.addListener((tabId) => {
