@@ -6,55 +6,69 @@ export async function executeScriptOnce({
   scriptExecutionState,
   updateState,
   nextPage = false,
+  details,
 }) {
   try {
     const tab = await getCurrentTab();
-    const url = tab?.url ?? tab?.pendingUrl;
+    const url = tab?.url ?? tab?.pendingUrl ?? (details ? details.url : null);
+    const pageKey = tab?.id ?? (details ? details.tabId : null);
+    const title = truncateTitle(
+      tab?.title ?? (details ? scriptExecutionState.title : null),
+    );
 
-    if (!url) {
-      console.warn("executeScriptOnce: no URL available", { tab });
+    if (!url || !title) {
+      console.warn("executeScriptOnce: no URL available", {
+        title,
+        url,
+        pageKey,
+        details,
+        tab,
+      });
       return false;
     }
 
     const book = getBookUrl(url);
-    const pageKey = tab.id;
 
     if (!nextPage && pageKey === scriptExecutionState.isActive) {
       // Stop if navigated to a different book
       if (!sendMessage && shouldStopExecution(url, scriptExecutionState)) {
-        updateState({ book: "", isActive: null });
-        console.log("Different book, stopping execution", { tab });
+        updateState({ book: "", isActive: null, title: null });
+        console.log("Different book, stopping execution", { tab, details });
         return false;
       }
     }
 
-    const action = sendMessage ? "startReadeFun" : "startReadeNextPage";
-
     // If the script is already active on this page, just send a message
     // in popup or command case upload page or if was stoped, start again
-    const isAlreadyInjected = await isReaderActive(tab.id);
+    const isAlreadyInjected = await isReaderActive(pageKey);
+
+    updateState({ book, isActive: pageKey, title });
+    setNewHistory(title, url);
+    await setReadingList({ title, url });
 
     if (isAlreadyInjected) {
-      setNewHistory(tab.title, url);
-      updateState({ book, isActive: pageKey });
-      await setReadingList({ title: tab.title, url });
       console.log("upload page or if was stoped, start again");
       return true;
     }
 
     await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
+      target: { tabId: pageKey },
       files: ["/js/script.js"],
     });
 
-    updateState({ book, isActive: pageKey });
-    setNewHistory(tab.title, url);
-
-    await chrome.tabs.sendMessage(tab.id, { action });
-    await setReadingList({ title: tab.title, url });
+    await chrome.tabs.sendMessage(pageKey, {
+      action: sendMessage ? "startReadeFun" : "startReadeNextPage",
+    });
 
     return true;
   } catch (error) {
+    console.log({
+      sendMessage,
+      scriptExecutionState,
+      updateState,
+      nextPage,
+      details,
+    });
     console.error("executeScriptOnce failed:", error);
     return false;
   }
@@ -77,4 +91,10 @@ async function isReaderActive(tabId) {
   } catch {
     return false;
   }
+}
+function truncateTitle(title, maxLength = 150) {
+  if (!title) return "";
+  return title.length > maxLength
+    ? `${title.substring(0, maxLength - 3)}...`
+    : title;
 }

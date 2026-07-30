@@ -8,7 +8,7 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log("Extension installed");
 });
 
-let scriptExecutionState = { isActive: null, book: "start" };
+let scriptExecutionState = { isActive: null, book: "start", title: null };
 let load = false;
 let nextPage = false;
 
@@ -58,13 +58,13 @@ chrome.runtime.onMessage.addListener(async (message) => {
 });
 
 chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
-  if (details.frameId === 0)
-    console.log("webNavigation ", {
-      details,
-      scriptExecutionState,
-      load,
-      nextPage,
-    });
+  // if (details.frameId === 0)
+  //   console.log("webNavigation ", {
+  //     details,
+  //     scriptExecutionState,
+  //     load,
+  //     nextPage,
+  //   });
   if (
     !load &&
     scriptExecutionState.isActive === details.tabId &&
@@ -79,6 +79,7 @@ chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
       scriptExecutionState,
       updateState,
       nextPage,
+      details,
     });
     nextPage = false;
 
