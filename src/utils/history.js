@@ -65,6 +65,7 @@ async function getFindBook(urlPage) {
 }
 
 export async function setReadingList({ title, url }) {
+  if (!title || !url) return;
   const readingListUrl = await getFindBook(url);
 
   if (readingListUrl) {
