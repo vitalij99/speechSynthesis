@@ -58,13 +58,14 @@ chrome.runtime.onMessage.addListener(async (message) => {
 });
 
 chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
-  // if (details.frameId === 0)
-  //   console.log("webNavigation ", {
-  //     details,
-  //     scriptExecutionState,
-  //     load,
-  //     nextPage,
-  //   });
+  if ((details.frameId === 0, scriptExecutionState.isActive))
+    console.log("webNavigation ");
+  console.log({
+    details,
+    scriptExecutionState,
+    load,
+    nextPage,
+  });
   if (
     !load &&
     scriptExecutionState.isActive === details.tabId &&
@@ -82,13 +83,6 @@ chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
       details,
     });
     nextPage = false;
-
-    console.log("webNavigation end", {
-      details,
-      scriptExecutionState,
-      load,
-      nextPage,
-    });
   }
 });
 chrome.tabs.onRemoved.addListener((tabId) => {
