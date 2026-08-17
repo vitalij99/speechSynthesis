@@ -58,7 +58,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
 });
 
 chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
-  if ((details.frameId === 0, scriptExecutionState.isActive))
+  if (details.frameId === 0 && scriptExecutionState.isActive)
     console.log("webNavigation ");
   console.log({
     details,
