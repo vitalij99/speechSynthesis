@@ -2,10 +2,11 @@ import { setStorage } from "../lib/storage";
 import { getBookUrl, setNewHistory, setReadingList } from "../utils/history";
 import { getCurrentTab } from "../utils/getCurrentTab";
 import { executeScriptOnce } from "../lib/executeScriptOnce";
+import { consoleLog, getLogs } from "../lib/consoleLog";
 
 // background.js
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("Extension installed");
+  consoleLog("Extension installed");
 });
 
 let scriptExecutionState = { isActive: null, book: "start", title: null };
@@ -18,7 +19,7 @@ loadState();
 
 chrome.commands.onCommand.addListener(async (command) => {
   if (command === "com-start") {
-    console.log("Command received: ", command, scriptExecutionState);
+    consoleLog("Command received: ", command, scriptExecutionState);
 
     await executeScriptOnce({
       sendMessage: true,
@@ -39,7 +40,7 @@ chrome.commands.onCommand.addListener(async (command) => {
 
 chrome.runtime.onMessage.addListener(async (message) => {
   const { action } = message;
-  console.log("message", action);
+  consoleLog("message", action);
   if (action === "firstTimeScript" || action === "autoStartLink") {
     return handleStartScript(action);
   }
@@ -58,20 +59,20 @@ chrome.runtime.onMessage.addListener(async (message) => {
 });
 
 chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
-  if (details.frameId === 0 && scriptExecutionState.isActive)
-    console.log("webNavigation ");
-  console.log({
-    details,
-    scriptExecutionState,
-    load,
-    nextPage,
-  });
+  if (details.frameId === 0 && scriptExecutionState.isActive === details.tabId)
+    consoleLog("webNavigation ", {
+      details,
+      scriptExecutionState,
+      load,
+      nextPage,
+    });
+
   if (
     !load &&
     scriptExecutionState.isActive === details.tabId &&
     details.frameId === 0
   ) {
-    console.log("webNavigation onDOMContentLoaded", {
+    consoleLog("webNavigation onDOMContentLoaded", {
       details,
       scriptExecutionState,
     });
@@ -105,6 +106,7 @@ async function loadState() {
   );
 
   if (saved) Object.assign(scriptExecutionState, saved);
+  await getLogs();
 }
 
 function updateState(updates) {
@@ -131,7 +133,7 @@ async function handleStartScript(action) {
   }, 2000);
 }
 async function handleStopScript() {
-  console.log(scriptExecutionState, `stopScript #${scriptExecutionState.book}`);
+  consoleLog(scriptExecutionState, `stopScript #${scriptExecutionState.book}`);
 
   const tab = await getCurrentTab();
   await setReadingList(tab);

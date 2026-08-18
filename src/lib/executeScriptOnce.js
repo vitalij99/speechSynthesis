@@ -1,5 +1,6 @@
 import { getCurrentTab } from "../utils/getCurrentTab";
 import { getBookUrl, setNewHistory, setReadingList } from "../utils/history";
+import { consoleLog } from "./consoleLog";
 
 export async function executeScriptOnce({
   sendMessage = false,
@@ -17,7 +18,7 @@ export async function executeScriptOnce({
     );
 
     if (!url || !title) {
-      console.warn("executeScriptOnce: no URL available", {
+      consoleLog("executeScriptOnce: no URL available", {
         title,
         url,
         pageKey,
@@ -33,7 +34,7 @@ export async function executeScriptOnce({
       // Stop if navigated to a different book
       if (!sendMessage && shouldStopExecution(url, scriptExecutionState)) {
         updateState({ book: "", isActive: null, title: null });
-        console.log("Different book, stopping execution", { tab, details });
+        consoleLog("Different book, stopping execution", { tab, details });
         return false;
       }
     }
@@ -47,7 +48,7 @@ export async function executeScriptOnce({
     await setReadingList({ title, url });
 
     if (isAlreadyInjected) {
-      console.log("upload page or if was stoped, start again");
+      consoleLog("upload page or if was stoped, start again");
       return true;
     }
 
@@ -62,7 +63,7 @@ export async function executeScriptOnce({
 
     return true;
   } catch (error) {
-    console.log({
+    consoleLog({
       sendMessage,
       scriptExecutionState,
       updateState,
