@@ -3,13 +3,14 @@ import { getBookUrl, setNewHistory, setReadingList } from "../utils/history";
 import { getCurrentTab } from "../utils/getCurrentTab";
 import { executeScriptOnce } from "../lib/executeScriptOnce";
 import { consoleLog, getLogs } from "../lib/consoleLog";
+import { truncateTitle } from "../utils/truncateTitle";
 
 // background.js
 chrome.runtime.onInstalled.addListener(() => {
   consoleLog("Extension installed");
 });
 
-let scriptExecutionState = { isActive: null, book: "start", title: null };
+let scriptExecutionState = { isActive: null, book: "start" };
 let load = false;
 let nextPage = false;
 
@@ -39,8 +40,12 @@ chrome.commands.onCommand.addListener(async (command) => {
 });
 
 chrome.runtime.onMessage.addListener(async (message) => {
-  const { action } = message;
-  consoleLog("message", action);
+  const { action, value } = message;
+  consoleLog("message", message);
+
+  if (action === "setBookToHistory") {
+    return handleSetBookToHistory(value);
+  }
   if (action === "firstTimeScript" || action === "autoStartLink") {
     return handleStartScript(action);
   }
@@ -60,13 +65,6 @@ chrome.runtime.onMessage.addListener(async (message) => {
 
 chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
   if (details.frameId !== 0) return;
-  if (scriptExecutionState.isActive === details.tabId)
-    consoleLog("webNavigation ", {
-      details,
-      scriptExecutionState,
-      load,
-      nextPage,
-    });
 
   if (!load && scriptExecutionState.isActive === details.tabId) {
     consoleLog("webNavigation onDOMContentLoaded", {
@@ -149,4 +147,11 @@ async function handleCloseReader() {
 }
 function handleNextPage() {
   nextPage = true;
+}
+function handleSetBookToHistory(params) {
+  const { url } = params;
+
+  const title = truncateTitle(params.title);
+  setNewHistory(title, url);
+  setReadingList({ title, url });
 }

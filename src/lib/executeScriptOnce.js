@@ -13,13 +13,9 @@ export async function executeScriptOnce({
     const tab = await getCurrentTab();
     const url = tab?.url ?? tab?.pendingUrl ?? (details ? details.url : null);
     const pageKey = tab?.id ?? (details ? details.tabId : null);
-    const title = truncateTitle(
-      tab?.title ?? (details ? scriptExecutionState.title : null),
-    );
 
-    if (!url || !title) {
+    if (!url) {
       consoleLog("executeScriptOnce: no URL available", {
-        title,
         url,
         pageKey,
         details,
@@ -30,10 +26,10 @@ export async function executeScriptOnce({
 
     const book = getBookUrl(url);
 
-    if (!nextPage && pageKey === scriptExecutionState.isActive) {
+    if (!nextPage) {
       // Stop if navigated to a different book
       if (!sendMessage && shouldStopExecution(url, scriptExecutionState)) {
-        updateState({ book: "", isActive: null, title: null });
+        updateState({ book: "", isActive: null });
         consoleLog("Different book, stopping execution", { tab, details });
         return false;
       }
@@ -41,11 +37,9 @@ export async function executeScriptOnce({
 
     // If the script is already active on this page, just send a message
     // in popup or command case upload page or if was stoped, start again
-    const isAlreadyInjected = await isReaderActive(pageKey);
+    const isAlreadyInjected = await isReaderActive(pageKey, sendMessage);
 
-    updateState({ book, isActive: pageKey, title });
-    setNewHistory(title, url);
-    await setReadingList({ title, url });
+    updateState({ book, isActive: pageKey });
 
     if (isAlreadyInjected) {
       consoleLog("upload page or if was stoped, start again");
@@ -85,17 +79,13 @@ function shouldStopExecution(url, scriptExecutionState) {
   return isDeeperPath || isDifferentBook;
 }
 
-async function isReaderActive(tabId) {
+async function isReaderActive(tabId, sendMessage) {
   try {
-    await chrome.tabs.sendMessage(tabId, { action: "isReaderActive" });
+    await chrome.tabs.sendMessage(tabId, {
+      action: sendMessage ? "togleReaderMessage" : "isReaderActive",
+    });
     return true;
   } catch {
     return false;
   }
-}
-function truncateTitle(title, maxLength = 150) {
-  if (!title) return "";
-  return title.length > maxLength
-    ? `${title.substring(0, maxLength - 3)}...`
-    : title;
 }

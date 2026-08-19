@@ -95,6 +95,10 @@ async function startReade() {
         speak();
       }
     }, 1000);
+
+    const value = { title: document.title, url: document.URL };
+
+    chrome.runtime.sendMessage({ action: "setBookToHistory", value });
   } catch (error) {
     console.error(error.message);
     console.log(error);
