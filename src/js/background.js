@@ -41,7 +41,7 @@ chrome.commands.onCommand.addListener(async (command) => {
 
 chrome.runtime.onMessage.addListener(async (message) => {
   const { action, value } = message;
-  consoleLog("message", message);
+  console.log("message", message);
 
   if (action === "setBookToHistory") {
     return handleSetBookToHistory(value);
@@ -71,6 +71,17 @@ chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
       details,
       scriptExecutionState,
     });
+
+    if (
+      !nextPage &&
+      shouldStopExecution(details.url, scriptExecutionState.book)
+    ) {
+      // Stop if navigated to a different book
+      updateState({ book: "", isActive: null });
+      consoleLog("Different book, stopping execution", details);
+      return false;
+    }
+
     await executeScriptOnce({
       sendMessage: false,
       scriptExecutionState,
@@ -154,4 +165,10 @@ function handleSetBookToHistory(params) {
   const title = truncateTitle(params.title);
   setNewHistory(title, url);
   setReadingList({ title, url });
+}
+function shouldStopExecution(url, book) {
+  const isDeeperPath = book.split("/").length + 1 > url.split("/").length;
+  const isDifferentBook = !url.startsWith(book);
+
+  return isDeeperPath || isDifferentBook;
 }

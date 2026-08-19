@@ -4,9 +4,7 @@ import { consoleLog } from "./consoleLog";
 
 export async function executeScriptOnce({
   sendMessage = false,
-  scriptExecutionState,
   updateState,
-  nextPage = false,
   details,
 }) {
   try {
@@ -25,15 +23,6 @@ export async function executeScriptOnce({
     }
 
     const book = getBookUrl(url);
-
-    if (!nextPage) {
-      // Stop if navigated to a different book
-      if (!sendMessage && shouldStopExecution(url, scriptExecutionState)) {
-        updateState({ book: "", isActive: null });
-        consoleLog("Different book, stopping execution", { tab, details });
-        return false;
-      }
-    }
 
     // If the script is already active on this page, just send a message
     // in popup or command case upload page or if was stoped, start again
@@ -59,9 +48,6 @@ export async function executeScriptOnce({
   } catch (error) {
     consoleLog({
       sendMessage,
-      scriptExecutionState,
-      updateState,
-      nextPage,
       details,
     });
     console.error("executeScriptOnce failed:", error);
@@ -70,14 +56,6 @@ export async function executeScriptOnce({
 }
 
 // --- helpers ---
-
-function shouldStopExecution(url, scriptExecutionState) {
-  const isDeeperPath =
-    scriptExecutionState.book.split("/").length + 1 > url.split("/").length;
-  const isDifferentBook = !url.startsWith(scriptExecutionState.book);
-
-  return isDeeperPath || isDifferentBook;
-}
 
 async function isReaderActive(tabId, sendMessage) {
   try {
