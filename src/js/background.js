@@ -59,7 +59,8 @@ chrome.runtime.onMessage.addListener(async (message) => {
 });
 
 chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
-  if (details.frameId === 0 && scriptExecutionState.isActive === details.tabId)
+  if (details.frameId !== 0) return;
+  if (scriptExecutionState.isActive === details.tabId)
     consoleLog("webNavigation ", {
       details,
       scriptExecutionState,
@@ -67,11 +68,7 @@ chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
       nextPage,
     });
 
-  if (
-    !load &&
-    scriptExecutionState.isActive === details.tabId &&
-    details.frameId === 0
-  ) {
+  if (!load && scriptExecutionState.isActive === details.tabId) {
     consoleLog("webNavigation onDOMContentLoaded", {
       details,
       scriptExecutionState,
@@ -86,6 +83,11 @@ chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
     nextPage = false;
   }
 });
+
+// chrome.webNavigation.onHistoryStateUpdated.addListener(async (details) => {
+//   console.log("SPA nav", details);
+// });
+
 chrome.tabs.onRemoved.addListener((tabId) => {
   if (scriptExecutionState.isActive === tabId) {
     updateState({ isActive: null });

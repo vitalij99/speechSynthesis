@@ -375,8 +375,11 @@ chrome.runtime.onMessage.addListener(async (message) => {
     case "goToNextPage":
       moveToNextPage({ nextPageBtn: options.nextPageBtn });
       break;
-    case "isReaderActive":
+    case "togleReaderMessage":
       togleReaderOff();
+      break;
+    case "isReaderActive":
+      console.log("isReaderActive");
       break;
   }
 });
