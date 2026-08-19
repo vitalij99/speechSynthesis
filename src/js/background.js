@@ -20,11 +20,10 @@ loadState();
 
 chrome.commands.onCommand.addListener(async (command) => {
   if (command === "com-start") {
-    consoleLog("Command received: ", command, scriptExecutionState);
+    consoleLog("Command received: ", command);
 
     await executeScriptOnce({
       sendMessage: true,
-      scriptExecutionState,
       updateState,
     });
   } else if (command === "com-add-p") {
@@ -84,9 +83,7 @@ chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
 
     await executeScriptOnce({
       sendMessage: false,
-      scriptExecutionState,
       updateState,
-      nextPage,
       details,
     });
     nextPage = false;
@@ -133,9 +130,7 @@ async function handleStartScript(action) {
   setTimeout(async () => {
     await executeScriptOnce({
       sendMessage: true,
-      scriptExecutionState,
       updateState,
-      nextPage,
     });
   }, delay);
 
