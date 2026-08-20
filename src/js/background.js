@@ -60,6 +60,9 @@ chrome.runtime.onMessage.addListener(async (message) => {
   if (action === "goToNextPage") {
     return handleNextPage();
   }
+  if (action === "cheakReaderActiveBg") {
+    return await isReaderActive();
+  }
 });
 
 chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
@@ -139,7 +142,8 @@ async function handleStartScript(action) {
   }, 2000);
 }
 async function handleStopScript() {
-  consoleLog(scriptExecutionState, `stopScript #${scriptExecutionState.book}`);
+  consoleLog(`stopScript #${scriptExecutionState.book}`);
+  setStorage({ reader: null });
 
   const tab = await getCurrentTab();
   await setReadingList(tab);
@@ -147,7 +151,6 @@ async function handleStopScript() {
 async function handleCloseReader() {
   updateState({ book: "", isActive: null });
   setStorage({ reader: null });
-
   const tab = await getCurrentTab();
   await setReadingList(tab);
 }
@@ -166,4 +169,19 @@ function shouldStopExecution(url, book) {
   const isDifferentBook = !url.startsWith(book);
 
   return isDeeperPath || isDifferentBook;
+}
+async function isReaderActive(value) {
+  try {
+    const result = await chrome.tabs.sendMessage(
+      scriptExecutionState.isActive,
+      {
+        action: "isReaderActive",
+        value,
+      },
+    );
+
+    return result;
+  } catch {
+    return false;
+  }
 }

@@ -10,19 +10,12 @@ const toggleBtn = document.getElementById("toggleHistory");
 const rulesText = document.getElementById("rulesText");
 const toggleRulesBtn = document.getElementById("toggleRulesText");
 
-let reader = null;
 let isInitialized = false;
 
-function isReaderActive(reader) {
-  if (!reader) return false;
-  const savedDate = new Date(reader);
-  const now = new Date();
-  return savedDate > now;
-}
+async function updateReaderButton() {
+  const isActive = await isReaderActive();
 
-function updateReaderButton(reader) {
-  const isActive = isReaderActive(reader);
-  btnStartReader.textContent = !!isActive ? "Stop" : "Play";
+  btnStartReader.textContent = isActive ? "Stop" : "Play";
   btnStartReader.setAttribute("aria-pressed", isActive.toString());
 }
 
@@ -84,21 +77,19 @@ function escapeHtml(text) {
 
 async function handleReaderToggle() {
   try {
-    const isActive = isReaderActive(reader);
+    const isActive = await isReaderActive();
 
     if (isActive) {
-      await chrome.runtime.sendMessage({ action: "stopScript" });
-      reader = null;
-      await setStorage({ reader });
+      btnStartReader.textContent = "Play";
     } else {
-      await chrome.runtime.sendMessage({ action: "firstTimeScript" });
       window.close();
     }
+    await chrome.runtime.sendMessage({ action: "firstTimeScript" });
   } catch (error) {
     console.error("Failed to toggle reader:", error);
 
     btnStartReader.textContent = "Error - Try again";
-    setTimeout(() => updateReaderButton(reader), 2000);
+    setTimeout(() => updateReaderButton(), 2000);
   }
 }
 
@@ -133,14 +124,12 @@ async function init() {
   isInitialized = true;
 
   try {
-    const {
-      reader: storedReader,
-      navigator,
-      rulesText: storedRulesText,
-    } = await getStorage(["reader", "navigator", "rulesText"]);
+    const { navigator, rulesText: storedRulesText } = await getStorage([
+      "navigator",
+      "rulesText",
+    ]);
 
-    reader = storedReader;
-    updateReaderButton(reader);
+    updateReaderButton();
     updateNavigatorLink(navigator);
     handleAutoStartLink();
 
@@ -188,11 +177,6 @@ if (document.readyState === "loading") {
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== "sync") return;
 
-  if (changes.reader) {
-    reader = changes.reader.newValue;
-    updateReaderButton(reader);
-  }
-
   if (changes.navigator) {
     updateNavigatorLink(changes.navigator.newValue);
   }
@@ -201,3 +185,17 @@ chrome.storage.onChanged.addListener((changes, area) => {
     loadHistory();
   }
 });
+
+// --- helpers ---
+async function isReaderActive(action = "cheakReaderActiveBg", value) {
+  try {
+    const result = await chrome.runtime.sendMessage({
+      action,
+      value,
+    });
+
+    return result;
+  } catch {
+    return false;
+  }
+}

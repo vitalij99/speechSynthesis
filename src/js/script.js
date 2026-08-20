@@ -364,7 +364,7 @@ chrome.storage.onChanged.addListener((changes) => {
     Object.assign(options, changes.options.newValue);
   }
 });
-chrome.runtime.onMessage.addListener(async (message) => {
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   const { action } = message;
 
   switch (action) {
@@ -383,7 +383,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
       togleReaderOff();
       break;
     case "isReaderActive":
-      console.log("isReaderActive");
+      sendResponse(synth?.speaking);
       break;
   }
 });
