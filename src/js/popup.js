@@ -145,6 +145,8 @@ async function init() {
         chrome.storage.sync.set({ rulesText: rulesText.value });
       }, 300),
     );
+
+    setTimeout(() => updateReaderButton(), 2000);
   } catch (error) {
     console.error("Failed to initialize popup:", error);
   }
