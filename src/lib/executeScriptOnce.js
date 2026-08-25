@@ -1,6 +1,6 @@
 import { getCurrentTab } from "../utils/getCurrentTab";
 import { getBookUrl, setNewHistory, setReadingList } from "../utils/history";
-import { consoleLog } from "./consoleLog";
+import { consoleLog } from "../utils/consoleLog";
 
 export async function executeScriptOnce({
   sendMessage = false,

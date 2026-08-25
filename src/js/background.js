@@ -2,7 +2,7 @@ import { setStorage } from "../lib/storage";
 import { getBookUrl, setNewHistory, setReadingList } from "../utils/history";
 import { getCurrentTab } from "../utils/getCurrentTab";
 import { executeScriptOnce } from "../lib/executeScriptOnce";
-import { consoleLog, getLogs } from "../lib/consoleLog";
+import { consoleLog, getLogs } from "../utils/consoleLog";
 import { truncateTitle } from "../utils/truncateTitle";
 
 // background.js

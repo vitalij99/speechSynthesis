@@ -13,6 +13,7 @@ export function consoleLog(...params) {
       const month = String(time.getMonth() + 1).padStart(2, "0");
       const hours = String(time.getHours()).padStart(2, "0");
       const minutes = String(time.getMinutes()).padStart(2, "0");
+
       const formattedTime = `${day}.${month} ${hours}:${minutes}`;
 
       const saveLogs = [{ [formattedTime]: params }, ...lastLog].slice(0, 20);
