@@ -35,11 +35,7 @@ export function configureButtons({
   inputParagraf.oninput = (e) => {
     if (synth.speaking) synth.cancel();
 
-    autoScrollToParagraph({
-      textContainer: textContainer.children[getValue(e)],
-      isHandleParagraphChange: true,
-      isAutoScrollDisabled: false,
-    });
+    textContainer.children[getValue(e)].scrollIntoView({ block: "center" });
   };
 }
 
