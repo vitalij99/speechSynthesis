@@ -14,6 +14,9 @@ let scriptExecutionState = { isActive: null, book: "start" };
 let load = false;
 let nextPage = false;
 
+let ready = false;
+const pending = [];
+
 chrome.runtime.onStartup.addListener(loadState);
 chrome.runtime.onInstalled.addListener(loadState);
 loadState();
@@ -68,34 +71,40 @@ chrome.runtime.onMessage.addListener(async (message) => {
 chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
   if (details.frameId !== 0) return;
 
-  if (!load && scriptExecutionState.isActive === details.tabId) {
-    consoleLog("webNavigation onDOMContentLoaded", {
-      details,
-      scriptExecutionState,
-    });
+  console.log("web-", { details, scriptExecutionState, ready });
 
-    if (
-      !nextPage &&
-      shouldStopExecution(details.url, scriptExecutionState.book)
-    ) {
-      // Stop if navigated to a different book
-      updateState({ book: "", isActive: null });
-      consoleLog("Different book, stopping execution", details);
-      return false;
-    }
-
-    await executeScriptOnce({
-      sendMessage: false,
-      updateState,
-      details,
-    });
-    nextPage = false;
+  if (!ready) {
+    pending.push(details);
+    return;
   }
+  handleNavigation(details);
 });
 
-// chrome.webNavigation.onHistoryStateUpdated.addListener(async (details) => {
-//   console.log("SPA nav", details);
-// });
+async function handleNavigation(details) {
+  if (load && scriptExecutionState.isActive !== details.tabId) return;
+
+  consoleLog("webNavigation onDOMContentLoaded", {
+    details,
+    scriptExecutionState,
+  });
+
+  if (
+    !nextPage &&
+    shouldStopExecution(details.url, scriptExecutionState.book)
+  ) {
+    // Stop if navigated to a different book
+    updateState({ book: "", isActive: null });
+    consoleLog("Different book, stopping execution", details);
+    return false;
+  }
+
+  await executeScriptOnce({
+    sendMessage: false,
+    updateState,
+    details,
+  });
+  nextPage = false;
+}
 
 chrome.tabs.onRemoved.addListener((tabId) => {
   if (scriptExecutionState.isActive === tabId) {
@@ -118,6 +127,9 @@ async function loadState() {
 
   if (saved) Object.assign(scriptExecutionState, saved);
   await getLogs();
+
+  ready = true;
+  pending.splice(0).forEach(handleNavigation);
 }
 
 function updateState(updates) {
