@@ -81,29 +81,29 @@ chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
 });
 
 async function handleNavigation(details) {
-  if (load && scriptExecutionState.isActive !== details.tabId) return;
+  if (!load && scriptExecutionState.isActive === details.tabId) {
+    consoleLog("webNavigation onDOMContentLoaded", {
+      details,
+      scriptExecutionState,
+    });
 
-  consoleLog("webNavigation onDOMContentLoaded", {
-    details,
-    scriptExecutionState,
-  });
+    if (
+      !nextPage &&
+      shouldStopExecution(details.url, scriptExecutionState.book)
+    ) {
+      // Stop if navigated to a different book
+      updateState({ book: "", isActive: null });
+      consoleLog("Different book, stopping execution", details);
+      return false;
+    }
 
-  if (
-    !nextPage &&
-    shouldStopExecution(details.url, scriptExecutionState.book)
-  ) {
-    // Stop if navigated to a different book
-    updateState({ book: "", isActive: null });
-    consoleLog("Different book, stopping execution", details);
-    return false;
+    await executeScriptOnce({
+      sendMessage: false,
+      updateState,
+      details,
+    });
+    nextPage = false;
   }
-
-  await executeScriptOnce({
-    sendMessage: false,
-    updateState,
-    details,
-  });
-  nextPage = false;
 }
 
 chrome.tabs.onRemoved.addListener((tabId) => {
