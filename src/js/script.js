@@ -22,7 +22,7 @@ import {
   setNextPage,
 } from "../lib/pageNavigation.js";
 import { initStorageRulesText, replaceText } from "../lib/replaceText.js";
-import { resetReader } from "../lib/resetReader.js";
+
 import { setVoice } from "../lib/setVoice.js";
 import {
   getStorageData,
@@ -40,7 +40,6 @@ let paragraf = 0;
 
 let paused = false;
 let saveStyledParagraf = null;
-let timerId = null;
 let timerCounter = { count: 0, paragraf: 0 };
 
 // read param
@@ -49,6 +48,10 @@ let synth = null;
 let voices = null;
 let utterThis = null;
 let stopFirstClick = false;
+
+// checkSpeaking
+let timerSpeakingTime = null;
+let checkSpeakingTimer = null;
 
 async function startReade() {
   try {
@@ -96,6 +99,8 @@ async function startReade() {
       }
     }, 1000);
 
+    startWatchdog();
+
     const value = { title: document.title, url: document.URL };
 
     chrome.runtime.sendMessage({ action: "setBookToHistory", value });
@@ -117,6 +122,7 @@ function handleParagraphChange(inputParagraf) {
 
 function handleStopClick(buttonStart) {
   reader = null;
+  stopWatchdog();
   setSaveData({ reader });
   setStorageBook({ navigator, setSaveData });
   clearParagraphStyle(textContainer, paragraf);
@@ -145,14 +151,21 @@ function handleStartClick(buttonStart) {
 
     buttonStart.textContent = "Pause";
     speak();
+
+    startWatchdog();
   } else if (paused) {
     paused = false;
     synth.resume();
+
     buttonStart.textContent = "Pause";
+
+    startWatchdog();
   } else {
     paused = true;
     synth.pause();
     buttonStart.textContent = "Play";
+
+    stopWatchdog();
   }
 }
 
@@ -219,8 +232,17 @@ function speak() {
 
       saveStyledParagraf = paragraf;
 
+      timerSpeakingTime = Date.now();
+
+      utterThis.addEventListener("boundary", (event) => {
+        if (synth.speaking) {
+          timerSpeakingTime = Date.now();
+        }
+      });
+
       utterThis.onend = () => {
         clearParagraphStyle(textContainer, saveStyledParagraf || paragraf);
+        timerSpeakingTime = null;
 
         paragraf++;
         addParagraph(paragraf);
@@ -247,15 +269,7 @@ function speak() {
           paragraf++;
           timerCounter.count = 0;
         }
-        resetReader({
-          synth,
-          textContainer,
-          paragraf,
-          speak,
-          options,
-          reader,
-          clearParagraphStyle,
-        });
+        resetReader();
       };
 
       utterThis.voice = setVoice(utterThis, voices, options.utterThis.language);
@@ -350,6 +364,41 @@ function handleButtonClose(shadowHost) {
   chrome.runtime.sendMessage({ action: "closeReader" });
   clearParagraphStyle(textContainer, paragraf);
   shadowHost.remove();
+}
+
+function startWatchdog() {
+  stopWatchdog();
+
+  checkSpeakingTimer = setInterval(() => {
+    if (!timerSpeakingTime || !synth.speaking) return;
+
+    if (Date.now() - timerSpeakingTime > 3000) {
+      console.log("Читання, можливо, зупинилось/зависло");
+
+      resetReader();
+
+      stopWatchdog();
+    }
+  }, 3000);
+}
+
+function stopWatchdog() {
+  if (checkSpeakingTimer) {
+    clearInterval(checkSpeakingTimer);
+    checkSpeakingTimer = null;
+  }
+}
+function resetReader() {
+  console.log("⏹ Озвучка зупинилася або нема нових слів. resetReader");
+
+  if (!options.timerCheckbox || !reader) return;
+
+  clearParagraphStyle(textContainer, paragraf);
+  synth.cancel();
+
+  if (!synth.speaking) {
+    speak();
+  }
 }
 
 chrome.storage.onChanged.addListener((changes) => {
