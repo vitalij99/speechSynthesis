@@ -370,7 +370,8 @@ function startWatchdog() {
   stopWatchdog();
 
   checkSpeakingTimer = setInterval(() => {
-    if (!timerSpeakingTime || !synth.speaking) return;
+    if (!synth.speaking) return;
+    if (!timerSpeakingTime || synth.paused) return;
 
     if (Date.now() - timerSpeakingTime > 3000) {
       console.log("Читання, можливо, зупинилось/зависло");
