@@ -2,15 +2,12 @@ import {
   autoScrollToParagraph,
   startAutoScrollEvents,
 } from "../lib/autoScroll.js";
-import {
-  clearParagraphStyle,
-  initStyles,
-  styleCurrentParagraph,
-} from "../lib/paragraphStyle.js";
+import { initStyles, styleCurrentParagraph } from "../lib/paragraphStyle.js";
 import { configureButtons, configureReload } from "../lib/configureButtons.js";
 import {
   addParagraph,
   createHTMLButton,
+  setInputParagrafValue,
   setStorageBook,
 } from "../lib/createHtmlButton.js";
 import { debounce } from "../utils/debounce.js";
@@ -39,7 +36,7 @@ let reader = null;
 let paragraf = 0;
 
 let paused = false;
-let saveStyledParagraf = null;
+
 let timerCounter = { count: 0, paragraf: 0 };
 
 // read param
@@ -52,6 +49,10 @@ let stopFirstClick = false;
 // checkSpeaking
 let timerSpeakingTime = null;
 let checkSpeakingTimer = null;
+
+let chunkRanges = [];
+let chunkSize = 1;
+let activeIndex = null;
 
 async function startReade() {
   try {
@@ -113,7 +114,7 @@ async function startReade() {
 function handleParagraphChange(inputParagraf) {
   if (synth?.speaking) synth.cancel();
 
-  clearParagraphStyle(textContainer, paragraf);
+  clearChunkStyle();
   paragraf = Number(inputParagraf.value);
   if (paragraf < 0) paragraf = 0;
 
@@ -125,7 +126,7 @@ function handleStopClick(buttonStart) {
   stopWatchdog();
   setSaveData({ reader });
   setStorageBook({ navigator, setSaveData });
-  clearParagraphStyle(textContainer, paragraf);
+  clearChunkStyle();
 
   synth.cancel();
   if (buttonStart) {
@@ -187,8 +188,6 @@ function speak() {
       navigator.thisPageSave &&
       !document.URL.startsWith(navigator.thisPageSave)
     ) {
-      // if the current url did not reload to the same page, do not navigate to next page and reset paragraf to 0
-
       console.log("Already on a different page, not navigating to next page.", {
         currentPage: document.URL,
         savedPage: navigator.thisPageSave,
@@ -197,89 +196,75 @@ function speak() {
       handleStartReadFun();
       return;
     } else {
-      moveToNextPage({
-        nextPageBtn: options.nextPageBtn,
-      });
+      moveToNextPage({ nextPageBtn: options.nextPageBtn });
     }
-  } else {
-    const textElement = textContainer.children[paragraf];
-
-    const text = checkChildrenVisibility(textElement);
-
-    if (text === null || text === undefined) {
-      paragraf++;
-      addParagraph(paragraf);
-
-      speak();
-      return;
-    }
-
-    const paragrafText = checkText(text);
-
-    if (!paragrafText || paragrafText?.length === 0) {
-      paragraf++;
-      addParagraph(paragraf);
-      speak();
-    } else if (paragrafText !== "") {
-      const repText = replaceText(paragrafText);
-
-      utterThis = new SpeechSynthesisUtterance(repText);
-      styleCurrentParagraph(textContainer, paragraf);
-      autoScrollToParagraph({
-        textContainer: textElement,
-        isHandleParagraphChange: false,
-      });
-
-      saveStyledParagraf = paragraf;
-
-      timerSpeakingTime = Date.now();
-
-      utterThis.addEventListener("boundary", (event) => {
-        if (synth.speaking) {
-          timerSpeakingTime = Date.now();
-        }
-      });
-
-      utterThis.onend = () => {
-        clearParagraphStyle(textContainer, saveStyledParagraf || paragraf);
-        timerSpeakingTime = null;
-
-        paragraf++;
-        addParagraph(paragraf);
-
-        if (reader) {
-          setSaveData({ paragraf });
-
-          if (synth.speaking) synth.cancel();
-
-          speak();
-        }
-      };
-
-      utterThis.onerror = (event) => {
-        if (event.error === "interrupted") return;
-        if (event.error === "not-allowed") return;
-        console.error("SpeechSynthesisUtterance.onerror", event.error);
-        timerCounter.count++;
-
-        timerCounter.paragraf = paragraf;
-        if (timerCounter.count >= 3 && timerCounter.paragraf === paragraf) {
-          clearParagraphStyle(textContainer, paragraf);
-
-          paragraf++;
-          timerCounter.count = 0;
-        }
-        resetReader();
-      };
-
-      utterThis.voice = setVoice(utterThis, voices, options.utterThis.language);
-      utterThis.pitch = options.utterThis.pitch;
-      utterThis.rate = options.utterThis.rate;
-      utterThis.volume = options.utterThis.volume;
-
-      synth.speak(utterThis);
-    }
+    return;
   }
+
+  const textElement = textContainer.children[paragraf];
+  if (!textElement) return;
+
+  const chunk = buildChunk(paragraf);
+
+  if (!chunk.text) {
+    paragraf += Math.max(chunk.count, 1);
+    addParagraph(paragraf);
+    speak();
+    return;
+  }
+
+  chunkSize = chunk.count;
+  chunkRanges = chunk.ranges;
+
+  utterThis = new SpeechSynthesisUtterance(chunk.text);
+
+  setActiveParagraph(chunkRanges[0].index);
+
+  timerSpeakingTime = Date.now();
+
+  utterThis.addEventListener("boundary", () => {
+    if (!synth.speaking) return;
+    timerSpeakingTime = Date.now();
+
+    const idx = findParagraphByChar(event.charIndex);
+    if (idx !== null) setActiveParagraph(idx);
+  });
+
+  utterThis.onend = () => {
+    clearChunkStyle();
+    timerSpeakingTime = null;
+
+    paragraf++;
+    addParagraph(paragraf);
+
+    if (reader) {
+      setSaveData({ paragraf });
+      if (synth.speaking) synth.cancel();
+      speak();
+    }
+  };
+
+  utterThis.onerror = (event) => {
+    if (event.error === "interrupted") return;
+    if (event.error === "not-allowed") return;
+    console.error("SpeechSynthesisUtterance.onerror", event.error);
+    timerCounter.count++;
+
+    timerCounter.paragraf = paragraf;
+    if (timerCounter.count >= 3 && timerCounter.paragraf === paragraf) {
+      clearChunkStyle();
+      paragraf += chunkSize;
+      timerCounter.count = 0;
+    }
+    resetReader();
+  };
+
+  utterThis.voice = setVoice(utterThis, voices, options.utterThis.language);
+  utterThis.pitch = options.utterThis.pitch;
+  utterThis.rate = options.utterThis.rate;
+  utterThis.volume = options.utterThis.volume;
+
+  synth.speak(utterThis);
 }
 
 async function initGetStorage() {
@@ -362,7 +347,7 @@ function togleReaderOff() {
 function handleButtonClose(shadowHost) {
   synth?.cancel();
   chrome.runtime.sendMessage({ action: "closeReader" });
-  clearParagraphStyle(textContainer, paragraf);
+  clearChunkStyle();
   shadowHost.remove();
 }
 
@@ -394,12 +379,82 @@ function resetReader() {
 
   if (!options.timerCheckbox || !reader) return;
 
-  clearParagraphStyle(textContainer, paragraf);
+  clearChunkStyle();
   synth.cancel();
 
   if (!synth.speaking) {
     speak();
   }
+}
+
+function clearChunkStyle() {
+  try {
+    if (activeIndex !== null) {
+      textContainer.children[activeIndex].style = "";
+    }
+  } catch (error) {
+    console.error("Error clearing chunk styles:", error);
+  }
+
+  chunkRanges = [];
+}
+
+function setActiveParagraph(i) {
+  if (activeIndex === i) return;
+
+  if (activeIndex !== null) {
+    textContainer.children[activeIndex].style = "";
+  }
+  activeIndex = i;
+  paragraf = i;
+  setInputParagrafValue(paragraf);
+
+  styleCurrentParagraph(textContainer, i);
+  autoScrollToParagraph({
+    textContainer: textContainer.children[i],
+    isHandleParagraphChange: false,
+  });
+}
+function findParagraphByChar(charIndex) {
+  for (let k = chunkRanges.length - 1; k >= 0; k--) {
+    if (charIndex >= chunkRanges[k].start) return chunkRanges[k].index;
+  }
+  return chunkRanges[0]?.index ?? null;
+}
+
+function buildChunk(start) {
+  const maxChars = options.maxChunkChars || 500;
+  const total = textContainer.children.length;
+  const limit = total - (options.lastParagraf || 0);
+
+  let text = "";
+  const ranges = [];
+  let count = 0;
+
+  for (let i = start; i < limit; i++) {
+    const raw = checkChildrenVisibility(textContainer.children[i]);
+    const clean = raw == null ? "" : checkText(raw);
+    count++;
+
+    if (!clean) continue;
+
+    let t = replaceText(clean).trim();
+
+    if (!/[.!?…:;»"”)]$/.test(t)) t += ".";
+
+    if (ranges.length && text.length + 1 + t.length > maxChars) {
+      count--;
+      break;
+    }
+
+    const from = text.length ? text.length + 1 : 0;
+    text = text ? text + " " + t : t;
+    ranges.push({ index: i, start: from, end: text.length });
+
+    if (text.length >= maxChars) break;
+  }
+
+  return { text, count, ranges };
 }
 
 chrome.storage.onChanged.addListener((changes) => {

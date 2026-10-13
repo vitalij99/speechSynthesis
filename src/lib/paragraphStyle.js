@@ -1,11 +1,3 @@
-export function clearParagraphStyle(container, index) {
-  try {
-    container.children[index].style = "";
-  } catch {
-    return;
-  }
-}
-
 let stylesIndex = 0;
 
 export async function initStyles() {

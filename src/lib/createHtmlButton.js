@@ -199,6 +199,12 @@ const handleParagraphChange = (isAdd) => {
   inputParagraf.onchange(value);
 };
 
+export function setInputParagrafValue(value) {
+  if (inputParagraf) {
+    inputParagraf.value = value;
+  }
+}
+
 export async function createHTMLButton({
   isReload = false,
   handleButtonClose,
