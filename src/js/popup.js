@@ -16,7 +16,6 @@ async function updateReaderButton() {
   const isActive = await isReaderActive();
 
   btnStartReader.textContent = isActive ? "Stop" : "Play";
-  btnStartReader.setAttribute("aria-pressed", isActive.toString());
 }
 
 function updateNavigatorLink(navigator) {
