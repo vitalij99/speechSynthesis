@@ -414,6 +414,13 @@ function setActiveParagraph(i) {
     textContainer: textContainer.children[i],
     isHandleParagraphChange: false,
   });
+
+  if (
+    paragraf >= textContainer.children.length - (options.lastParagraf || 0) &&
+    options.timerCheckbox
+  ) {
+    moveToNextPage({ nextPageBtn: options.nextPageBtn });
+  }
 }
 function findParagraphByChar(charIndex) {
   for (let k = chunkRanges.length - 1; k >= 0; k--) {
