@@ -392,6 +392,7 @@ function clearChunkStyle() {
     if (activeIndex !== null) {
       textContainer.children[activeIndex].style = "";
     }
+    activeIndex = null;
   } catch (error) {
     console.error("Error clearing chunk styles:", error);
   }
