@@ -12,6 +12,7 @@ const allStyles = {
   borderRadius: "6px",
   outlineOffset: "3px",
 };
+
 export const styles = [
   {
     ...allStyles,
@@ -53,7 +54,6 @@ export const styles = [
   {
     ...allStyles,
     background: "rgba(255, 255, 255, 0.15)",
-
     filter: "invert(1)",
   },
 ];
