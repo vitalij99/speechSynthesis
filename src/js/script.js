@@ -245,9 +245,9 @@ function speak() {
   };
 
   utterThis.onerror = (event) => {
+    console.log("SpeechSynthesisUtterance", event.error);
     if (event.error === "interrupted") return;
     if (event.error === "not-allowed") return;
-    console.error("SpeechSynthesisUtterance.onerror", event.error);
     timerCounter.count++;
 
     timerCounter.paragraf = paragraf;

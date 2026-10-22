@@ -71,8 +71,6 @@ chrome.runtime.onMessage.addListener(async (message) => {
 chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
   if (details.frameId !== 0) return;
 
-  console.log("web-", { details, scriptExecutionState, ready });
-
   if (!ready) {
     pending.push(details);
     return;
@@ -82,10 +80,7 @@ chrome.webNavigation.onDOMContentLoaded.addListener(async (details) => {
 
 async function handleNavigation(details) {
   if (!load && scriptExecutionState.isActive === details.tabId) {
-    consoleLog("webNavigation onDOMContentLoaded", {
-      details,
-      scriptExecutionState,
-    });
+    consoleLog("Script is active, checking if we should continue", details);
 
     if (
       !nextPage &&
@@ -96,7 +91,7 @@ async function handleNavigation(details) {
       consoleLog("Different book, stopping execution", details);
       return false;
     }
-
+    consoleLog("Continuing execution on next page", details);
     await executeScriptOnce({
       sendMessage: false,
       updateState,
@@ -109,6 +104,7 @@ async function handleNavigation(details) {
 chrome.tabs.onRemoved.addListener((tabId) => {
   if (scriptExecutionState.isActive === tabId) {
     updateState({ isActive: null });
+    consoleLog("Active tab closed, resetting state", { tabId });
   }
 });
 
