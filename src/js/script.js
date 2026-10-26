@@ -403,6 +403,12 @@ function clearChunkStyle() {
 function setActiveParagraph(i) {
   if (activeIndex === i) return;
 
+  // if text was translated or changed, reset the reader to reprocess the text
+  const isChanged = checkIsChangedTextInChunk(i + 1);
+  if (isChanged) {
+    resetReader();
+  }
+
   if (activeIndex !== null) {
     textContainer.children[activeIndex].style = "";
   }
@@ -457,12 +463,26 @@ function buildChunk(start) {
 
     const from = text.length ? text.length + 1 : 0;
     text = text ? text + " " + t : t;
-    ranges.push({ index: i, start: from, end: text.length });
+    ranges.push({
+      index: i,
+      start: from,
+      end: text.length,
+      charCount: textContainer.children[i].textContent.length,
+    });
 
     if (text.length >= maxChars) break;
   }
 
   return { text, count, ranges };
+}
+
+function checkIsChangedTextInChunk(idx) {
+  const chunk = chunkRanges.find((range) => range.index === idx);
+  if (!chunk) return false;
+  const charparIsChanged =
+    chunk.charCount !== textContainer.children[idx].textContent.length;
+
+  return charparIsChanged;
 }
 
 chrome.storage.onChanged.addListener((changes) => {
