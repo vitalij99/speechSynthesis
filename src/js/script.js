@@ -29,6 +29,7 @@ import {
 } from "../lib/storageContent.js";
 import { checkChildrenVisibility, checkText } from "../lib/textCheck.js";
 import { setStorageDate } from "../lib/setStorageDate.js";
+import { handleNextMedia } from "../lib/handleNextMedia.js";
 //script.js
 console.log("Script loaded");
 
@@ -101,6 +102,7 @@ async function startReade() {
     }, 1000);
 
     startWatchdog();
+    handleNextMedia();
 
     const value = { title: document.title, url: document.URL };
 
