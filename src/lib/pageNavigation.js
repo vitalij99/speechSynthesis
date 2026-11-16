@@ -1,20 +1,19 @@
+import { IGNORED_CLASS } from "../ver/ver";
 import { setSaveData } from "./storageContent";
 
 export function getHtmlElements(selector, document = window.document) {
   try {
-    return (
-      selector
-        .split("\n")
-        .map((name) => {
-          if (!name.trim()) return null;
-          try {
-            return document.querySelector(name);
-          } catch {
-            return null;
-          }
-        })
-        .filter(Boolean)?.[0] || null
-    );
+    for (const name of selector.split("\n")) {
+      if (!name.trim()) continue;
+
+      try {
+        const found = Array.from(document.querySelectorAll(name)).find(
+          (el) => !el.closest("." + IGNORED_CLASS),
+        );
+        if (found) return found;
+      } catch {}
+    }
+    return null;
   } catch {
     return null;
   }
@@ -56,7 +55,10 @@ export function saveThisPage({ navigator }) {
   setSaveData({ navigator });
 }
 
-export function moveToNextPage({ nextPageBtn }) {
+export function moveToNextPage({
+  nextPageBtn,
+  resetReaderOnNextPage = () => {},
+}) {
   setSaveData({ paragraf: 0 });
 
   const initialURL = window.location.href;
@@ -87,7 +89,9 @@ export function moveToNextPage({ nextPageBtn }) {
       // move to next page not uploaded in background.js
       console.log("Navigated to next page via keyboard event.");
 
-      location.reload();
+      resetReaderOnNextPage();
+
+      // location.reload();
     }
   }, 2000);
 }

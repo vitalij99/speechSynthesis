@@ -30,6 +30,8 @@ import {
 import { checkChildrenVisibility, checkText } from "../lib/textCheck.js";
 import { setStorageDate } from "../lib/setStorageDate.js";
 import { handleNextMedia } from "../lib/handleNextMedia.js";
+
+import { IGNORED_CLASS } from "../ver/ver";
 //script.js
 console.log("Script loaded");
 
@@ -102,7 +104,7 @@ async function startReade() {
     }, 1000);
 
     startWatchdog();
-    handleNextMedia();
+    handleNextMedia(handleStopClick);
 
     const value = { title: document.title, url: document.URL };
 
@@ -198,7 +200,10 @@ function speak() {
       handleStartReadFun();
       return;
     } else {
-      moveToNextPage({ nextPageBtn: options.nextPageBtn });
+      moveToNextPage({
+        nextPageBtn: options.nextPageBtn,
+        resetReaderOnNextPage,
+      });
     }
     return;
   }
@@ -428,7 +433,11 @@ function setActiveParagraph(i) {
     paragraf >= textContainer.children.length - (options.lastParagraf || 0) &&
     options.timerCheckbox
   ) {
-    moveToNextPage({ nextPageBtn: options.nextPageBtn });
+    textContainer.classList.add(IGNORED_CLASS);
+    moveToNextPage({
+      nextPageBtn: options.nextPageBtn,
+      resetReaderOnNextPage,
+    });
   }
 }
 function findParagraphByChar(charIndex) {
@@ -487,6 +496,13 @@ function checkIsChangedTextInChunk(idx) {
   return charparIsChanged;
 }
 
+function resetReaderOnNextPage() {
+  clearChunkStyle();
+  synth.cancel();
+
+  handleStartReadNextPage();
+}
+
 chrome.storage.onChanged.addListener((changes) => {
   if (changes.reader) {
     reader = changes.reader.newValue;
@@ -512,7 +528,10 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       break;
 
     case "goToNextPage":
-      moveToNextPage({ nextPageBtn: options.nextPageBtn });
+      moveToNextPage({
+        nextPageBtn: options.nextPageBtn,
+        resetReaderOnNextPage,
+      });
       break;
     case "togleReaderMessage":
       togleReaderOff();
